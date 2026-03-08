@@ -1,0 +1,137 @@
+<?php
+
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Office\OfficeController;
+use App\Http\Controllers\Citizen\CitizenController;
+use Illuminate\Support\Facades\Route;
+
+// ── Public ────────────────────────────────────────────────────────────────────
+
+Route::get('/', function () {
+    if (!auth()->check()) {
+        return view('welcome');
+    }
+
+    return match (auth()->user()->role) {
+        'admin' => redirect()->route('admin.dashboard'),
+        'office_user' => redirect()->route('office.dashboard'),
+        default => redirect()->route('citizen.dashboard'),
+    };
+})->name('home');
+Route::get('/track/{reference}', [CitizenController::class, 'trackByQr'])->name('citizen.track');
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login',    [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login',   [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register',[AuthController::class, 'register']);
+
+    Route::get('/2fa',  [AuthController::class, 'show2FA'])->name('2fa.verify');
+    Route::post('/2fa', [AuthController::class, 'verify2FA']);
+
+    // Password reset
+    Route::get('/forgot-password',        [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password',       [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password',        [AuthController::class, 'resetPassword'])->name('password.update');
+
+    Route::get('/auth/{provider}',          [AuthController::class, 'redirectToProvider'])->name('social.redirect');
+    Route::get('/auth/{provider}/callback', [AuthController::class, 'handleProviderCallback'])->name('social.callback');
+});
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    Route::get('/municipalities',                   [AdminController::class, 'municipalities'])->name('municipalities');
+    Route::post('/municipalities',                  [AdminController::class, 'storeMunicipality'])->name('municipalities.store');
+    Route::put('/municipalities/{municipality}',    [AdminController::class, 'updateMunicipality'])->name('municipalities.update');
+    Route::delete('/municipalities/{municipality}', [AdminController::class, 'destroyMunicipality'])->name('municipalities.destroy');
+
+    Route::get('/offices',              [AdminController::class, 'offices'])->name('offices');
+    Route::post('/offices',             [AdminController::class, 'storeOffice'])->name('offices.store');
+    Route::put('/offices/{office}',     [AdminController::class, 'updateOffice'])->name('offices.update');
+    Route::delete('/offices/{office}',  [AdminController::class, 'destroyOffice'])->name('offices.destroy');
+
+    Route::get('/users',                        [AdminController::class, 'users'])->name('users');
+    Route::post('/users/office-user',           [AdminController::class, 'createOfficeUser'])->name('users.office.create');
+    Route::patch('/users/{user}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle');
+
+    Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+});
+
+// ── Office ────────────────────────────────────────────────────────────────────
+
+Route::middleware(['auth', 'role:office_user'])->prefix('office')->name('office.')->group(function () {
+    Route::get('/dashboard', [OfficeController::class, 'dashboard'])->name('dashboard');
+
+    Route::get('/profile',  [OfficeController::class, 'editProfile'])->name('profile');
+    Route::put('/profile',  [OfficeController::class, 'updateProfile'])->name('profile.update');
+
+    Route::get('/services',               [OfficeController::class, 'services'])->name('services');
+    Route::post('/services',              [OfficeController::class, 'storeService'])->name('services.store');
+    Route::put('/services/{service}',     [OfficeController::class, 'updateService'])->name('services.update');
+    Route::delete('/services/{service}',  [OfficeController::class, 'destroyService'])->name('services.destroy');
+
+    Route::get('/requests',                    [OfficeController::class, 'requests'])->name('requests');
+    Route::get('/requests/{request}',          [OfficeController::class, 'showRequest'])->name('requests.show');
+    Route::patch('/requests/{request}/status', [OfficeController::class, 'updateRequestStatus'])->name('requests.status');
+
+    // PDF generation & download
+    Route::get('/requests/{request}/pdf/{type}', [OfficeController::class, 'downloadPdf'])->name('requests.pdf');
+
+    Route::post('/requests/{request}/messages', [OfficeController::class, 'sendMessage'])->name('messages.send');
+
+    Route::get('/feedback',                  [OfficeController::class, 'feedback'])->name('feedback');
+    Route::patch('/feedback/{feedback}/reply', [OfficeController::class, 'replyFeedback'])->name('feedback.reply');
+
+    Route::get('/appointments',                 [OfficeController::class, 'appointments'])->name('appointments');
+    Route::patch('/appointments/{appointment}', [OfficeController::class, 'updateAppointment'])->name('appointments.update');
+});
+
+// ── Citizen ───────────────────────────────────────────────────────────────────
+
+Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')->group(function () {
+    Route::get('/dashboard', [CitizenController::class, 'dashboard'])->name('dashboard');
+
+    // Profile
+    Route::get('/profile',  [CitizenController::class, 'profile'])->name('profile');
+    Route::put('/profile',  [CitizenController::class, 'updateProfile'])->name('profile.update');
+
+    // Browse
+    Route::get('/offices',          [CitizenController::class, 'browseOffices'])->name('offices');
+    Route::get('/offices/{office}', [CitizenController::class, 'showOffice'])->name('offices.show');
+    Route::get('/services/{service}', [CitizenController::class, 'showService'])->name('services.show');
+
+    // Submit request
+    Route::post('/services/{service}/request', [CitizenController::class, 'submitRequest'])->name('requests.submit');
+
+    // Payment
+    Route::get('/requests/{serviceRequest}/payment',  [CitizenController::class, 'showPayment'])->name('payment');
+    Route::post('/requests/{serviceRequest}/payment', [CitizenController::class, 'processPayment'])->name('payment.process');
+
+    // My requests
+    Route::get('/requests',                   [CitizenController::class, 'myRequests'])->name('requests');
+    Route::get('/requests/{serviceRequest}',  [CitizenController::class, 'showRequest'])->name('requests.show');
+
+    // Messages
+    Route::post('/requests/{serviceRequest}/messages', [CitizenController::class, 'sendMessage'])->name('messages.send');
+
+    // Documents
+    Route::get('/requests/{serviceRequest}/documents/{docId}', [CitizenController::class, 'downloadDocument'])->name('documents.download');
+
+    // PDF receipt download
+    Route::get('/requests/{serviceRequest}/receipt', [CitizenController::class, 'downloadReceipt'])->name('requests.receipt');
+
+    // Appointments
+    Route::post('/appointments', [CitizenController::class, 'bookAppointment'])->name('appointments.book');
+
+    // Feedback
+    Route::post('/feedback', [CitizenController::class, 'submitFeedback'])->name('feedback.submit');
+});

@@ -1,0 +1,84 @@
+
+## STEP 8 — Create the MySQL Database
+
+Open MySQL and run:
+
+```sql
+CREATE DATABASE eservices CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Or via terminal:
+
+```bash
+mysql -u root -p -e "CREATE DATABASE eservices;"
+```
+
+---
+
+## STEP 9 — Delete the Default Laravel Migrations
+
+Laravel ships with its own user/cache/jobs migrations that conflict with ours. Delete them:
+
+```bash
+rm database/migrations/0001_01_01_000000_create_users_table.php
+rm database/migrations/0001_01_01_000001_create_cache_table.php
+rm database/migrations/0001_01_01_000002_create_jobs_table.php
+```
+
+---
+
+## STEP 10 — Run Migrations and Seed
+
+```bash
+php artisan migrate --seed
+```
+
+If you need a clean reset at any point:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+---
+
+## STEP 11 — Create Storage Link
+
+This makes uploaded files (logos, QR codes, documents) accessible from the browser:
+
+```bash
+php artisan storage:link
+```
+
+---
+
+## STEP 12 — Generate App Key
+
+```bash
+php artisan key:generate
+```
+
+---
+
+## STEP 13 — Start the Server
+
+```bash
+php artisan serve
+```
+
+Open your browser: **http://localhost:8000**
+
+---
+
+## Default Login Credentials
+
+After seeding, use these accounts to test each role:
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@eservices.gov | password |
+| Office Manager — Beirut | manager@beirut.gov.lb | password |
+| Office Manager — Baabda | manager@baabda.gov.lb | password |
+| Office Manager — Tripoli | manager@tripoli.gov.lb | password |
+| Citizen 1 | citizen1@test.com | password |
+| Citizen 2 | citizen2@test.com | password |
+| Citizen 3 | citizen3@test.com | password |
