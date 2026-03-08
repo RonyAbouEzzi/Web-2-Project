@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\{Auth, Hash, Password};
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use PragmaRX\Google2FA\Google2FA;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Throwable;
 
 class AuthController extends Controller
@@ -121,6 +120,11 @@ class AuthController extends Controller
 
     public function verify2FA(Request $request)
     {
+        // Accept both "otp" and legacy "otp_code" from the 2FA form.
+        $request->merge([
+            'otp' => $request->input('otp', $request->input('otp_code')),
+        ]);
+
         $request->validate(['otp' => 'required|digits:6']);
         $user = User::findOrFail(session('2fa_user_id'));
 
@@ -252,31 +256,157 @@ class AuthController extends Controller
     // ── Social OAuth ──────────────────────────────────────────────
     public function redirectToProvider(string $provider)
     {
-        abort_unless(in_array($provider, ['google', 'facebook']), 404);
-        return Socialite::driver($provider)->redirect();
+        abort_unless(in_array($provider, ['google', 'github']), 404);
+
+        try {
+            $driver = Socialite::driver($provider);
+
+            if ($provider === 'github') {
+                // Request e-mail scope to improve success rate for GitHub sign-in.
+                $driver = $driver->scopes(['read:user', 'user:email']);
+            }
+
+            return $driver->redirect();
+        } catch (Throwable $e) {
+            report($e);
+
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Unable to start social login. Please check OAuth configuration.']);
+        }
     }
 
     public function handleProviderCallback(string $provider)
     {
         try {
-            $socialUser = Socialite::driver($provider)->user();
-        } catch (\Exception $e) {
+            abort_unless(in_array($provider, ['google', 'github']), 404);
+
+            $driver = Socialite::driver($provider);
+            if ($provider === 'github') {
+                $driver = $driver->scopes(['read:user', 'user:email']);
+            }
+
+            $socialUser = $driver->user();
+        } catch (Throwable $e) {
             return redirect()->route('login')
                 ->withErrors(['email' => 'Social login failed. Please try again.']);
         }
 
-        $user = User::firstOrCreate(
-            ['email' => $socialUser->getEmail()],
-            [
-                'name'            => $socialUser->getName(),
-                'password'        => Hash::make(Str::random(24)),
-                'role'            => 'citizen',
+        $email = $socialUser->getEmail();
+        if (!$email) {
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Your social account has no accessible email address.']);
+        }
+
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            if (!$user->is_active) {
+                return redirect()->route('login')
+                    ->withErrors(['email' => 'Your account has been deactivated.']);
+            }
+
+            $user->forceFill([
                 'social_provider' => $provider,
                 'social_id'       => $socialUser->getId(),
-                'avatar'          => $socialUser->getAvatar(),
+                'avatar'          => $socialUser->getAvatar() ?: $user->avatar,
+            ]);
+
+            if (is_null($user->email_verified_at)) {
+                $user->email_verified_at = now();
+            }
+
+            $user->save();
+
+            if (blank($user->password)) {
+                session([
+                    'social_password_setup' => [
+                        'mode'     => 'link-existing',
+                        'user_id'  => $user->id,
+                        'provider' => $provider,
+                        'email'    => $user->email,
+                        'name'     => $user->name,
+                    ],
+                ]);
+
+                return redirect()->route('social.password.form')
+                    ->with('info', 'Set a password to complete your account setup.');
+            }
+
+            Auth::login($user);
+            session()->regenerate();
+            return $this->redirectByRole($user);
+        }
+
+        session([
+            'social_password_setup' => [
+                'mode'      => 'create-new',
+                'provider'  => $provider,
+                'social_id' => $socialUser->getId(),
+                'email'     => $email,
+                'name'      => $socialUser->getName() ?: 'Social User',
+                'avatar'    => $socialUser->getAvatar(),
+            ],
+        ]);
+
+        return redirect()->route('social.password.form')
+            ->with('info', 'Choose a password to finish creating your account.');
+    }
+
+    public function showSocialPasswordForm()
+    {
+        if (Auth::check()) {
+            return $this->redirectByRole(Auth::user());
+        }
+
+        $payload = session('social_password_setup');
+        if (!$payload) {
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Your social signup session expired. Please try again.']);
+        }
+
+        return view('auth.social-password', [
+            'social' => $payload,
+        ]);
+    }
+
+    public function storeSocialPassword(Request $request)
+    {
+        $payload = session('social_password_setup');
+        if (!$payload) {
+            return redirect()->route('login')
+                ->withErrors(['email' => 'Your social signup session expired. Please try again.']);
+        }
+
+        $data = $request->validate([
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        if (($payload['mode'] ?? null) === 'link-existing') {
+            $user = User::find($payload['user_id'] ?? 0);
+
+            if (!$user) {
+                session()->forget('social_password_setup');
+                return redirect()->route('login')
+                    ->withErrors(['email' => 'Account was not found. Please sign in again.']);
+            }
+
+            $user->password = Hash::make($data['password']);
+            $user->save();
+        } else {
+            $user = User::create([
+                'name'            => $payload['name'] ?? 'Social User',
+                'email'           => $payload['email'],
+                'password'        => Hash::make($data['password']),
+                'role'            => 'citizen',
+                'social_provider' => $payload['provider'] ?? null,
+                'social_id'       => $payload['social_id'] ?? null,
+                'avatar'          => $payload['avatar'] ?? null,
                 'is_active'       => true,
-            ]
-        );
+                'email_verified_at' => now(),
+            ]);
+        }
+
+        session()->forget('social_password_setup');
 
         if (!$user->is_active) {
             return redirect()->route('login')
@@ -284,7 +414,9 @@ class AuthController extends Controller
         }
 
         Auth::login($user);
-        return $this->redirectByRole($user);
+        $request->session()->regenerate();
+        return $this->redirectByRole($user)
+            ->with('success', 'Password saved successfully.');
     }
 
     // ── Password Reset ────────────────────────────────────────────
@@ -297,10 +429,19 @@ class AuthController extends Controller
     public function sendResetLink(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-        $status = Password::sendResetLink($request->only('email'));
+
+        try {
+            $status = Password::sendResetLink($request->only('email'));
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()->withErrors([
+                'email' => 'Unable to send reset email. Check SMTP settings and try again.',
+            ]);
+        }
 
         return $status === Password::RESET_LINK_SENT
-            ? back()->with('success', 'Reset link sent! Check your inbox.')
+            ? back()->with('status', __($status))
             : back()->withErrors(['email' => __($status)]);
     }
 
