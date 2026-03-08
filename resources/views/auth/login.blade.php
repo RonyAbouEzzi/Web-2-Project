@@ -301,9 +301,9 @@
                 </svg>
                 Google
             </a>
-            <a href="{{ route('social.redirect', 'facebook') }}" class="btn-social">
-                <i class="bi bi-facebook" style="color:#1877F2;font-size:1rem"></i>
-                Facebook
+            <a href="{{ route('social.redirect', 'github') }}" class="btn-social">
+                <i class="bi bi-github" style="font-size:1rem"></i>
+                GitHub
             </a>
         </div>
 
