@@ -40,6 +40,8 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/auth/{provider}',          [AuthController::class, 'redirectToProvider'])->name('social.redirect');
     Route::get('/auth/{provider}/callback', [AuthController::class, 'handleProviderCallback'])->name('social.callback');
+    Route::get('/auth/social/password',     [AuthController::class, 'showSocialPasswordForm'])->name('social.password.form');
+    Route::post('/auth/social/password',    [AuthController::class, 'storeSocialPassword'])->name('social.password.store');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');

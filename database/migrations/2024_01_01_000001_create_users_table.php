@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->boolean('is_active')->default(true);
             $table->string('two_factor_secret')->nullable();
             $table->boolean('two_factor_enabled')->default(false);
-            $table->string('social_provider')->nullable(); // google, facebook, etc.
+            $table->string('social_provider')->nullable(); // google, github, etc.
             $table->string('social_id')->nullable();
             $table->string('avatar')->nullable();
             $table->timestamp('email_verified_at')->nullable();
