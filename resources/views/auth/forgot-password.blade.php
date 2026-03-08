@@ -55,6 +55,13 @@
     </div>
     @endif
 
+    @if($errors->any())
+    <div class="success-box" style="background:#FFF1F2;border-color:rgba(190,18,60,.2);color:#9F1239">
+        <i class="bi bi-exclamation-circle-fill" style="flex-shrink:0;margin-top:1px"></i>
+        <span>{{ $errors->first() }}</span>
+    </div>
+    @endif
+
     <form action="{{ route('password.email') }}" method="POST" novalidate>
         @csrf
         <div>
