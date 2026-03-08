@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\{Auth, Hash, Password};
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use PragmaRX\Google2FA\Google2FA;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Throwable;
 
 class AuthController extends Controller
@@ -137,6 +138,120 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
         return $this->redirectByRole($user);
+    }
+
+    public function show2FASettings()
+    {
+        $user = Auth::user();
+
+        if ($user->two_factor_enabled && $user->two_factor_secret) {
+            session()->forget('2fa_setup_secret');
+
+            return view('auth.2fa-settings', [
+                'isEnabled' => true,
+                'manualKey' => null,
+                'qrSvg'     => null,
+            ]);
+        }
+
+        $secret = session('2fa_setup_secret');
+        if (!$secret) {
+            $secret = (new Google2FA())->generateSecretKey();
+            session(['2fa_setup_secret' => $secret]);
+        }
+
+        $issuer = config('app.name', 'E-Services');
+        $label = rawurlencode($issuer . ':' . $user->email);
+        $issuerEncoded = rawurlencode($issuer);
+        $otpAuthUrl = "otpauth://totp/{$label}?secret={$secret}&issuer={$issuerEncoded}&algorithm=SHA1&digits=6&period=30";
+
+        return view('auth.2fa-settings', [
+            'isEnabled' => false,
+            'manualKey' => $secret,
+            'qrSvg'     => QrCode::format('svg')->size(220)->margin(1)->generate($otpAuthUrl),
+        ]);
+    }
+
+    public function enable2FA(Request $request)
+    {
+        $request->merge([
+            'otp' => $request->input('otp', $request->input('otp_code')),
+        ]);
+
+        $request->validate([
+            'otp' => 'required|digits:6',
+        ]);
+
+        $user = Auth::user();
+        $secret = session('2fa_setup_secret');
+
+        if (!$secret) {
+            return redirect()->route('security.2fa')
+                ->withErrors(['otp' => '2FA setup expired. Please scan the QR code again.']);
+        }
+
+        $g2fa = new Google2FA();
+        if (!$g2fa->verifyKey($secret, $request->input('otp'))) {
+            return back()->withErrors(['otp' => 'Invalid code. Please try again.']);
+        }
+
+        $user->forceFill([
+            'two_factor_secret' => $secret,
+            'two_factor_enabled' => true,
+        ])->save();
+
+        session()->forget('2fa_setup_secret');
+
+        return redirect()->route('security.2fa')
+            ->with('success', 'Two-factor authentication has been enabled.');
+    }
+
+    public function disable2FA(Request $request)
+    {
+        $request->merge([
+            'otp' => $request->input('otp', $request->input('otp_code')),
+        ]);
+
+        $request->validate([
+            'otp' => 'required|digits:6',
+        ]);
+
+        $user = Auth::user();
+
+        if (!$user->two_factor_enabled || !$user->two_factor_secret) {
+            return redirect()->route('security.2fa')
+                ->withErrors(['otp' => 'Two-factor authentication is not enabled.']);
+        }
+
+        $g2fa = new Google2FA();
+        if (!$g2fa->verifyKey($user->two_factor_secret, $request->input('otp'))) {
+            return back()->withErrors(['otp' => 'Invalid code. Please try again.']);
+        }
+
+        $user->forceFill([
+            'two_factor_secret' => null,
+            'two_factor_enabled' => false,
+        ])->save();
+
+        session()->forget('2fa_setup_secret');
+
+        return redirect()->route('security.2fa')
+            ->with('success', 'Two-factor authentication has been disabled.');
+    }
+
+    public function regenerate2FASecret()
+    {
+        $user = Auth::user();
+
+        if ($user->two_factor_enabled) {
+            return redirect()->route('security.2fa')
+                ->withErrors(['otp' => 'Disable 2FA first before generating a new secret.']);
+        }
+
+        session()->forget('2fa_setup_secret');
+
+        return redirect()->route('security.2fa')
+            ->with('info', 'A new authenticator secret has been generated.');
     }
 
     // ── Social OAuth ──────────────────────────────────────────────

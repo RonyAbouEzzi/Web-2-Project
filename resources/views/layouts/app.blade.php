@@ -402,6 +402,7 @@
                 @elseif(auth()->user()->isOfficeUser())
                 <a class="dropdown-item" href="{{ route('office.profile') }}"><i class="bi bi-gear me-2"></i>Office Settings</a>
                 @endif
+                <a class="dropdown-item" href="{{ route('security.2fa') }}"><i class="bi bi-shield-lock me-2"></i>2FA Security</a>
                 <div class="dropdown-divider"></div>
                 <form action="{{ route('logout') }}" method="POST">@csrf
                     <button class="dropdown-item text-danger" style="width:100%;text-align:left;background:none;border:none;cursor:pointer">
