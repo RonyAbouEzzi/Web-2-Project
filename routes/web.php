@@ -40,9 +40,18 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/auth/{provider}',          [AuthController::class, 'redirectToProvider'])->name('social.redirect');
     Route::get('/auth/{provider}/callback', [AuthController::class, 'handleProviderCallback'])->name('social.callback');
+    Route::get('/auth/social/password',     [AuthController::class, 'showSocialPasswordForm'])->name('social.password.form');
+    Route::post('/auth/social/password',    [AuthController::class, 'storeSocialPassword'])->name('social.password.store');
 });
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::middleware('auth')->group(function () {
+    Route::get('/security/2fa', [AuthController::class, 'show2FASettings'])->name('security.2fa');
+    Route::post('/security/2fa/enable', [AuthController::class, 'enable2FA'])->name('security.2fa.enable');
+    Route::post('/security/2fa/disable', [AuthController::class, 'disable2FA'])->name('security.2fa.disable');
+    Route::post('/security/2fa/regenerate', [AuthController::class, 'regenerate2FASecret'])->name('security.2fa.regenerate');
+
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
