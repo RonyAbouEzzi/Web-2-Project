@@ -136,6 +136,36 @@
             </div>
         </div>
 
+        {{-- Payment History --}}
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><i class="bi bi-credit-card me-2" style="color:var(--primary)"></i>Payment History</span>
+            </div>
+            <div class="card-body p0">
+                @forelse($paidRequests ?? [] as $pr)
+                <a href="{{ route('citizen.requests.show', $pr) }}"
+                   style="display:flex;align-items:center;gap:.85rem;padding:.85rem 1.2rem;border-bottom:1px solid var(--ink-100);text-decoration:none;color:inherit;transition:background .12s"
+                   onmouseover="this.style.background='var(--ink-50)'" onmouseout="this.style.background='transparent'">
+                    <div style="width:36px;height:36px;border-radius:9px;background:#f0fdf4;color:#16a34a;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                        <div style="font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $pr->service->name }}</div>
+                        <div style="font-size:.71rem;color:var(--ink-400)">{{ $pr->office->name }} &middot; {{ ucfirst($pr->payment_method ?? 'card') }} &middot; {{ $pr->updated_at->format('M d, Y') }}</div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0">
+                        <div style="font-size:.85rem;font-weight:700;color:#16a34a">${{ number_format($pr->amount_paid, 2) }}</div>
+                    </div>
+                </a>
+                @empty
+                <div class="empty-state" style="padding:2rem 1rem">
+                    <div class="empty-icon"><i class="bi bi-credit-card"></i></div>
+                    <p style="font-size:.82rem;color:var(--ink-400)">No payments yet.</p>
+                </div>
+                @endforelse
+            </div>
+        </div>
+
         {{-- Recent Activity --}}
         <div class="card">
             <div class="card-header">

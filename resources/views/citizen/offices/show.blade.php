@@ -116,18 +116,34 @@
             <div class="card-header"><span class="card-title"><i class="bi bi-calendar-plus me-2" style="color:var(--primary)"></i>Book Appointment</span></div>
             <div class="card-body">
                 <p style="font-size:.8rem;color:#6b7280;margin-bottom:.9rem">Schedule an in-person visit</p>
+                @if(session('success'))
+                <div class="alert alert-success mb-3" style="font-size:.82rem">
+                    <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
+                </div>
+                @endif
+                @if($errors->any())
+                <div class="alert alert-danger mb-3" style="font-size:.82rem">
+                    @foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach
+                </div>
+                @endif
                 <form action="{{ route('citizen.appointments.book') }}" method="POST">
                     @csrf
                     <input type="hidden" name="office_id" value="{{ $office->id }}">
                     <div class="mb-2">
                         <label class="form-label">Date</label>
-                        <input type="date" name="appointment_date" class="form-control" min="{{ now()->addDay()->format('Y-m-d') }}" required>
+                        <input type="date" name="appointment_date" id="aptDate" class="form-control" min="{{ now()->addDay()->format('Y-m-d') }}" required>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Time</label>
-                        <input type="time" name="appointment_time" class="form-control" required>
+                        <label class="form-label">Time Slot</label>
+                        <select name="appointment_time" id="aptTime" class="form-select" required>
+                            <option value="">Select a date first</option>
+                        </select>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block"><i class="bi bi-calendar-check"></i> Book</button>
+                    <div class="mb-3">
+                        <label class="form-label">Notes <span style="color:#9ca3af;font-weight:400">(optional)</span></label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Reason for visit..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block"><i class="bi bi-calendar-check"></i> Book Appointment</button>
                 </form>
             </div>
         </div>
@@ -140,5 +156,56 @@
     .office-grid { grid-template-columns: 1fr 280px !important; }
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+(function() {
+    var workingHours = @json($office->working_hours ?? []);
+    var dayMap = {0:'sun',1:'mon',2:'tue',3:'wed',4:'thu',5:'fri',6:'sat'};
+    var aptDate = document.getElementById('aptDate');
+    var aptTime = document.getElementById('aptTime');
+
+    aptDate.addEventListener('change', function() {
+        aptTime.innerHTML = '';
+        var date = new Date(this.value + 'T00:00:00');
+        var dayKey = dayMap[date.getDay()];
+        var hours = workingHours[dayKey];
+
+        if (!hours || hours === 'closed' || hours === 'Closed') {
+            aptTime.innerHTML = '<option value="">Office closed on this day</option>';
+            return;
+        }
+
+        // Parse hours like "08:00 - 16:00" or "8:00-16:00"
+        var parts = hours.replace(/\s/g,'').split('-');
+        if (parts.length !== 2) {
+            aptTime.innerHTML = '<option value="">Select time</option>';
+            // Generate default slots 8-16
+            for (var h = 8; h < 16; h++) {
+                for (var m = 0; m < 60; m += 30) {
+                    var t = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+                    aptTime.innerHTML += '<option value="'+t+'">'+t+'</option>';
+                }
+            }
+            return;
+        }
+
+        var startH = parseInt(parts[0].split(':')[0]);
+        var startM = parseInt(parts[0].split(':')[1] || '0');
+        var endH = parseInt(parts[1].split(':')[0]);
+        var endM = parseInt(parts[1].split(':')[1] || '0');
+
+        aptTime.innerHTML = '<option value="">Choose a time slot</option>';
+        for (var h = startH; h < endH || (h === endH && 0 < endM); h++) {
+            for (var m = (h === startH ? startM : 0); m < 60; m += 30) {
+                if (h > endH || (h === endH && m >= endM)) break;
+                var t = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+                aptTime.innerHTML += '<option value="'+t+'">'+t+'</option>';
+            }
+        }
+    });
+})();
+</script>
 @endpush
 @endsection

@@ -15,7 +15,15 @@ class CitizenController extends Controller
     {
         $user     = Auth::user();
         $requests = $user->serviceRequests()->with(['service', 'office'])->latest()->paginate(10);
-        return view('citizen.dashboard', compact('requests'));
+        $upcomingAppointments = Appointment::where('citizen_id', $user->id)
+            ->whereIn('status', ['scheduled', 'confirmed'])
+            ->where('appointment_date', '>=', now()->toDateString())
+            ->with('office')
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time')
+            ->take(3)
+            ->get();
+        return view('citizen.dashboard', compact('requests', 'upcomingAppointments'));
     }
 
     // ── Profile ───────────────────────────────────────────────────
@@ -23,7 +31,13 @@ class CitizenController extends Controller
     {
         $user = Auth::user();
         $requests = $user->serviceRequests()->with(['service', 'office'])->latest()->take(5)->get();
-        return view('citizen.profile', compact('user', 'requests'));
+        $paidRequests = $user->serviceRequests()
+            ->where('payment_status', 'paid')
+            ->with(['service', 'office'])
+            ->latest()
+            ->take(10)
+            ->get();
+        return view('citizen.profile', compact('user', 'requests', 'paidRequests'));
     }
 
     public function updateProfile(Request $request)
@@ -72,7 +86,19 @@ class CitizenController extends Controller
     public function showService(Service $service)
     {
         $service->load('office');
-        return view('citizen.services.show', compact('service'));
+
+        $paymentService = app(PaymentService::class);
+        $baseCurrency = $service->currency ?? 'USD';
+        $basePrice = $service->price;
+
+        $convertedPrices = [];
+        foreach (['USD', 'LBP', 'EUR'] as $currency) {
+            if ($currency !== $baseCurrency) {
+                $convertedPrices[$currency] = $paymentService->convertCurrency($basePrice, $baseCurrency, $currency);
+            }
+        }
+
+        return view('citizen.services.show', compact('service', 'convertedPrices'));
     }
 
     public function submitRequest(Request $request, Service $service)
@@ -112,7 +138,8 @@ class CitizenController extends Controller
     public function showPayment(ServiceRequest $serviceRequest)
     {
         abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
-        return view('citizen.payment', compact('serviceRequest'));
+        $stripeKey = config('services.stripe.key');
+        return view('citizen.payment', compact('serviceRequest', 'stripeKey'));
     }
 
     public function processPayment(Request $request, ServiceRequest $serviceRequest)
@@ -121,16 +148,94 @@ class CitizenController extends Controller
 
         $data = $request->validate(['payment_method' => 'required|in:card,crypto']);
 
-        $result = app(PaymentService::class)->process($serviceRequest, $data['payment_method'], $request->all());
+        $paymentService = app(PaymentService::class);
+        $result = $paymentService->process($serviceRequest, $data['payment_method'], $request->all());
+
+        if (!$result['success']) {
+            return back()->withErrors(['payment' => $result['message']]);
+        }
+
+        // Stripe card payment: redirect to Stripe Checkout
+        if ($data['payment_method'] === 'card' && isset($result['redirect_url'])) {
+            return redirect($result['redirect_url']);
+        }
+
+        // Crypto payment: show wallet address for manual transfer
+        if ($data['payment_method'] === 'crypto' && !empty($result['requires_confirmation'])) {
+            return view('citizen.payment-crypto', [
+                'serviceRequest'  => $serviceRequest,
+                'wallet_address'  => $result['wallet_address'],
+                'crypto_amount'   => $result['crypto_amount'],
+                'crypto_currency' => $result['crypto_currency'],
+                'transaction_id'  => $result['transaction_id'],
+            ]);
+        }
+
+        // Direct success (fallback)
+        $serviceRequest->update([
+            'payment_status' => 'paid',
+            'payment_method' => $data['payment_method'],
+            'transaction_id' => $result['transaction_id'],
+        ]);
+
+        return redirect()->route('citizen.requests.show', $serviceRequest)
+                         ->with('success', 'Payment successful! Your request is now being processed.');
+    }
+
+    public function paymentSuccess(Request $request, ServiceRequest $serviceRequest)
+    {
+        abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
+
+        $sessionId = $request->query('session_id');
+        if (!$sessionId) {
+            return redirect()->route('citizen.payment', $serviceRequest)
+                             ->withErrors(['payment' => 'Invalid payment session.']);
+        }
+
+        $result = app(PaymentService::class)->verifyStripeSession($sessionId);
 
         if ($result['success']) {
             $serviceRequest->update([
                 'payment_status' => 'paid',
-                'payment_method' => $data['payment_method'],
+                'payment_method' => 'card',
                 'transaction_id' => $result['transaction_id'],
             ]);
+
             return redirect()->route('citizen.requests.show', $serviceRequest)
                              ->with('success', 'Payment successful! Your request is now being processed.');
+        }
+
+        return redirect()->route('citizen.payment', $serviceRequest)
+                         ->withErrors(['payment' => $result['message']]);
+    }
+
+    public function paymentCancel(ServiceRequest $serviceRequest)
+    {
+        abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
+
+        return redirect()->route('citizen.payment', $serviceRequest)
+                         ->with('warning', 'Payment was cancelled. You can try again.');
+    }
+
+    public function confirmCryptoPayment(Request $request, ServiceRequest $serviceRequest)
+    {
+        abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
+
+        $data = $request->validate([
+            'tx_hash' => 'required|string|min:10|max:100',
+        ]);
+
+        $result = app(PaymentService::class)->confirmCrypto($serviceRequest, $data['tx_hash']);
+
+        if ($result['success']) {
+            $serviceRequest->update([
+                'payment_status' => 'paid',
+                'payment_method' => 'crypto',
+                'transaction_id' => $result['transaction_id'],
+            ]);
+
+            return redirect()->route('citizen.requests.show', $serviceRequest)
+                             ->with('success', 'Crypto payment confirmed! Your request is now being processed.');
         }
 
         return back()->withErrors(['payment' => $result['message']]);

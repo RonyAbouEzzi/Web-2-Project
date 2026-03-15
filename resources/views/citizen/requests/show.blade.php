@@ -128,12 +128,21 @@
                     <span style="font-size:.8rem;color:#6b7280">Status</span>
                     <span class="sbadge s-{{ $serviceRequest->payment_status }}">{{ ucfirst($serviceRequest->payment_status) }}</span>
                 </div>
+                @if($serviceRequest->transaction_id)
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem">
+                    <span style="font-size:.8rem;color:#6b7280">Method</span>
+                    <span style="font-size:.82rem;font-weight:600">{{ ucfirst($serviceRequest->payment_method ?? '-') }}</span>
+                </div>
+                @endif
                 @if($serviceRequest->payment_status !== 'paid')
                 <a href="{{ route('citizen.payment', $serviceRequest) }}" class="btn btn-primary btn-block">
                     <i class="bi bi-credit-card"></i> Pay Now
                 </a>
                 @else
-                <div style="text-align:center;color:#16a34a;font-size:.8rem;font-weight:600"><i class="bi bi-check-circle me-1"></i>Payment complete</div>
+                <div style="text-align:center;color:#16a34a;font-size:.8rem;font-weight:600;margin-bottom:.75rem"><i class="bi bi-check-circle me-1"></i>Payment complete</div>
+                <a href="{{ route('citizen.requests.receipt', $serviceRequest) }}" class="btn btn-sm btn-block" style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0">
+                    <i class="bi bi-file-earmark-pdf"></i> Download Receipt
+                </a>
                 @endif
             </div>
         </div>

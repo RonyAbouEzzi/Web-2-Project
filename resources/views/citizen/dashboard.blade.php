@@ -58,6 +58,33 @@
     @endforeach
 </div>
 
+{{-- Upcoming Appointments --}}
+@if(isset($upcomingAppointments) && $upcomingAppointments->count() > 0)
+<div class="card mb-3">
+    <div class="card-header">
+        <span class="card-title"><i class="bi bi-calendar-event me-2" style="color:var(--primary)"></i>Upcoming Appointments</span>
+    </div>
+    <div class="card-body p0">
+        @foreach($upcomingAppointments as $apt)
+        <div style="display:flex;align-items:center;gap:.85rem;padding:.85rem 1.2rem;{{ !$loop->last ? 'border-bottom:1px solid var(--ink-100);' : '' }}">
+            <div style="width:48px;text-align:center;flex-shrink:0">
+                <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;color:var(--primary);letter-spacing:.05em">{{ \Carbon\Carbon::parse($apt->appointment_date)->format('M') }}</div>
+                <div style="font-size:1.3rem;font-weight:800;color:var(--ink-900);line-height:1">{{ \Carbon\Carbon::parse($apt->appointment_date)->format('d') }}</div>
+            </div>
+            <div style="flex:1;min-width:0">
+                <div style="font-size:.85rem;font-weight:700;color:var(--ink-800)">{{ $apt->office->name }}</div>
+                <div style="font-size:.73rem;color:var(--ink-400);margin-top:2px">
+                    <i class="bi bi-clock me-1"></i>{{ $apt->appointment_time }}
+                    @if($apt->notes) &middot; {{ Str::limit($apt->notes, 40) }}@endif
+                </div>
+            </div>
+            <span class="sbadge s-{{ $apt->status }}">{{ ucfirst($apt->status) }}</span>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- My Requests list --}}
 <div class="card">
     <div class="card-header">

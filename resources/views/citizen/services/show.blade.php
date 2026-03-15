@@ -37,6 +37,21 @@
                 </div>
                 @endif
             </div>
+
+            @if(isset($convertedPrices) && count($convertedPrices) > 0)
+            <div style="margin-top:1rem;border-top:1px solid #f3f4f6;padding-top:.85rem">
+                <div style="font-size:.72rem;color:#9ca3af;margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem">
+                    <i class="bi bi-currency-exchange"></i> Also equivalent to:
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+                    @foreach($convertedPrices as $currency => $amount)
+                    <span style="background:#f0fdf4;color:#166534;font-size:.78rem;font-weight:600;padding:.35rem .7rem;border-radius:6px">
+                        @if($currency === 'USD')$@elseif($currency === 'EUR')&euro;@elseif($currency === 'LBP')LBP @endif{{ number_format($amount, $currency === 'LBP' ? 0 : 2) }}
+                    </span>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 
@@ -64,7 +79,18 @@
     <div class="card">
         <div class="card-header"><span class="card-title"><i class="bi bi-send me-2" style="color:var(--primary)"></i>Submit Request</span></div>
         <div class="card-body">
-            <form action="{{ route('citizen.requests.submit', $service) }}" method="POST" enctype="multipart/form-data">
+            @if($errors->any())
+            <div class="alert alert-danger mb-3">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <ul class="mb-0 ps-3">
+                    @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            <form action="{{ route('citizen.requests.submit', $service) }}" method="POST" enctype="multipart/form-data" id="submitForm">
                 @csrf
 
                 {{-- Notes --}}
@@ -125,7 +151,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block" style="padding:.65rem">
+                <button type="submit" class="btn btn-primary btn-block" style="padding:.65rem" id="submitBtn">
                     <i class="bi bi-send-fill"></i> Submit Request
                 </button>
                 <a href="{{ route('citizen.offices.show', $service->office) }}" class="btn btn-block mt-2"
@@ -139,6 +165,12 @@
 
 @push('scripts')
 <script>
+document.getElementById('submitForm').addEventListener('submit', function() {
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Submitting...';
+});
+
 function handleUpload(idx, input) {
     const zone  = document.getElementById('zone_' + idx);
     const label = document.getElementById('zone_label_' + idx);
