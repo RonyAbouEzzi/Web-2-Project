@@ -28,7 +28,7 @@ class ServiceRequest extends Model
     public function documents()  { return $this->hasMany(RequestDocument::class); }
     public function statusLogs() { return $this->hasMany(RequestStatusLog::class); }
     public function messages()   { return $this->hasMany(Message::class); }
-    public function appointment(){ return $this->hasOne(Appointment::class); }
+    public function appointment() { return $this->hasOne(Appointment::class); }
 
     // ── Helpers ───────────────────────────────────────────────────
     public static function generateReference(): string
