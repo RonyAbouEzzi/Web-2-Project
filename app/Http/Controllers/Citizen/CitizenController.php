@@ -48,18 +48,41 @@ class CitizenController extends Controller
     // ── Browse Services ───────────────────────────────────────────
     public function browseOffices(Request $request)
     {
-        $municipalities = \App\Models\Municipality::where('is_active', true)->orderBy('name')->get();
-        $query = Office::where('is_active', true)->with('municipality');
+        $municipalities = \App\Models\Municipality::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $query = Office::where('is_active', true)
+            ->with(['municipality', 'services']);
 
         if ($search = $request->search) {
             $query->where('name', 'like', "%{$search}%");
         }
+
         if ($mid = $request->municipality_id) {
             $query->where('municipality_id', $mid);
         }
 
         $offices = $query->withCount('requests')->paginate(12);
-        return view('citizen.offices.index', compact('offices', 'municipalities'));
+
+        $mapOffices = $offices->getCollection()
+            ->filter(fn ($office) => !is_null($office->latitude) && !is_null($office->longitude))
+            ->map(function ($office) {
+                return [
+                    'id' => $office->id,
+                    'name' => $office->name,
+                    'municipality' => $office->municipality?->name,
+                    'address' => $office->address,
+                    'latitude' => (float) $office->latitude,
+                    'longitude' => (float) $office->longitude,
+                    'phone' => $office->phone,
+                    'services_count' => $office->services->count(),
+                    'show_url' => route('citizen.offices.show', $office),
+                ];
+            })
+            ->values();
+
+        return view('citizen.offices.index', compact('offices', 'municipalities', 'mapOffices'));
     }
 
     public function showOffice(Office $office)

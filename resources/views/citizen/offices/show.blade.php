@@ -72,6 +72,21 @@
 
     {{-- Sidebar: info + reviews --}}
     <div style="display:flex;flex-direction:column;gap:1rem">
+        {{-- Map --}}
+        @if($office->latitude && $office->longitude)
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i class="bi bi-geo-alt me-2" style="color:var(--primary)"></i>
+                    Location
+                </span>
+            </div>
+            <div class="card-body" style="padding:0">
+                <div id="officeMap" style="width:100%;height:220px;border-radius:0 0 12px 12px"></div>
+            </div>
+        </div>
+        @endif
+
         {{-- Working Hours --}}
         @if($office->working_hours)
         <div class="card">
@@ -140,5 +155,53 @@
     .office-grid { grid-template-columns: 1fr 280px !important; }
 }
 </style>
+@endpush
+@push('scripts')
+<script>
+function initOfficeMap() {
+    const lat = {{ $office->latitude ?? 0 }};
+    const lng = {{ $office->longitude ?? 0 }};
+
+    if (!lat || !lng) return;
+
+    const officeMap = document.getElementById("officeMap");
+    if (!officeMap) return;
+
+    const map = new google.maps.Map(officeMap, {
+        center: { lat: lat, lng: lng },
+        zoom: 15,
+    });
+
+    const infoWindow = new google.maps.InfoWindow({
+        content: `
+            <div style="min-width:180px;max-width:220px;padding:4px 2px;">
+                <div style="font-weight:800;font-size:14px;color:#111827;margin-bottom:4px;">
+                    {{ addslashes($office->name) }}
+                </div>
+                <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">
+                    {{ addslashes($office->municipality->name) }}
+                </div>
+                <div style="font-size:12px;color:#374151;line-height:1.4;">
+                    {{ addslashes($office->address ?? '') }}
+                </div>
+            </div>
+        `
+    });
+
+    const marker = new google.maps.Marker({
+        position: { lat: lat, lng: lng },
+        map: map,
+        title: "{{ $office->name }}"
+    });
+
+    marker.addListener('click', () => {
+        infoWindow.open(map, marker);
+    });
+}
+</script>
+
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initOfficeMap">
+</script>
 @endpush
 @endsection
