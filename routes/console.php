@@ -2,6 +2,7 @@
 
 use App\Events\AppointmentReminderBroadcast;
 use App\Models\Appointment;
+use App\Notifications\AppointmentReminder;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
@@ -30,6 +31,8 @@ Artisan::command('appointments:remind-upcoming', function () {
         }
 
         event(new AppointmentReminderBroadcast($appointment, 'daily_scheduler'));
+        $appointment->loadMissing(['citizen', 'request']);
+        $appointment->citizen?->notify(new AppointmentReminder($appointment, 'daily_scheduler'));
         $dispatched++;
     }
 
