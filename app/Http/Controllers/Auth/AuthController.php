@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\RegistrationConfirmation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, Hash, Password};
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use PragmaRX\Google2FA\Google2FA;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Throwable;
 
 class AuthController extends Controller
@@ -63,6 +65,8 @@ class AuthController extends Controller
             'role'        => 'citizen',
             'is_active'   => true,
         ]);
+
+        $user->notify(new RegistrationConfirmation());
 
         Auth::login($user);
         $request->session()->regenerate();
@@ -404,6 +408,8 @@ class AuthController extends Controller
                 'is_active'       => true,
                 'email_verified_at' => now(),
             ]);
+
+            $user->notify(new RegistrationConfirmation());
         }
 
         session()->forget('social_password_setup');

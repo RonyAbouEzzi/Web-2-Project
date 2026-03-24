@@ -67,7 +67,7 @@
                         <div style="font-size:.7rem;color:#9ca3af">By {{ $doc->uploaded_by }}</div>
                     </div>
                     <a href="{{ route('citizen.documents.download', [$serviceRequest, $doc->id]) }}"
-                       class="btn btn-sm" style="background:#f3f4f6;border:none;color:#374151;flex-shrink:0">
+                        class="btn btn-sm" style="background:#f3f4f6;border:none;color:#374151;flex-shrink:0">
                         <i class="bi bi-download"></i>
                     </a>
                 </div>
@@ -81,16 +81,27 @@
         <div class="card">
             <div class="card-header"><span class="card-title"><i class="bi bi-chat-dots me-2" style="color:var(--primary)"></i>Messages</span></div>
             <div class="chat-box" id="chatBox">
-                @foreach($serviceRequest->messages as $msg)
-                @php $mine = $msg->sender_id === auth()->id(); @endphp
-                <div class="msg {{ $mine ? 'mine' : 'theirs' }}">
-                    <div class="msg-av {{ $mine ? 'av-me' : 'av-other' }}">{{ strtoupper(substr($msg->sender->name,0,1)) }}</div>
-                    <div class="msg-bubble">
-                        <p>{{ $msg->body }}</p>
-                        <div class="msg-time">{{ $msg->created_at->format('H:i') }}</div>
+                @if($serviceRequest->messages->isEmpty())
+                    <div style="padding:1rem;text-align:center;color:#9ca3af;font-size:.82rem">
+                        No messages yet. Start the conversation.
                     </div>
-                </div>
-                @endforeach
+                @else
+                    @foreach($serviceRequest->messages as $msg)
+                    @php $mine = $msg->sender_id === auth()->id(); @endphp
+                    <div class="msg {{ $mine ? 'mine' : 'theirs' }}">
+                        <div class="msg-av {{ $mine ? 'av-me' : 'av-other' }}">
+                            {{ strtoupper(substr($msg->sender->name,0,1)) }}
+                        </div>
+                        <div class="msg-bubble">
+                            <div style="font-size:.7rem;font-weight:700;margin-bottom:.2rem;color:#6b7280">
+                                {{ $mine ? 'You' : $msg->sender->name }}
+                            </div>
+                            <p>{{ $msg->body }}</p>
+                            <div class="msg-time">{{ $msg->created_at->format('H:i') }}</div>
+                        </div>
+                    </div>
+                    @endforeach
+                @endif
             </div>
             <div style="border-top:1px solid #f3f4f6;padding:.75rem 1rem">
                 <div style="display:flex;gap:.5rem">
@@ -110,7 +121,7 @@
             <div class="card-body">
                 <div style="font-size:.83rem;font-weight:700;margin-bottom:.75rem">Track via QR Code</div>
                 <img src="{{ Storage::url($serviceRequest->qr_code) }}" alt="QR Code"
-                     style="max-width:160px;border-radius:8px;border:1px solid #e5eaf0">
+                    style="max-width:160px;border-radius:8px;border:1px solid #e5eaf0">
                 <div style="font-size:.72rem;color:#9ca3af;margin-top:.6rem">Scan to check request status</div>
             </div>
         </div>
@@ -155,6 +166,53 @@
                 @endif
             </div>
         </div>
+        @if($serviceRequest->status === 'completed')
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            <i class="bi bi-star me-2" style="color:var(--primary)"></i>Feedback
+        </span>
+    </div>
+    <div class="card-body">
+        @if($errors->any())
+            <div class="alert alert-danger" style="font-size:.8rem">
+                <ul style="margin:0;padding-left:1rem">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('citizen.feedback.submit') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="office_id" value="{{ $serviceRequest->office_id }}">
+                    <input type="hidden" name="service_request_id" value="{{ $serviceRequest->id }}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <select name="rating" class="form-select" required>
+                            <option value="">Select rating</option>
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Very Good</option>
+                            <option value="3">3 - Good</option>
+                            <option value="2">2 - Fair</option>
+                            <option value="1">1 - Poor</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Comment</label>
+                        <textarea name="comment" class="form-control" rows="3" placeholder="Write your feedback..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-send"></i> Submit Feedback
+                    </button>
+                </form>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 
@@ -203,33 +261,79 @@
 
 @push('scripts')
 <script>
-const chatBox  = document.getElementById('chatBox');
-const chatInput= document.getElementById('chatInput');
-const sendBtn  = document.getElementById('sendBtn');
+    const chatBox   = document.getElementById('chatBox');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn   = document.getElementById('sendBtn');
 
-async function sendMsg() {
-    const body = chatInput.value.trim();
-    if (!body) return;
-    chatInput.disabled = true; sendBtn.disabled = true;
-    try {
-        const r = await fetch('{{ route('citizen.messages.send', $serviceRequest) }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
-            body: JSON.stringify({ body })
-        });
-        if (r.ok) {
+    async function sendMsg() {
+        const body = chatInput.value.trim();
+        if (!body) return;
+
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+
+        try {
+            const response = await fetch('{{ route('citizen.messages.send', $serviceRequest) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ body })
+            });
+
+            const data = await response.json();
+
+            // ❌ if error
+            if (!response.ok || !data.success) {
+                alert(data.message || 'Failed to send message');
+                return;
+            }
+
+            // ✅ success
+            const msg = data.message;
             chatInput.value = '';
+
             const div = document.createElement('div');
             div.className = 'msg mine';
-            div.innerHTML = `<div class="msg-av av-me">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div><div class="msg-bubble"><p>${body}</p><div class="msg-time">Just now</div></div>`;
+
+            div.innerHTML = `
+                <div class="msg-av av-me">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div>
+                <div class="msg-bubble">
+                    <div style="font-size:.7rem;font-weight:700;margin-bottom:.2rem;color:#6b7280">
+                        You
+                    </div>
+                    <p></p>
+                    <div class="msg-time">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+            `;
+
+            // 🔐 SAFE TEXT (IMPORTANT)
+            div.querySelector('p').textContent = msg.body;
+
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (error) {
+            alert('Something went wrong while sending the message.');
+        } finally {
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            chatInput.focus();
         }
-    } finally { chatInput.disabled = false; sendBtn.disabled = false; chatInput.focus(); }
-}
-sendBtn.addEventListener('click', sendMsg);
-chatInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } });
-chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    sendBtn.addEventListener('click', sendMsg);
+
+    chatInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMsg();
+        }
+    });
+
+    chatBox.scrollTop = chatBox.scrollHeight;
 </script>
 @endpush
 @endsection
