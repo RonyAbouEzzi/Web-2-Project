@@ -47,4 +47,8 @@ return [
         'redirect'      => env('GITHUB_REDIRECT_URI', '/auth/github/callback'),
     ],
 
+    'google_maps' => [
+        'api_key' => env('GOOGLE_MAPS_API_KEY'),
+    ],
+
 ];
