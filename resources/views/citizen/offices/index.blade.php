@@ -23,6 +23,24 @@
     </div>
 </div>
 
+{{-- Map Section --}}
+<div class="card mb-3">
+    <div class="card-header">
+        <span class="card-title">
+            <i class="bi bi-geo-alt me-2" style="color:var(--primary)"></i>Office Locations
+        </span>
+    </div>
+    <div class="card-body">
+        @if($mapOffices->isEmpty())
+            <div style="text-align:center;padding:2rem 1rem;color:#9ca3af">
+                No office locations available to display on the map.
+            </div>
+        @else
+            <div id="officesMap" style="width:100%;height:430px;border-radius:12px;overflow:hidden;border:1px solid #e5eaf0"></div>
+        @endif
+    </div>
+</div>
+
 {{-- Office Cards Grid --}}
 @if($offices->isEmpty())
 <div style="text-align:center;padding:3rem 1rem;color:#9ca3af;background:#fff;border-radius:14px;border:1px solid #e5eaf0">
@@ -79,4 +97,70 @@
 </div>
 <div style="margin-top:1rem">{{ $offices->links() }}</div>
 @endif
+@push('scripts')
+@if($mapOffices->isNotEmpty())
+<script>
+    window.officeLocations = @json($mapOffices);
+</script>
+
+<script>
+    function initCitizenOfficesMap() {
+        const offices = window.officeLocations || [];
+        if (!offices.length) return;
+
+        const firstOffice = offices[0];
+
+        const map = new google.maps.Map(document.getElementById('officesMap'), {
+            center: { lat: firstOffice.latitude, lng: firstOffice.longitude },
+            zoom: 11,
+        });
+
+        const bounds = new google.maps.LatLngBounds();
+        const infoWindow = new google.maps.InfoWindow();
+
+        offices.forEach((office) => {
+            const marker = new google.maps.Marker({
+                position: { lat: office.latitude, lng: office.longitude },
+                map,
+                title: office.name,
+            });
+
+            bounds.extend({ lat: office.latitude, lng: office.longitude });
+
+            marker.addListener('click', () => {
+                infoWindow.setContent(`
+                    <div style="min-width:220px;max-width:260px;padding:4px 2px;">
+                        <div style="font-weight:800;font-size:14px;color:#111827;margin-bottom:4px;">
+                            ${office.name}
+                        </div>
+                        <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">
+                            ${office.municipality ?? ''}
+                        </div>
+                        <div style="font-size:12px;color:#374151;line-height:1.4;margin-bottom:8px;">
+                            ${office.address ?? ''}
+                        </div>
+                        <div style="font-size:12px;color:#374151;margin-bottom:8px;">
+                            ${office.services_count} services
+                        </div>
+                        <a href="${office.show_url}" style="display:inline-block;padding:6px 10px;background:#0038a8;color:#fff;text-decoration:none;border-radius:8px;font-size:12px;">
+                            View Office
+                        </a>
+                    </div>
+                `);
+
+                infoWindow.open(map, marker);
+            });
+        });
+
+        if (offices.length > 1) {
+            map.fitBounds(bounds);
+        }
+    }
+</script>
+
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initCitizenOfficesMap">
+</script>
+@endif
+@endpush
 @endsection

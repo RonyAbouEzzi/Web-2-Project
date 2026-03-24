@@ -88,14 +88,14 @@ Route::middleware(['auth', 'role:office_user'])->prefix('office')->name('office.
     Route::put('/services/{service}',     [OfficeController::class, 'updateService'])->name('services.update');
     Route::delete('/services/{service}',  [OfficeController::class, 'destroyService'])->name('services.destroy');
 
-    Route::get('/requests',                    [OfficeController::class, 'requests'])->name('requests');
-    Route::get('/requests/{request}',          [OfficeController::class, 'showRequest'])->name('requests.show');
-    Route::patch('/requests/{request}/status', [OfficeController::class, 'updateRequestStatus'])->name('requests.status');
+    Route::get('/requests',[OfficeController::class, 'requests'])->name('requests');
+    Route::get('/requests/{serviceRequest}',          [OfficeController::class, 'showRequest'])->name('requests.show');
+    Route::patch('/requests/{serviceRequest}/status', [OfficeController::class, 'updateRequestStatus'])->name('requests.status');
 
     // PDF generation & download
-    Route::get('/requests/{request}/pdf/{type}', [OfficeController::class, 'downloadPdf'])->name('requests.pdf');
+    Route::get('/requests/{serviceRequest}/pdf/{type}', [OfficeController::class, 'downloadPdf'])->name('requests.pdf');
 
-    Route::post('/requests/{request}/messages', [OfficeController::class, 'sendMessage'])->name('messages.send');
+    Route::post('/requests/{serviceRequest}/messages', [OfficeController::class, 'sendMessage'])->name('messages.send');
 
     Route::get('/feedback',                  [OfficeController::class, 'feedback'])->name('feedback');
     Route::patch('/feedback/{feedback}/reply', [OfficeController::class, 'replyFeedback'])->name('feedback.reply');
