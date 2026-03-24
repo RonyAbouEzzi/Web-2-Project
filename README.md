@@ -2,6 +2,8 @@
 
 Web Programming 2 team project (Laravel 12).
 
+Detailed local setup and deployment notes are in `Running.md`.
+
 ## Team Branches
 
 Each member works only on their assigned feature branch:
