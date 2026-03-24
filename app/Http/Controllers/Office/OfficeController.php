@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Office;
 use App\Http\Controllers\Controller;
 use App\Events\{AppointmentReminderBroadcast, ServiceRequestStatusUpdated};
 use App\Models\{Appointment, Feedback, Office, Service, ServiceCategory, ServiceRequest};
+use App\Notifications\AppointmentReminder;
 use App\Notifications\RequestStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -215,6 +216,8 @@ class OfficeController extends Controller
 
         if ($data['status'] === 'confirmed') {
             event(new AppointmentReminderBroadcast($appointment->fresh(), 'appointment_confirmed'));
+            $appointment->loadMissing(['citizen', 'request']);
+            $appointment->citizen?->notify(new AppointmentReminder($appointment, 'appointment_confirmed'));
         }
 
         return back()->with('success', 'Appointment updated.');
