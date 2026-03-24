@@ -63,15 +63,38 @@
 
                 {{-- Google Maps preview --}}
                 @if($office->latitude && $office->longitude)
+                @php
+                    $mapsKey = config('services.google_maps.api_key');
+                    $mapQuery = rawurlencode($office->latitude . ',' . $office->longitude);
+                    $mapUrl = $mapsKey
+                        ? "https://www.google.com/maps/embed/v1/place?key={$mapsKey}&q={$mapQuery}&zoom=15"
+                        : null;
+                @endphp
                 <div style="margin-bottom:.75rem">
                     <label class="form-label">Map Preview</label>
-                    <div style="border-radius:10px;overflow:hidden;border:1px solid #e5eaf0;height:200px;background:#f3f4f6;display:flex;align-items:center;justify-content:center">
-                        <div style="text-align:center;color:#9ca3af">
-                            <i class="bi bi-geo-alt" style="font-size:2rem;display:block;margin-bottom:.4rem"></i>
-                            <span style="font-size:.78rem">{{ $office->latitude }}, {{ $office->longitude }}</span>
+                    @if($mapUrl)
+                        <div style="border-radius:10px;overflow:hidden;border:1px solid #e5eaf0;height:260px;background:#f3f4f6">
+                            <iframe
+                                title="Office location map"
+                                src="{{ $mapUrl }}"
+                                width="100%"
+                                height="260"
+                                style="border:0"
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"
+                                allowfullscreen>
+                            </iframe>
                         </div>
-                    </div>
-                    <p class="form-text">Google Maps embed requires your API key to be configured.</p>
+                        <p class="form-text">Showing map for coordinates {{ $office->latitude }}, {{ $office->longitude }}.</p>
+                    @else
+                        <div style="border-radius:10px;overflow:hidden;border:1px solid #e5eaf0;height:200px;background:#f3f4f6;display:flex;align-items:center;justify-content:center">
+                            <div style="text-align:center;color:#9ca3af">
+                                <i class="bi bi-geo-alt" style="font-size:2rem;display:block;margin-bottom:.4rem"></i>
+                                <span style="font-size:.78rem">{{ $office->latitude }}, {{ $office->longitude }}</span>
+                            </div>
+                        </div>
+                        <p class="form-text">Set <code>GOOGLE_MAPS_API_KEY</code> in <code>.env</code> and clear config cache.</p>
+                    @endif
                 </div>
                 @endif
 
