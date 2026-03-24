@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Citizen;
 use App\Http\Controllers\Controller;
 use App\Events\{AppointmentReminderBroadcast, NewRequestSubmitted, RequestDocumentUploaded};
 use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceRequest};
+use App\Notifications\AppointmentReminder;
 use App\Services\{QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, Hash};
@@ -49,18 +50,41 @@ class CitizenController extends Controller
     // ── Browse Services ───────────────────────────────────────────
     public function browseOffices(Request $request)
     {
-        $municipalities = \App\Models\Municipality::where('is_active', true)->orderBy('name')->get();
-        $query = Office::where('is_active', true)->with('municipality');
+        $municipalities = \App\Models\Municipality::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $query = Office::where('is_active', true)
+            ->with(['municipality', 'services']);
 
         if ($search = $request->search) {
             $query->where('name', 'like', "%{$search}%");
         }
+
         if ($mid = $request->municipality_id) {
             $query->where('municipality_id', $mid);
         }
 
         $offices = $query->withCount('requests')->paginate(12);
-        return view('citizen.offices.index', compact('offices', 'municipalities'));
+
+        $mapOffices = $offices->getCollection()
+            ->filter(fn ($office) => !is_null($office->latitude) && !is_null($office->longitude))
+            ->map(function ($office) {
+                return [
+                    'id' => $office->id,
+                    'name' => $office->name,
+                    'municipality' => $office->municipality?->name,
+                    'address' => $office->address,
+                    'latitude' => (float) $office->latitude,
+                    'longitude' => (float) $office->longitude,
+                    'phone' => $office->phone,
+                    'services_count' => $office->services->count(),
+                    'show_url' => route('citizen.offices.show', $office),
+                ];
+            })
+            ->values();
+
+        return view('citizen.offices.index', compact('offices', 'municipalities', 'mapOffices'));
     }
 
     public function showOffice(Office $office)
@@ -80,7 +104,7 @@ class CitizenController extends Controller
     {
         $request->validate([
             'notes'         => 'nullable|string|max:1000',
-            'documents'     => 'required|array',
+            'documents'     => 'required|array|min:1',
             'documents.*'   => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
@@ -134,7 +158,7 @@ class CitizenController extends Controller
                 'transaction_id' => $result['transaction_id'],
             ]);
             return redirect()->route('citizen.requests.show', $serviceRequest)
-                             ->with('success', 'Payment successful! Your request is now being processed.');
+                            ->with('success', 'Payment successful! Your request is now being processed.');
         }
 
         return back()->withErrors(['payment' => $result['message']]);
@@ -163,7 +187,7 @@ class CitizenController extends Controller
     public function trackByQr(string $reference)
     {
         $req = ServiceRequest::where('reference_number', $reference)
-                             ->with(['service', 'office', 'statusLogs'])->firstOrFail();
+                            ->with(['service', 'office', 'statusLogs'])->firstOrFail();
         return view('citizen.requests.track', compact('req'));
     }
 
@@ -190,6 +214,7 @@ class CitizenController extends Controller
 
         $appointment = Appointment::create(array_merge($data, ['citizen_id' => Auth::id()]));
         event(new AppointmentReminderBroadcast($appointment, 'appointment_booked'));
+        Auth::user()?->notify(new AppointmentReminder($appointment->fresh(['request']), 'appointment_booked'));
 
         return back()->with('success', 'Appointment booked successfully.');
     }
@@ -204,7 +229,20 @@ class CitizenController extends Controller
             'comment'            => 'nullable|string|max:1000',
         ]);
 
+        if (!empty($data['service_request_id'])) {
+            $alreadyExists = Feedback::where('citizen_id', Auth::id())
+                ->where('service_request_id', $data['service_request_id'])
+                ->exists();
+
+            if ($alreadyExists) {
+                return back()->withErrors([
+                    'feedback' => 'You have already submitted feedback for this request.'
+                ])->withInput();
+            }
+        }
+
         Feedback::create(array_merge($data, ['citizen_id' => Auth::id()]));
+
         return back()->with('success', 'Thank you for your feedback!');
     }
 
