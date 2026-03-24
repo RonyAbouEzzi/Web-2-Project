@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Citizen;
 use App\Http\Controllers\Controller;
 use App\Events\{AppointmentReminderBroadcast, NewRequestSubmitted, RequestDocumentUploaded};
 use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceRequest};
+use App\Notifications\AppointmentReminder;
 use App\Services\{QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, Hash};
@@ -213,6 +214,7 @@ class CitizenController extends Controller
 
         $appointment = Appointment::create(array_merge($data, ['citizen_id' => Auth::id()]));
         event(new AppointmentReminderBroadcast($appointment, 'appointment_booked'));
+        Auth::user()?->notify(new AppointmentReminder($appointment->fresh(['request']), 'appointment_booked'));
 
         return back()->with('success', 'Appointment booked successfully.');
     }
