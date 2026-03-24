@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Office;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceCategory, ServiceRequest};
+use App\Events\{AppointmentReminderBroadcast, ServiceRequestStatusUpdated};
+use App\Models\{Appointment, Feedback, Office, Service, ServiceCategory, ServiceRequest};
 use App\Notifications\RequestStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class OfficeController extends Controller
 {
@@ -177,6 +177,7 @@ class OfficeController extends Controller
 
         // Notify citizen
         $serviceRequest->citizen->notify(new RequestStatusUpdated($serviceRequest));
+        event(new ServiceRequestStatusUpdated($serviceRequest, $oldStatus, $data['comment'] ?? null));
 
         return back()->with('success', 'Request status updated.');
     }
@@ -211,9 +212,16 @@ class OfficeController extends Controller
     public function updateAppointment(Request $request, Appointment $appointment)
     {
         $this->authorizeOfficeOwnership($appointment->office_id);
-        $appointment->update($request->validate([
+        $data = $request->validate([
             'status' => 'required|in:confirmed,cancelled,completed',
-        ]));
+        ]);
+
+        $appointment->update($data);
+
+        if ($data['status'] === 'confirmed') {
+            event(new AppointmentReminderBroadcast($appointment->fresh(), 'appointment_confirmed'));
+        }
+
         return back()->with('success', 'Appointment updated.');
     }
 
