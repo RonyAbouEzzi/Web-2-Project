@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Citizen;
 
 use App\Http\Controllers\Controller;
+use App\Events\{AppointmentReminderBroadcast, NewRequestSubmitted, RequestDocumentUploaded};
 use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceRequest};
 use App\Services\{QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Auth, Hash, Storage};
+use Illuminate\Support\Facades\{Auth, Hash};
 
 class CitizenController extends Controller
 {
@@ -120,15 +121,18 @@ class CitizenController extends Controller
 
         foreach ($request->file('documents') as $file) {
             $path = $file->store('request_documents/' . $serviceRequest->id, 'private');
-            $serviceRequest->documents()->create([
+            $document = $serviceRequest->documents()->create([
                 'file_path'     => $path,
                 'original_name' => $file->getClientOriginalName(),
                 'uploaded_by'   => 'citizen',
             ]);
+
+            event(new RequestDocumentUploaded($serviceRequest, $document));
         }
 
         $qrPath = app(QrCodeService::class)->generate($serviceRequest);
         $serviceRequest->update(['qr_code' => $qrPath]);
+        event(new NewRequestSubmitted($serviceRequest));
 
         return redirect()->route('citizen.payment', $serviceRequest)
                          ->with('success', 'Request submitted. Please complete payment.');
@@ -289,7 +293,9 @@ class CitizenController extends Controller
             'notes'              => 'nullable|string',
         ]);
 
-        Appointment::create(array_merge($data, ['citizen_id' => Auth::id()]));
+        $appointment = Appointment::create(array_merge($data, ['citizen_id' => Auth::id()]));
+        event(new AppointmentReminderBroadcast($appointment, 'appointment_booked'));
+
         return back()->with('success', 'Appointment booked successfully.');
     }
 
