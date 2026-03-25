@@ -232,6 +232,7 @@
                         <i class="bi bi-file-earmark-check"></i>
                         <span id="uploadName">File selected</span>
                     </div>
+                    <div id="ocrStatus" style="display:none;margin-top:.55rem;font-size:.75rem;border-radius:8px;padding:.45rem .6rem;"></div>
                 </div>
 
                 {{-- Password --}}
@@ -271,26 +272,125 @@
 </div>
 
 <script>
-const zone    = document.getElementById('idUploadZone');
-const input   = document.getElementById('national_id_doc');
+const zone = document.getElementById('idUploadZone');
+const input = document.getElementById('national_id_doc');
 const preview = document.getElementById('uploadPreview');
-const nameEl  = document.getElementById('uploadName');
+const nameEl = document.getElementById('uploadName');
+const ocrStatus = document.getElementById('ocrStatus');
+const firstNameInput = document.getElementById('first_name');
+const lastNameInput = document.getElementById('last_name');
+const nationalIdInput = document.getElementById('national_id');
+const extractEndpoint = '{{ route('register.id-extract') }}';
+const csrfToken = '{{ csrf_token() }}';
+
+let extractionRunId = 0;
+
+function setStatus(message, type = 'info') {
+    if (!ocrStatus) return;
+
+    const styles = {
+        info: ['#EFF6FF', '#1E4080'],
+        success: ['#ECFDF5', '#0D7A4E'],
+        warn: ['#FFF7ED', '#9A3412'],
+        error: ['#FFF1F2', '#9F1239'],
+    };
+
+    const [bg, color] = styles[type] || styles.info;
+    ocrStatus.style.display = 'block';
+    ocrStatus.style.background = bg;
+    ocrStatus.style.color = color;
+    ocrStatus.textContent = message;
+}
+
+function applyExtractedFields(data) {
+    let filledAny = false;
+
+    if (data.national_id && nationalIdInput && !nationalIdInput.value.trim()) {
+        nationalIdInput.value = data.national_id;
+        filledAny = true;
+    }
+
+    if (data.first_name && firstNameInput && !firstNameInput.value.trim()) {
+        firstNameInput.value = data.first_name;
+        filledAny = true;
+    }
+
+    if (data.last_name && lastNameInput && !lastNameInput.value.trim()) {
+        lastNameInput.value = data.last_name;
+        filledAny = true;
+    }
+
+    return filledAny;
+}
+
+async function runAzureExtraction(file) {
+    if (!file) return;
+
+    const myRunId = ++extractionRunId;
+    setStatus('Reading ID data...', 'info');
+
+    const formData = new FormData();
+    formData.append('national_id_document', file);
+
+    try {
+        const response = await fetch(extractEndpoint, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: formData,
+            credentials: 'same-origin',
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (myRunId !== extractionRunId) return;
+
+        if (!response.ok) {
+            setStatus(payload.message || 'Could not extract fields from this ID file.', 'warn');
+            return;
+        }
+
+        const filledAny = applyExtractedFields(payload.data || {});
+
+        if (filledAny) {
+            setStatus(payload.message || 'ID data extracted and form fields were auto-filled.', 'success');
+        } else {
+            setStatus(payload.message || 'No clear fields found. Please complete manually.', 'warn');
+        }
+    } catch (error) {
+        setStatus('Extraction request failed. Please check your connection and try again.', 'error');
+    }
+}
+
+function handleSelectedFile(file) {
+    if (!file) return;
+
+    nameEl.textContent = file.name;
+    preview.style.display = 'flex';
+    runAzureExtraction(file);
+}
 
 input?.addEventListener('change', () => {
-    if(input.files[0]) {
-        nameEl.textContent = input.files[0].name;
-        preview.style.display = 'flex';
-    }
+    handleSelectedFile(input.files[0]);
 });
 
-zone?.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag'); });
-zone?.addEventListener('dragleave', ()=> { zone.classList.remove('drag'); });
-zone?.addEventListener('drop', e => {
-    e.preventDefault(); zone.classList.remove('drag');
-    if(e.dataTransfer.files[0]) {
-        input.files = e.dataTransfer.files;
-        nameEl.textContent = e.dataTransfer.files[0].name;
-        preview.style.display = 'flex';
+zone?.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    zone.classList.add('drag');
+});
+
+zone?.addEventListener('dragleave', () => {
+    zone.classList.remove('drag');
+});
+
+zone?.addEventListener('drop', (event) => {
+    event.preventDefault();
+    zone.classList.remove('drag');
+
+    if (event.dataTransfer.files[0]) {
+        input.files = event.dataTransfer.files;
+        handleSelectedFile(event.dataTransfer.files[0]);
     }
 });
 </script>

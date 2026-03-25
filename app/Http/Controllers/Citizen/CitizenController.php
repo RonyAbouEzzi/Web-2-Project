@@ -8,7 +8,7 @@ use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceRequest}
 use App\Notifications\AppointmentReminder;
 use App\Services\{QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Auth, Hash};
+use Illuminate\Support\Facades\{Auth, Hash, Storage};
 
 class CitizenController extends Controller
 {
@@ -34,11 +34,25 @@ class CitizenController extends Controller
         $data = $request->validate([
             'name'         => 'required|string|max:100',
             'phone'        => 'nullable|string|max:20',
+            'national_id'  => 'required|string|max:20',
+            'national_id_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'password'     => 'nullable|min:8|confirmed',
         ]);
 
-        $user->name  = $data['name'];
+        $user->name = $data['name'];
         $user->phone = $data['phone'] ?? $user->phone;
+        $user->national_id = $data['national_id'];
+
+        if ($request->hasFile('national_id_document')) {
+            $path = $request->file('national_id_document')->store('id_documents', 'private');
+
+            if (filled($user->id_document)) {
+                Storage::disk('private')->delete($user->id_document);
+            }
+
+            $user->id_document = $path;
+        }
+
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
