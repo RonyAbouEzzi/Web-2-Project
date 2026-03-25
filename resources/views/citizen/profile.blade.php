@@ -4,7 +4,27 @@
 
 @section('content')
 
+@php
+    $missingFields = $user->missingCitizenProfileFields();
+@endphp
+
 <div style="display:grid;grid-template-columns:1fr;gap:1.25rem" class="profile-grid">
+
+    @if(!empty($missingFields))
+    <div class="card" style="border-color:#F59E0B;background:#FFFBEB">
+        <div class="card-body" style="display:flex;align-items:flex-start;gap:.75rem">
+            <i class="bi bi-exclamation-triangle-fill" style="color:#B45309;font-size:1rem;margin-top:.1rem"></i>
+            <div>
+                <div style="font-size:.88rem;font-weight:700;color:#92400E;margin-bottom:.18rem">Complete your profile to submit requests</div>
+                <div style="font-size:.79rem;color:#B45309">
+                    Missing:
+                    {{ implode(', ', $missingFields) }}.
+                    Fill the fields below, then save.
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     {{-- Profile Header Card --}}
     <div class="card">
@@ -56,7 +76,7 @@
                 <span class="card-title"><i class="bi bi-person-gear me-2" style="color:var(--primary)"></i>Account Information</span>
             </div>
             <div class="card-body">
-                <form action="{{ route('citizen.profile.update') }}" method="POST">
+                <form action="{{ route('citizen.profile.update') }}" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf @method('PUT')
                     <div style="display:grid;grid-template-columns:1fr;gap:1rem" class="form-grid">
                         <div>
@@ -81,6 +101,28 @@
                                 <i class="bi bi-phone ii"></i>
                                 <input type="tel" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="+961 xx xxx xxx">
                             </div>
+                        </div>
+                        <div>
+                            <label class="form-label">National ID Number</label>
+                            <div class="input-icon-wrap">
+                                <i class="bi bi-credit-card-2-front ii"></i>
+                                <input type="text" id="national_id" name="national_id" class="form-control" value="{{ old('national_id', $user->national_id) }}" placeholder="LB-XXXXXXXXX" required>
+                            </div>
+                            <div class="form-text">Required to complete your account verification.</div>
+                        </div>
+                        <div>
+                            <label class="form-label">National ID Document <span style="font-weight:400;color:var(--ink-400)">(photo or scan)</span></label>
+                            <div class="upload-zone" id="idUploadZone" onclick="document.getElementById('national_id_doc').click()">
+                                <div class="upload-icon"><i class="bi bi-cloud-upload"></i></div>
+                                <div class="upload-title">Click to upload your ID document</div>
+                                <div class="upload-sub">JPG, PNG or PDF · Max 5MB</div>
+                                <input type="file" id="national_id_doc" name="national_id_document" accept=".jpg,.jpeg,.png,.pdf">
+                            </div>
+                            <div class="upload-preview" id="uploadPreview">
+                                <i class="bi bi-file-earmark-check"></i>
+                                <span id="uploadName">File selected</span>
+                            </div>
+                            <div id="ocrStatus" style="display:none;margin-top:.55rem;font-size:.75rem;border-radius:8px;padding:.45rem .6rem;"></div>
                         </div>
                         <div style="border-top:1px solid var(--ink-100);padding-top:1rem">
                             <label class="form-label" style="font-size:.82rem;color:var(--ink-500);font-weight:500">Change Password <span style="font-weight:400">(leave blank to keep current)</span></label>
@@ -127,7 +169,7 @@
                     <span class="ir-label">Member Since</span>
                     <span class="ir-value">{{ $user->created_at->format('F d, Y') }}</span>
                 </div>
-                @if($user->national_id_doc)
+                @if($user->id_document)
                 <div class="info-row">
                     <span class="ir-label">ID Document</span>
                     <span class="sbadge s-approved"><i class="bi bi-check2" style="margin-right:.2rem"></i>Uploaded</span>
@@ -170,6 +212,47 @@
 
 @push('styles')
 <style>
+.upload-zone {
+    border: 2px dashed var(--ink-200);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all .18s;
+    background: var(--white);
+}
+.upload-zone:hover,
+.upload-zone.drag {
+    border-color: var(--primary);
+    background: var(--primary-lt);
+}
+.upload-zone input { display: none; }
+.upload-icon {
+    font-size: 1.4rem;
+    color: var(--ink-300);
+    margin-bottom: .35rem;
+}
+.upload-title {
+    font-size: .79rem;
+    font-weight: 600;
+    color: var(--ink-700);
+}
+.upload-sub {
+    font-size: .71rem;
+    color: var(--ink-400);
+}
+.upload-preview {
+    display: none;
+    align-items: center;
+    gap: .55rem;
+    margin-top: .55rem;
+    padding: .5rem .7rem;
+    border-radius: 8px;
+    background: #ECFDF5;
+    color: #0D7A4E;
+    font-size: .76rem;
+}
+.upload-preview i { font-size: .95rem; }
 @media (min-width: 640px) {
     .stats-mini { grid-template-columns: repeat(3, 1fr) !important; }
     .pw-grid { grid-template-columns: 1fr 1fr !important; }
@@ -179,5 +262,109 @@
     .profile-cols .card:last-child { grid-column: 1 / -1; }
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+const zone = document.getElementById('idUploadZone');
+const input = document.getElementById('national_id_doc');
+const preview = document.getElementById('uploadPreview');
+const nameEl = document.getElementById('uploadName');
+const ocrStatus = document.getElementById('ocrStatus');
+const nationalIdInput = document.getElementById('national_id');
+const extractEndpoint = '{{ route('citizen.profile.id-extract') }}';
+const csrfToken = '{{ csrf_token() }}';
+
+let extractionRunId = 0;
+
+function setStatus(message, type = 'info') {
+    if (!ocrStatus) return;
+
+    const styles = {
+        info: ['#EFF6FF', '#1E4080'],
+        success: ['#ECFDF5', '#0D7A4E'],
+        warn: ['#FFF7ED', '#9A3412'],
+        error: ['#FFF1F2', '#9F1239'],
+    };
+
+    const [bg, color] = styles[type] || styles.info;
+    ocrStatus.style.display = 'block';
+    ocrStatus.style.background = bg;
+    ocrStatus.style.color = color;
+    ocrStatus.textContent = message;
+}
+
+async function runExtraction(file) {
+    if (!file) return;
+
+    const myRunId = ++extractionRunId;
+    setStatus('Reading ID data...', 'info');
+
+    const formData = new FormData();
+    formData.append('national_id_document', file);
+
+    try {
+        const response = await fetch(extractEndpoint, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: formData,
+            credentials: 'same-origin',
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (myRunId !== extractionRunId) return;
+
+        if (!response.ok) {
+            setStatus(payload.message || 'Could not extract fields from this ID file.', 'warn');
+            return;
+        }
+
+        if (payload?.data?.national_id && nationalIdInput && !nationalIdInput.value.trim()) {
+            nationalIdInput.value = payload.data.national_id;
+        }
+
+        setStatus(payload.message || 'ID fields extracted successfully.', 'success');
+    } catch (error) {
+        setStatus('Extraction request failed. Please check your connection and try again.', 'error');
+    }
+}
+
+function handleSelectedFile(file) {
+    if (!file) return;
+
+    if (nameEl && preview) {
+        nameEl.textContent = file.name;
+        preview.style.display = 'flex';
+    }
+
+    runExtraction(file);
+}
+
+input?.addEventListener('change', () => {
+    handleSelectedFile(input.files[0]);
+});
+
+zone?.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    zone.classList.add('drag');
+});
+
+zone?.addEventListener('dragleave', () => {
+    zone.classList.remove('drag');
+});
+
+zone?.addEventListener('drop', (event) => {
+    event.preventDefault();
+    zone.classList.remove('drag');
+
+    if (event.dataTransfer.files[0]) {
+        input.files = event.dataTransfer.files;
+        handleSelectedFile(event.dataTransfer.files[0]);
+    }
+});
+</script>
 @endpush
 @endsection

@@ -34,6 +34,36 @@ class User extends Authenticatable
     public function isOfficeUser(): bool { return $this->role === 'office_user'; }
     public function isCitizen(): bool    { return $this->role === 'citizen'; }
 
+    public function hasCompletedCitizenProfile(): bool
+    {
+        if (!$this->isCitizen()) {
+            return true;
+        }
+
+        return filled($this->name)
+            && filled($this->national_id)
+            && filled($this->id_document);
+    }
+
+    public function missingCitizenProfileFields(): array
+    {
+        if (!$this->isCitizen()) {
+            return [];
+        }
+
+        $missing = [];
+
+        if (blank($this->national_id)) {
+            $missing[] = 'National ID';
+        }
+
+        if (blank($this->id_document)) {
+            $missing[] = 'National ID document';
+        }
+
+        return $missing;
+    }
+
     // ── Relationships ─────────────────────────────────────────────
     public function offices()
     {
