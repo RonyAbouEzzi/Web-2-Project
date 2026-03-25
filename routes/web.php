@@ -13,6 +13,10 @@ Route::get('/', function () {
         return view('welcome');
     }
 
+    if (auth()->user()->role === 'citizen' && !auth()->user()->hasCompletedCitizenProfile()) {
+        return redirect()->route('citizen.profile');
+    }
+
     return match (auth()->user()->role) {
         'admin' => redirect()->route('admin.dashboard'),
         'office_user' => redirect()->route('office.dashboard'),
@@ -27,6 +31,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/login',    [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login',   [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register/id-extract', [AuthController::class, 'extractNationalIdDocument'])->name('register.id-extract');
     Route::post('/register',[AuthController::class, 'register']);
 
     Route::get('/2fa',  [AuthController::class, 'show2FA'])->name('2fa.verify');
@@ -112,21 +117,30 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
     // Profile
     Route::get('/profile',  [CitizenController::class, 'profile'])->name('profile');
     Route::put('/profile',  [CitizenController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/id-extract', [AuthController::class, 'extractNationalIdDocument'])->name('profile.id-extract');
 
     // Browse
     Route::get('/offices',          [CitizenController::class, 'browseOffices'])->name('offices');
     Route::get('/offices/{office}', [CitizenController::class, 'showOffice'])->name('offices.show');
     Route::get('/services/{service}', [CitizenController::class, 'showService'])->name('services.show');
 
-    // Submit request
-    Route::post('/services/{service}/request', [CitizenController::class, 'submitRequest'])->name('requests.submit');
+    Route::middleware('citizen.profile.complete')->group(function () {
+        // Submit request
+        Route::post('/services/{service}/request', [CitizenController::class, 'submitRequest'])->name('requests.submit');
 
-    // Payment
-    Route::get('/requests/{serviceRequest}/payment',         [CitizenController::class, 'showPayment'])->name('payment');
-    Route::post('/requests/{serviceRequest}/payment',        [CitizenController::class, 'processPayment'])->name('payment.process');
-    Route::get('/requests/{serviceRequest}/payment/success', [CitizenController::class, 'paymentSuccess'])->name('payment.success');
-    Route::get('/requests/{serviceRequest}/payment/cancel',  [CitizenController::class, 'paymentCancel'])->name('payment.cancel');
-    Route::post('/requests/{serviceRequest}/payment/crypto', [CitizenController::class, 'confirmCryptoPayment'])->name('payment.crypto.confirm');
+        // Payment
+        Route::get('/requests/{serviceRequest}/payment',  [CitizenController::class, 'showPayment'])->name('payment');
+        Route::post('/requests/{serviceRequest}/payment', [CitizenController::class, 'processPayment'])->name('payment.process');
+        Route::get('/requests/{serviceRequest}/payment/success', [CitizenController::class, 'paymentSuccess'])->name('payment.success');
+        Route::get('/requests/{serviceRequest}/payment/cancel',  [CitizenController::class, 'paymentCancel'])->name('payment.cancel');
+        Route::post('/requests/{serviceRequest}/payment/crypto', [CitizenController::class, 'confirmCryptoPayment'])->name('payment.crypto.confirm');
+
+        // Appointments
+        Route::post('/appointments', [CitizenController::class, 'bookAppointment'])->name('appointments.book');
+
+        // Feedback
+        Route::post('/feedback', [CitizenController::class, 'submitFeedback'])->name('feedback.submit');
+    });
 
     // My requests
     Route::get('/requests',                   [CitizenController::class, 'myRequests'])->name('requests');
@@ -141,9 +155,4 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
     // PDF receipt download
     Route::get('/requests/{serviceRequest}/receipt', [CitizenController::class, 'downloadReceipt'])->name('requests.receipt');
 
-    // Appointments
-    Route::post('/appointments', [CitizenController::class, 'bookAppointment'])->name('appointments.book');
-
-    // Feedback
-    Route::post('/feedback', [CitizenController::class, 'submitFeedback'])->name('feedback.submit');
 });
