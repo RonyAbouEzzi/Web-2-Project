@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 return route('home');
             }
 
+            if ($user->role === 'citizen' && ! $user->hasCompletedCitizenProfile()) {
+                return route('citizen.profile');
+            }
+
             return match ($user->role) {
                 'admin' => route('admin.dashboard'),
                 'office_user' => route('office.dashboard'),
@@ -30,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Role-based access control alias.
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'citizen.profile.complete' => \App\Http\Middleware\EnsureCitizenProfileComplete::class,
         ]);
 
         // Security headers on all web responses.
