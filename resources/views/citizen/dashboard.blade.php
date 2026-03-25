@@ -15,6 +15,24 @@
     ];
 @endphp
 
+@if(!$user->hasCompletedCitizenProfile())
+<div class="card" style="margin-bottom:1rem;border-color:#F59E0B;background:#FFFBEB">
+    <div class="card-body" style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;flex-wrap:wrap">
+        <div>
+            <div style="font-size:.86rem;font-weight:700;color:#92400E;margin-bottom:.2rem">
+                Complete your profile to submit new requests
+            </div>
+            <div style="font-size:.78rem;color:#B45309">
+                Missing: {{ implode(', ', $user->missingCitizenProfileFields()) }}.
+            </div>
+        </div>
+        <a href="{{ route('citizen.profile') }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-person-gear"></i> Complete Profile
+        </a>
+    </div>
+</div>
+@endif
+
 {{-- Welcome banner --}}
 <div class="hero-banner" style="margin-bottom:1.25rem">
     <div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem">
