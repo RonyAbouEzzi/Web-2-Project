@@ -5,15 +5,15 @@
     'bodyClass' => ''
 ])
 
-<div {{ $attributes->merge(['class' => 'card gov-card']) }}>
+<div {{ $attributes->merge(['class' => 'card']) }}>
     @if($title || $actions)
         <div class="card-header d-flex justify-content-between align-items-center gap-2 flex-wrap">
             <div>
                 @if($title)
-                    <h6 class="mb-0 fw-bold">{{ $title }}</h6>
+                    <h6 class="card-title">{{ $title }}</h6>
                 @endif
                 @if($subtitle)
-                    <small class="text-muted">{{ $subtitle }}</small>
+                    <small class="card-subtitle">{{ $subtitle }}</small>
                 @endif
             </div>
             @if($actions)
