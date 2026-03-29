@@ -6,17 +6,15 @@
     'actionLabel' => 'Get Started',
 ])
 
-<div class="empty-state" {{ $attributes }}>
-    <div class="empty-icon">
-        <i class="bi {{ $icon }}"></i>
+<div {{ $attributes->merge(['class' => 'text-center py-4']) }}>
+    <div class="mb-2">
+        <i class="bi {{ $icon }} text-muted" style="font-size:2rem;"></i>
     </div>
-    <h4>{{ $title }}</h4>
+    <div class="fw-semibold mb-1" style="font-size:.88rem;">{{ $title }}</div>
     @if($message)
-        <p>{{ $message }}</p>
+        <div class="text-muted mb-3" style="font-size:.8rem;">{{ $message }}</div>
     @endif
     @if($actionUrl)
-        <a href="{{ $actionUrl }}" class="btn btn-primary btn-sm">
-            {{ $actionLabel }}
-        </a>
+        <a href="{{ $actionUrl }}" class="btn btn-sm btn-primary">{{ $actionLabel }}</a>
     @endif
 </div>
