@@ -68,4 +68,15 @@ return [
         'timeout_seconds' => (int) env('OCR_SPACE_TIMEOUT', 20),
     ],
 
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'),
+        'default_country_code' => env('SMS_DEFAULT_COUNTRY_CODE', '+961'),
+    ],
+
+    'twilio' => [
+        'sid' => env('TWILIO_ACCOUNT_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'from' => env('TWILIO_FROM'),
+    ],
+
 ];
