@@ -93,6 +93,19 @@ STRIPE_KEY=pk_test_your_stripe_public_key
 STRIPE_SECRET=sk_test_your_stripe_secret_key
 ```
 
+### SMS Reminders (Twilio)
+
+```env
+# Use log during development if you do not want to send real SMS
+SMS_DRIVER=log
+SMS_DEFAULT_COUNTRY_CODE=+961
+
+# Switch SMS_DRIVER=twilio and fill these for real SMS
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_FROM=+1XXXXXXXXXX
+```
+
 ### Pusher (Realtime)
 
 ```env
@@ -179,6 +192,22 @@ php artisan queue:work
 - Create an inbox in Mailtrap Email Sandbox
 - Copy SMTP host/port/username/password into `.env`
 
+### Twilio SMS
+
+- Create a Twilio account and a Messaging-enabled phone number.
+- Copy `Account SID`, `Auth Token`, and `From` number into `.env`.
+- Use E.164 number format for users, for example `+96170123456`.
+
+To test reminders quickly:
+
+```bash
+php artisan appointments:remind-upcoming
+```
+
+- `SMS_DRIVER=log`: SMS payload is written to `storage/logs/laravel.log`.
+- `SMS_DRIVER=twilio`: real SMS is sent via Twilio.
+- If `QUEUE_CONNECTION` is not `sync`, run `php artisan queue:work` to deliver notifications.
+
 ## 8) Cache Clear Commands (after .env changes)
 
 ```bash
@@ -192,6 +221,7 @@ php artisan config:clear
 - Google login works
 - GitHub login works
 - Password reset email is received in Mailtrap
+- Appointment reminder SMS is logged/sent when appointment is confirmed or upcoming
 - Office map preview loads (valid Maps key)
 - Realtime features do not throw broadcast errors
 
