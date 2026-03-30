@@ -15,6 +15,10 @@ class Appointment extends Model
     'appointment_time' => 'datetime:H:i',
     ];
 
+    protected $casts = [
+        'appointment_date' => 'date',
+    ];
+
     public function citizen() { return $this->belongsTo(User::class, 'citizen_id'); }
     public function office()  { return $this->belongsTo(Office::class); }
     public function request() { return $this->belongsTo(ServiceRequest::class, 'service_request_id'); }
