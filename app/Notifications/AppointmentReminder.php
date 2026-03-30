@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Appointment;
+use App\Notifications\Channels\SmsChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -20,7 +21,14 @@ class AppointmentReminder extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['mail', 'database'];
+
+        $smsSources = ['appointment_confirmed', 'daily_scheduler'];
+        if (in_array($this->source, $smsSources, true) && filled($notifiable->phone ?? null)) {
+            $channels[] = SmsChannel::class;
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -58,5 +66,17 @@ class AppointmentReminder extends Notification implements ShouldQueue
             'message' => 'Appointment reminder for ' . $this->appointment->appointment_date . ' at ' . substr((string) $this->appointment->appointment_time, 0, 5) . '.',
         ];
     }
-}
 
+    public function toSms(object $notifiable): string
+    {
+        $date = (string) $this->appointment->appointment_date;
+        $time = substr((string) $this->appointment->appointment_time, 0, 5);
+        $status = ucfirst((string) $this->appointment->status);
+
+        $link = $this->appointment->service_request_id
+            ? route('citizen.requests.show', $this->appointment->service_request_id)
+            : route('citizen.offices.show', $this->appointment->office_id);
+
+        return "E-Services: Appointment {$status} on {$date} at {$time}. {$link}";
+    }
+}
