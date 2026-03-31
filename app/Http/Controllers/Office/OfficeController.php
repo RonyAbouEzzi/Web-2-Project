@@ -259,4 +259,14 @@ class OfficeController extends Controller
         $office = $this->currentOffice();
         abort_unless($office->id === $officeId, 403);
     }
+
+    public function getMessages(ServiceRequest $serviceRequest)
+    {
+        $this->authorizeOfficeOwnership($serviceRequest->office_id);
+
+        return response()->json([
+            'messages' => $serviceRequest->messages()->with('sender')->get()
+        ]);
+    }
+    
 }

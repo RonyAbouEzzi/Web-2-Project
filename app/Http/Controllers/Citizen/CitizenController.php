@@ -284,4 +284,13 @@ class CitizenController extends Controller
             $doc->original_name
         );
     }
+
+    public function getMessages(ServiceRequest $serviceRequest)
+    {
+        abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
+
+        return response()->json([
+            'messages' => $serviceRequest->messages()->with('sender')->get()
+        ]);
+    }
 }

@@ -84,6 +84,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 Route::middleware(['auth', 'role:office_user'])->prefix('office')->name('office.')->group(function () {
     Route::get('/dashboard', [OfficeController::class, 'dashboard'])->name('dashboard');
+    Route::get('/requests/{serviceRequest}/messages', [OfficeController::class, 'getMessages'])
+    ->name('messages.get');
 
     Route::get('/profile',  [OfficeController::class, 'editProfile'])->name('profile');
     Route::put('/profile',  [OfficeController::class, 'updateProfile'])->name('profile.update');
@@ -113,6 +115,8 @@ Route::middleware(['auth', 'role:office_user'])->prefix('office')->name('office.
 
 Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')->group(function () {
     Route::get('/dashboard', [CitizenController::class, 'dashboard'])->name('dashboard');
+    Route::get('/requests/{serviceRequest}/messages', [CitizenController::class, 'getMessages'])
+    ->name('messages.get');
 
     // Profile
     Route::get('/profile',  [CitizenController::class, 'profile'])->name('profile');
