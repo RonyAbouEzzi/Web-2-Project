@@ -26,9 +26,9 @@
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
-                        <span class="d-block text-muted stat-label mb-1">Total Users</span>
-                        <h3 class="mb-1 stat-value">{{ number_format($stats['total_users']) }}</h3>
-                        <span class="text-muted stat-sub">Registered citizens</span>
+                        <span class="d-block text-muted mb-1" style="font-size:.76rem;">Total Users</span>
+                        <h3 class="mb-1" style="font-size:1.5rem; font-weight:800;">{{ number_format($stats['total_users']) }}</h3>
+                        <span class="text-muted" style="font-size:.72rem;">Registered citizens</span>
                     </div>
                     <span class="stat-card-icon bg-teal"><i class="bi bi-people"></i></span>
                 </div>
@@ -40,9 +40,9 @@
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
-                        <span class="d-block text-muted stat-label mb-1">Offices</span>
-                        <h3 class="mb-1 stat-value">{{ number_format($stats['total_offices']) }}</h3>
-                        <span class="text-muted stat-sub">Active municipal offices</span>
+                        <span class="d-block text-muted mb-1" style="font-size:.76rem;">Offices</span>
+                        <h3 class="mb-1" style="font-size:1.5rem; font-weight:800;">{{ number_format($stats['total_offices']) }}</h3>
+                        <span class="text-muted" style="font-size:.72rem;">Active municipal offices</span>
                     </div>
                     <span class="stat-card-icon bg-sky"><i class="bi bi-buildings"></i></span>
                 </div>
@@ -54,9 +54,9 @@
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
-                        <span class="d-block text-muted stat-label mb-1">Requests</span>
-                        <h3 class="mb-1 stat-value">{{ number_format($stats['total_requests']) }}</h3>
-                        <span class="text-muted stat-sub">All submitted requests</span>
+                        <span class="d-block text-muted mb-1" style="font-size:.76rem;">Requests</span>
+                        <h3 class="mb-1" style="font-size:1.5rem; font-weight:800;">{{ number_format($stats['total_requests']) }}</h3>
+                        <span class="text-muted" style="font-size:.72rem;">All submitted requests</span>
                     </div>
                     <span class="stat-card-icon bg-amber"><i class="bi bi-file-earmark-text"></i></span>
                 </div>
@@ -68,9 +68,9 @@
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
-                        <span class="d-block text-muted stat-label mb-1">Revenue</span>
-                        <h3 class="mb-1 stat-value">${{ number_format($stats['total_revenue'], 0) }}</h3>
-                        <span class="text-muted stat-sub">Collected from paid requests</span>
+                        <span class="d-block text-muted mb-1" style="font-size:.76rem;">Revenue</span>
+                        <h3 class="mb-1" style="font-size:1.5rem; font-weight:800;">${{ number_format($stats['total_revenue'], 0) }}</h3>
+                        <span class="text-muted" style="font-size:.72rem;">Collected from paid requests</span>
                     </div>
                     <span class="stat-card-icon bg-emerald"><i class="bi bi-currency-dollar"></i></span>
                 </div>
@@ -118,7 +118,7 @@
                         </table>
                     </div>
                 @else
-                    <div class="p-4 text-muted text-center text-md">No request records available yet.</div>
+                    <div class="p-4 text-muted text-center" style="font-size:.84rem;">No request records available yet.</div>
                 @endif
             </div>
         </div>
@@ -136,15 +136,15 @@
                         @foreach($officeStats as $office)
                             <div class="d-flex justify-content-between align-items-center border rounded-3 p-3">
                                 <div>
-                                    <div class="fw-semibold text-md">{{ $office->name }}</div>
-                                    <div class="text-muted text-xs">{{ $office->municipality->name ?? 'Municipality' }}</div>
+                                    <div class="fw-semibold" style="font-size:.84rem;">{{ $office->name }}</div>
+                                    <div class="text-muted" style="font-size:.72rem;">{{ $office->municipality->name ?? 'Municipality' }}</div>
                                 </div>
                                 <span class="badge rounded-pill bg-info-subtle border border-info-subtle">{{ $office->requests_count }}</span>
                             </div>
                         @endforeach
                     </div>
                 @else
-                    <div class="text-muted text-center text-md">No office statistics to display.</div>
+                    <div class="text-muted text-center" style="font-size:.84rem;">No office statistics to display.</div>
                 @endif
             </div>
         </div>
