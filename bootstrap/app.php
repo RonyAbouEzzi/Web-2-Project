@@ -8,6 +8,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
+        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -17,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
             if (! $user) {
                 return route('home');
+            }
+
+            if ($user->role === 'citizen' && ! $user->hasCompletedCitizenProfile()) {
+                return route('citizen.profile');
             }
 
             return match ($user->role) {
@@ -29,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Role-based access control alias.
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'citizen.profile.complete' => \App\Http\Middleware\EnsureCitizenProfileComplete::class,
         ]);
 
         // Security headers on all web responses.

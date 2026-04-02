@@ -58,4 +58,35 @@ return [
         'redirect'      => env('GITHUB_REDIRECT_URI', '/auth/github/callback'),
     ],
 
+    'google_maps' => [
+        'api_key' => env('GOOGLE_MAPS_API_KEY'),
+    ],
+
+    'azure_document_intelligence' => [
+        'endpoint' => env('AZURE_DOC_INTELLIGENCE_ENDPOINT'),
+        'key' => env('AZURE_DOC_INTELLIGENCE_KEY'),
+        'api_version' => env('AZURE_DOC_INTELLIGENCE_API_VERSION', '2024-11-30'),
+        'timeout_seconds' => (int) env('AZURE_DOC_INTELLIGENCE_TIMEOUT', 20),
+        'poll_attempts' => (int) env('AZURE_DOC_INTELLIGENCE_POLL_ATTEMPTS', 15),
+        'poll_interval_ms' => (int) env('AZURE_DOC_INTELLIGENCE_POLL_INTERVAL_MS', 900),
+    ],
+
+    'ocr_space' => [
+        'endpoint' => env('OCR_SPACE_ENDPOINT', 'https://api.ocr.space/parse/image'),
+        'api_key' => env('OCR_SPACE_API_KEY'),
+        'language' => env('OCR_SPACE_LANGUAGE', 'auto'),
+        'engine' => env('OCR_SPACE_ENGINE', '2'),
+        'timeout_seconds' => (int) env('OCR_SPACE_TIMEOUT', 20),
+    ],
+
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'),
+        'default_country_code' => env('SMS_DEFAULT_COUNTRY_CODE', '+961'),
+    ],
+
+    'twilio' => [
+        'sid' => env('TWILIO_ACCOUNT_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'from' => env('TWILIO_FROM'),
+    ],
 ];

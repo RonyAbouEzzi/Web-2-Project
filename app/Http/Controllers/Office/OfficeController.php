@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Office;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceCategory, ServiceRequest};
+use App\Events\{AppointmentReminderBroadcast, ServiceRequestStatusUpdated};
+use App\Models\{Appointment, Feedback, Office, Service, ServiceCategory, ServiceRequest};
+use App\Notifications\AppointmentReminder;
 use App\Notifications\RequestStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class OfficeController extends Controller
 {
@@ -25,16 +26,16 @@ class OfficeController extends Controller
             'pending'              => $office->requests()->where('status', 'pending')->count(),
             'in_review'            => $office->requests()->where('status', 'in_review')->count(),
             'completed_this_month' => $office->requests()->where('status', 'completed')
-                                             ->whereMonth('updated_at', now()->month)->count(),
+                                            ->whereMonth('updated_at', now()->month)->count(),
             'revenue'              => $office->requests()->where('payment_status', 'paid')->sum('amount_paid'),
             'avg_rating'           => $office->feedbacks()->avg('rating') ?? 0,
             'pending_today'        => $office->requests()->whereDate('created_at', today())->count(),
         ];
 
         $recentRequests = $office->requests()
-                                 ->with(['citizen', 'service'])
-                                 ->whereIn('status', ['pending', 'in_review'])
-                                 ->latest()->limit(8)->get();
+                                ->with(['citizen', 'service'])
+                                ->whereIn('status', ['pending', 'in_review'])
+                                ->latest()->limit(8)->get();
 
         $todayAppointments = $office->appointments()
                                     ->with('citizen')
@@ -43,8 +44,8 @@ class OfficeController extends Controller
                                     ->limit(5)->get();
 
         $recentFeedback = $office->feedbacks()
-                                 ->with('citizen')
-                                 ->latest()->limit(4)->get();
+                                ->with('citizen')
+                                ->latest()->limit(4)->get();
 
         return view('office.dashboard', compact('office', 'stats', 'recentRequests', 'todayAppointments', 'recentFeedback'));
     }
@@ -133,18 +134,18 @@ class OfficeController extends Controller
         if ($request->status) $query->where('status', $request->status);
         if ($request->search) {
             $query->where('reference_number', 'like', "%{$request->search}%")
-                  ->orWhereHas('citizen', fn ($q) => $q->where('name', 'like', "%{$request->search}%"));
+                ->orWhereHas('citizen', fn ($q) => $q->where('name', 'like', "%{$request->search}%"));
         }
 
         $requests = $query->latest()->paginate(20);
         return view('office.requests.index', compact('requests'));
     }
 
-    public function showRequest(ServiceRequest $request)
+    public function showRequest(ServiceRequest $serviceRequest)
     {
-        $this->authorizeOfficeOwnership($request->office_id);
-        $request->load(['citizen', 'service', 'documents', 'statusLogs.changedBy', 'messages.sender']);
-        return view('office.requests.show', compact('request'));
+        $this->authorizeOfficeOwnership($serviceRequest->office_id);
+        $serviceRequest->load(['citizen', 'service', 'documents', 'statusLogs.changedBy', 'messages.sender' , 'appointment']);
+        return view('office.requests.show', compact('serviceRequest'));
     }
 
     public function updateRequestStatus(Request $request, ServiceRequest $serviceRequest)
@@ -172,6 +173,7 @@ class OfficeController extends Controller
 
         // Notify citizen
         $serviceRequest->citizen->notify(new RequestStatusUpdated($serviceRequest));
+        event(new ServiceRequestStatusUpdated($serviceRequest, $oldStatus, $data['comment'] ?? null));
 
         return back()->with('success', 'Request status updated.');
     }
@@ -206,9 +208,18 @@ class OfficeController extends Controller
     public function updateAppointment(Request $request, Appointment $appointment)
     {
         $this->authorizeOfficeOwnership($appointment->office_id);
-        $appointment->update($request->validate([
+        $data = $request->validate([
             'status' => 'required|in:confirmed,cancelled,completed',
-        ]));
+        ]);
+
+        $appointment->update($data);
+
+        if ($data['status'] === 'confirmed') {
+            event(new AppointmentReminderBroadcast($appointment->fresh(), 'appointment_confirmed'));
+            $appointment->loadMissing(['citizen', 'request']);
+            $appointment->citizen?->notify(new AppointmentReminder($appointment, 'appointment_confirmed'));
+        }
+
         return back()->with('success', 'Appointment updated.');
     }
 
@@ -216,7 +227,7 @@ class OfficeController extends Controller
     public function sendMessage(Request $request, ServiceRequest $serviceRequest)
     {
         $this->authorizeOfficeOwnership($serviceRequest->office_id);
-        $data = $request->validate(['body' => 'required|string']);
+        $data = $request->validate(['body' => 'required|string|max:2000']);
 
         $msg = $serviceRequest->messages()->create([
             'sender_id' => Auth::id(),
@@ -227,19 +238,19 @@ class OfficeController extends Controller
     }
 
     // ── PDF Downloads ─────────────────────────────────────────────
-    public function downloadPdf(ServiceRequest $request, string $type)
+    public function downloadPdf(ServiceRequest $serviceRequest, string $type)
     {
-        $this->authorizeOfficeOwnership($request->office_id);
+        $this->authorizeOfficeOwnership($serviceRequest->office_id);
         $svc = app(\App\Services\PdfService::class);
 
         $path = match ($type) {
-            'receipt'     => $svc->generateReceipt($request),
-            'approval'    => $svc->generateApprovalLetter($request),
-            'certificate' => $svc->generateCertificate($request),
+            'receipt'     => $svc->generateReceipt($serviceRequest),
+            'approval'    => $svc->generateApprovalLetter($serviceRequest),
+            'certificate' => $svc->generateCertificate($serviceRequest),
             default       => abort(404),
         };
 
-        return $svc->stream($path, "{$type}-{$request->reference_number}.pdf");
+        return $svc->stream($path, "{$type}-{$serviceRequest->reference_number}.pdf");
     }
 
     // ── Helpers ───────────────────────────────────────────────────

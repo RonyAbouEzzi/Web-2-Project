@@ -72,6 +72,21 @@
 
     {{-- Sidebar: info + reviews --}}
     <div style="display:flex;flex-direction:column;gap:1rem">
+        {{-- Map --}}
+        @if($office->latitude && $office->longitude)
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i class="bi bi-geo-alt me-2" style="color:var(--primary)"></i>
+                    Location
+                </span>
+            </div>
+            <div class="card-body" style="padding:0">
+                <div id="officeMap" style="width:100%;height:220px;border-radius:0 0 12px 12px"></div>
+            </div>
+        </div>
+        @endif
+
         {{-- Working Hours --}}
         @if($office->working_hours)
         <div class="card">
@@ -116,34 +131,18 @@
             <div class="card-header"><span class="card-title"><i class="bi bi-calendar-plus me-2" style="color:var(--primary)"></i>Book Appointment</span></div>
             <div class="card-body">
                 <p style="font-size:.8rem;color:#6b7280;margin-bottom:.9rem">Schedule an in-person visit</p>
-                @if(session('success'))
-                <div class="alert alert-success mb-3" style="font-size:.82rem">
-                    <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
-                </div>
-                @endif
-                @if($errors->any())
-                <div class="alert alert-danger mb-3" style="font-size:.82rem">
-                    @foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach
-                </div>
-                @endif
                 <form action="{{ route('citizen.appointments.book') }}" method="POST">
                     @csrf
                     <input type="hidden" name="office_id" value="{{ $office->id }}">
                     <div class="mb-2">
                         <label class="form-label">Date</label>
-                        <input type="date" name="appointment_date" id="aptDate" class="form-control" min="{{ now()->addDay()->format('Y-m-d') }}" required>
+                        <input type="date" name="appointment_date" class="form-control" min="{{ now()->addDay()->format('Y-m-d') }}" required>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Time Slot</label>
-                        <select name="appointment_time" id="aptTime" class="form-select" required>
-                            <option value="">Select a date first</option>
-                        </select>
+                        <label class="form-label">Time</label>
+                        <input type="time" name="appointment_time" class="form-control" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Notes <span style="color:#9ca3af;font-weight:400">(optional)</span></label>
-                        <textarea name="notes" class="form-control" rows="2" placeholder="Reason for visit..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block"><i class="bi bi-calendar-check"></i> Book Appointment</button>
+                    <button type="submit" class="btn btn-primary btn-block"><i class="bi bi-calendar-check"></i> Book</button>
                 </form>
             </div>
         </div>
@@ -157,55 +156,52 @@
 }
 </style>
 @endpush
-
 @push('scripts')
 <script>
-(function() {
-    var workingHours = @json($office->working_hours ?? []);
-    var dayMap = {0:'sun',1:'mon',2:'tue',3:'wed',4:'thu',5:'fri',6:'sat'};
-    var aptDate = document.getElementById('aptDate');
-    var aptTime = document.getElementById('aptTime');
+function initOfficeMap() {
+    const lat = {{ $office->latitude ?? 0 }};
+    const lng = {{ $office->longitude ?? 0 }};
 
-    aptDate.addEventListener('change', function() {
-        aptTime.innerHTML = '';
-        var date = new Date(this.value + 'T00:00:00');
-        var dayKey = dayMap[date.getDay()];
-        var hours = workingHours[dayKey];
+    if (!lat || !lng) return;
 
-        if (!hours || hours === 'closed' || hours === 'Closed') {
-            aptTime.innerHTML = '<option value="">Office closed on this day</option>';
-            return;
-        }
+    const officeMap = document.getElementById("officeMap");
+    if (!officeMap) return;
 
-        // Parse hours like "08:00 - 16:00" or "8:00-16:00"
-        var parts = hours.replace(/\s/g,'').split('-');
-        if (parts.length !== 2) {
-            aptTime.innerHTML = '<option value="">Select time</option>';
-            // Generate default slots 8-16
-            for (var h = 8; h < 16; h++) {
-                for (var m = 0; m < 60; m += 30) {
-                    var t = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
-                    aptTime.innerHTML += '<option value="'+t+'">'+t+'</option>';
-                }
-            }
-            return;
-        }
-
-        var startH = parseInt(parts[0].split(':')[0]);
-        var startM = parseInt(parts[0].split(':')[1] || '0');
-        var endH = parseInt(parts[1].split(':')[0]);
-        var endM = parseInt(parts[1].split(':')[1] || '0');
-
-        aptTime.innerHTML = '<option value="">Choose a time slot</option>';
-        for (var h = startH; h < endH || (h === endH && 0 < endM); h++) {
-            for (var m = (h === startH ? startM : 0); m < 60; m += 30) {
-                if (h > endH || (h === endH && m >= endM)) break;
-                var t = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
-                aptTime.innerHTML += '<option value="'+t+'">'+t+'</option>';
-            }
-        }
+    const map = new google.maps.Map(officeMap, {
+        center: { lat: lat, lng: lng },
+        zoom: 15,
     });
-})();
+
+    const infoWindow = new google.maps.InfoWindow({
+        content: `
+            <div style="min-width:180px;max-width:220px;padding:4px 2px;">
+                <div style="font-weight:800;font-size:14px;color:#111827;margin-bottom:4px;">
+                    {{ addslashes($office->name) }}
+                </div>
+                <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">
+                    {{ addslashes($office->municipality->name) }}
+                </div>
+                <div style="font-size:12px;color:#374151;line-height:1.4;">
+                    {{ addslashes($office->address ?? '') }}
+                </div>
+            </div>
+        `
+    });
+
+    const marker = new google.maps.Marker({
+        position: { lat: lat, lng: lng },
+        map: map,
+        title: "{{ $office->name }}"
+    });
+
+    marker.addListener('click', () => {
+        infoWindow.open(map, marker);
+    });
+}
+</script>
+
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initOfficeMap">
 </script>
 @endpush
 @endsection
