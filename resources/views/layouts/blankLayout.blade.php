@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'E-Services') | {{ config('variables.templateName', 'E-Services') }}</title>
+    <title>@yield('title', 'CedarGov') | {{ config('variables.templateName', 'CedarGov') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/brand/cedar-logo-icon-trim.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/img/brand/cedar-logo-icon-trim.png') }}">
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,3 +34,4 @@
     @stack('scripts')
 </body>
 </html>
+

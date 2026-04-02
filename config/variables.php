@@ -3,7 +3,7 @@
 return [
   "creatorName" => "Municipal E-Services",
   "creatorUrl" => "#",
-  "templateName" => "E-Services",
+  "templateName" => "CedarGov",
   "templateSuffix" => "Municipal Dashboard",
   "templateVersion" => "1.0.0",
   "templateFree" => true,

@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Create Account | {{ config('variables.templateName', 'E-Services') }}</title>
+    <title>Create Account | {{ config('variables.templateName', 'CedarGov') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/brand/cedar-logo-icon-trim.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/img/brand/cedar-logo-icon-trim.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +39,8 @@
             flex-shrink: 0;
         }
         .auth-brand { display:flex; align-items:center; gap:.625rem; text-decoration:none; color:var(--ink); }
-        .auth-brand-mark { width:34px; height:34px; background:var(--ink); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:.85rem; }
+        .auth-brand-mark{width:34px;height:34px;border-radius:8px;overflow:hidden;box-shadow:0 6px 14px rgba(26,23,20,.22);flex-shrink:0}
+        .auth-brand-mark img{width:100%;height:100%;object-fit:cover;display:block}
         .auth-brand strong { display:block; font-size:.875rem; font-weight:800; letter-spacing:-.01em; line-height:1.2; }
         .auth-brand span { display:block; font-size:.6rem; color:var(--muted); }
         .auth-nav-link { font-size:.875rem; font-weight:500; color:var(--muted); text-decoration:none; padding:.4rem .875rem; border-radius:6px; transition:color .15s,background .15s; }
@@ -134,10 +137,10 @@
 
 <nav class="auth-nav">
     <a href="{{ route('home') }}" class="auth-brand">
-        <span class="auth-brand-mark"><i class="bi bi-building-check"></i></span>
+        <span class="auth-brand-mark"><img src="{{ asset('assets/img/brand/cedar-logo-icon-trim.png') }}" alt="CedarGov icon"></span>
         <div>
-            <strong>E-Services</strong>
-            <span>Municipal Portal · Lebanon</span>
+            <strong>CedarGov</strong>
+            <span>Lebanon Gov Portal</span>
         </div>
     </a>
     <a href="{{ route('login') }}" class="auth-nav-link">Sign in</a>
@@ -254,3 +257,8 @@ function togglePwd(id, iconId) {
 </script>
 </body>
 </html>
+
+
+
+
+

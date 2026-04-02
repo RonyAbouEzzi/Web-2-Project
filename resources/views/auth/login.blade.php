@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sign In | {{ config('variables.templateName', 'E-Services') }}</title>
+    <title>Sign In | {{ config('variables.templateName', 'CedarGov') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/brand/cedar-logo-icon-trim.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/img/brand/cedar-logo-icon-trim.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,13 +57,16 @@
         .auth-brand-mark {
             width: 34px;
             height: 34px;
-            background: var(--ink);
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 0.85rem;
+            overflow: hidden;
+            box-shadow: 0 6px 14px rgba(26, 23, 20, 0.22);
+            flex-shrink: 0;
+        }
+        .auth-brand-mark img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
         .auth-brand strong {
             display: block;
@@ -323,10 +328,10 @@
 
 <nav class="auth-nav">
     <a href="{{ route('home') }}" class="auth-brand">
-        <span class="auth-brand-mark"><i class="bi bi-building-check"></i></span>
+        <span class="auth-brand-mark"><img src="{{ asset('assets/img/brand/cedar-logo-icon-trim.png') }}" alt="CedarGov icon"></span>
         <div>
-            <strong>E-Services</strong>
-            <span>Municipal Portal · Lebanon</span>
+            <strong>CedarGov</strong>
+            <span>Lebanon Gov Portal</span>
         </div>
     </a>
     <a href="{{ route('register') }}" class="auth-nav-link">Create account</a>
@@ -408,3 +413,7 @@ function togglePwd(id, iconId) {
 </script>
 </body>
 </html>
+
+
+
+

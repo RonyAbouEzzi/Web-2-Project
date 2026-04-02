@@ -22,7 +22,7 @@
                     <!-- /Logo -->
 
                     <h4 class="mb-1">Two-Factor Verification 💬</h4>
-                    <p class="mb-6 text-start">Open your authenticator app and enter the 6-digit code for E-Services</p>
+                    <p class="mb-6 text-start">Open your authenticator app and enter the 6-digit code for CedarGov</p>
 
                     @if($errors->any())
                     <div class="alert alert-danger py-2 mb-4 text-start">
@@ -92,3 +92,4 @@ inputs.forEach((inp, i) => {
 inputs[0].focus();
 </script>
 @endpush
+
