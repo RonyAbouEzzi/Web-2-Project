@@ -8,15 +8,110 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css" rel="stylesheet">
     <link href="{{ asset('sneat/css/core.css') }}" rel="stylesheet">
     <link href="{{ asset('sneat/css/demo.css') }}" rel="stylesheet">
-    <link href="{{ asset('sneat/vendor/fonts/iconify/iconify.css') }}" rel="stylesheet">
 
     <script src="{{ asset('sneat/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('sneat/js/config.js') }}"></script>
+
+    <style>
+        /* ── Font override: Inter across the entire app ── */
+        :root { --font-family-base: 'Inter', system-ui, sans-serif; }
+        body, .menu-inner, .navbar, .dropdown-menu, .form-control,
+        .btn, .badge, .card, .table { font-family: 'Inter', system-ui, sans-serif !important; }
+
+        /* ── NProgress teal theme ── */
+        #nprogress .bar { background: #0d9488; height: 3px; }
+        #nprogress .peg  { box-shadow: 0 0 10px #0d9488, 0 0 5px #0d9488; }
+
+        /* ── Utility: text sizes ── */
+        .text-2xs  { font-size: .68rem; }
+        .text-xs   { font-size: .76rem; }
+        .text-sm   { font-size: .82rem; }
+        .text-md   { font-size: .88rem; }
+        .fw-800    { font-weight: 800; }
+
+        /* ── Stat card helpers ── */
+        .stat-label { font-size: .76rem; }
+        .stat-value { font-size: 1.5rem; font-weight: 800; }
+        .stat-sub   { font-size: .72rem; }
+
+        /* ── Office card helpers ── */
+        .office-card-header {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: .85rem;
+        }
+        .office-card-logo {
+            width: 44px; height: 44px; border-radius: 10px;
+            object-fit: cover; border: 2px solid rgba(255,255,255,.3);
+        }
+        .office-card-logo-placeholder {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: #fff; flex-shrink: 0;
+        }
+        .office-card-name {
+            color: #fff; font-weight: 800; font-size: .88rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .office-card-municipality { color: rgba(255,255,255,.65); font-size: .73rem; }
+        .office-card-body { padding: 1rem; }
+        .office-card-meta {
+            display: flex; align-items: flex-start; gap: .5rem; margin-bottom: .5rem;
+        }
+        .office-card-meta-icon { color: #9ca3af; font-size: .85rem; margin-top: 1px; flex-shrink: 0; }
+        .office-card-meta-text { font-size: .78rem; color: #6b7280; line-height: 1.4; }
+        .office-card-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: .75rem; padding-top: .75rem; border-top: 1px solid #f3f4f6;
+        }
+        .office-card-wrap {
+            background: #fff; border-radius: 14px; border: 1px solid #e5eaf0;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06); overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .office-card-wrap:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.1);
+        }
+
+        /* ── Notification / user dropdown text sizes ── */
+        .notif-msg  { font-size: .78rem; }
+        .notif-time { font-size: .68rem; }
+        .user-name  { font-size: .84rem; }
+        .user-email { font-size: .7rem; }
+        .page-title-text { font-size: .95rem; font-weight: 700; color: #292524; }
+
+        /* ── Skeleton shimmer ── */
+        @keyframes skeleton-shimmer {
+            0%   { background-position: -400px 0; }
+            100% { background-position:  400px 0; }
+        }
+        body.page-loading table tbody tr td,
+        body.page-loading .skeleton-target {
+            color: transparent !important;
+            border-color: transparent !important;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+            background-size: 800px 100%;
+            animation: skeleton-shimmer 1.4s infinite linear;
+            border-radius: 4px;
+            pointer-events: none;
+            user-select: none;
+        }
+        body.page-loading table tbody tr td * { visibility: hidden; }
+
+        /* ── Toast positioning tweak ── */
+        .toast-container { z-index: 9999; }
+        .toast { min-width: 280px; }
+    </style>
 
     @stack('styles')
 </head>
@@ -211,7 +306,7 @@
                         <button class="layout-menu-toggle navbar-toggler" type="button" aria-label="Toggle sidebar">
                             <i class="bi bi-list" style="font-size:1.15rem;"></i>
                         </button>
-                        <h1 class="mb-0" style="font-size:.95rem; font-weight:700; color:#292524;">@yield('page-title', 'Dashboard')</h1>
+                        <h1 class="mb-0 page-title-text">@yield('page-title', 'Dashboard')</h1>
                     </div>
 
                     <div class="navbar-nav-right">
@@ -227,8 +322,8 @@
                                 <h6 class="dropdown-header">Notifications</h6>
                                 @forelse($user->unreadNotifications->take(6) as $notification)
                                     <div class="dropdown-item text-wrap">
-                                        <div class="fw-semibold text-dark" style="font-size:.78rem;">{{ $notification->data['message'] ?? 'New notification' }}</div>
-                                        <div class="text-muted" style="font-size:.68rem;">{{ $notification->created_at->diffForHumans() }}</div>
+                                        <div class="fw-semibold text-dark notif-msg">{{ $notification->data['message'] ?? 'New notification' }}</div>
+                                        <div class="text-muted notif-time">{{ $notification->created_at->diffForHumans() }}</div>
                                     </div>
                                 @empty
                                     <div class="dropdown-item text-muted">No new notifications.</div>
@@ -243,8 +338,8 @@
                             </div>
                             <div class="dropdown-menu dropdown-menu-end" style="min-width:215px;">
                                 <div class="px-3 py-2 border-bottom">
-                                    <div class="fw-bold text-dark" style="font-size:.84rem;">{{ $user->name }}</div>
-                                    <div class="text-muted" style="font-size:.7rem;">{{ $user->email }}</div>
+                                    <div class="fw-bold text-dark user-name">{{ $user->name }}</div>
+                                    <div class="text-muted user-email">{{ $user->email }}</div>
                                 </div>
                                 @if($user->isCitizen())
                                     <a class="dropdown-item" href="{{ route('citizen.profile') }}"><i class="bi bi-person me-2"></i>Profile</a>
@@ -291,25 +386,7 @@
                         </nav>
                     </div>
 
-                    {{-- Flash Messages --}}
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-                    @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-                    @if(session('info'))
-                        <div class="alert alert-info alert-dismissible fade show" role="alert">
-                            {{ session('info') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
+                    {{-- Validation errors (inline, near forms) --}}
                     @if($errors->any())
                         <div class="alert alert-danger" role="alert">
                             <ul class="mb-0 ps-3">
@@ -343,18 +420,78 @@
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
 </div>
+
+{{-- ── Toast Stack (flash messages) ── --}}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    @if(session('success'))
+        <div class="toast align-items-center text-bg-success border-0" role="alert" data-bs-autohide="true" data-bs-delay="4000">
+            <div class="d-flex">
+                <div class="toast-body"><i class="bi bi-check-circle me-2"></i>{{ session('success') }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="toast align-items-center text-bg-danger border-0" role="alert" data-bs-autohide="true" data-bs-delay="5000">
+            <div class="d-flex">
+                <div class="toast-body"><i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    @endif
+    @if(session('info'))
+        <div class="toast align-items-center text-bg-info border-0" role="alert" data-bs-autohide="true" data-bs-delay="4000">
+            <div class="d-flex">
+                <div class="toast-body"><i class="bi bi-info-circle me-2"></i>{{ session('info') }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    @endif
+</div>
+
 @endauth
 
 @guest
     @yield('content')
 @endguest
 
-<script src="{{ asset('sneat/vendor/libs/jquery/jquery.js') }}"></script>
-<script src="{{ asset('sneat/vendor/libs/popper/popper.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('sneat/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
 <script src="{{ asset('sneat/vendor/js/menu.js') }}"></script>
 <script src="{{ asset('sneat/js/main.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+<script>
+    // ── NProgress page-load bar ──
+    NProgress.configure({ showSpinner: false, trickleSpeed: 180 });
+
+    document.addEventListener('click', function (e) {
+        const a = e.target.closest('a[href]');
+        if (!a) return;
+        const href = a.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript') || a.target === '_blank' || a.download) return;
+        try {
+            const url = new URL(href, location.origin);
+            if (url.origin !== location.origin) return;
+        } catch (_) { return; }
+        NProgress.start();
+        document.body.classList.add('page-loading');
+    });
+
+    document.addEventListener('submit', function () {
+        NProgress.start();
+        document.body.classList.add('page-loading');
+    });
+
+    window.addEventListener('pageshow', function () {
+        NProgress.done();
+        document.body.classList.remove('page-loading');
+    });
+
+    // ── Auto-show flash toasts ──
+    document.querySelectorAll('.toast').forEach(function (el) {
+        new bootstrap.Toast(el).show();
+    });
+</script>
 @stack('scripts')
 </body>
 </html>

@@ -7,76 +7,78 @@
 {{-- Search --}}
 <div class="card mb-3">
     <div class="card-body">
-        <form method="GET" style="display:flex;flex-wrap:wrap;gap:.6rem">
-            <div style="flex:1;min-width:180px;position:relative">
-                <i class="bi bi-search" style="position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none"></i>
-                <input type="text" name="search" class="form-control" style="padding-left:2.3rem" placeholder="Search offices by name..." value="{{ request('search') }}">
+        <form method="GET" class="d-flex flex-wrap gap-2">
+            <div class="flex-grow-1 position-relative" style="min-width:180px;">
+                <i class="bi bi-search position-absolute text-muted" style="left:.8rem;top:50%;transform:translateY(-50%);pointer-events:none;"></i>
+                <input type="text" name="search" class="form-control ps-5" placeholder="Search offices by name..." value="{{ request('search') }}">
             </div>
-            <select name="municipality_id" class="form-select" style="min-width:160px">
+            <select name="municipality_id" class="form-select" style="min-width:160px;">
                 <option value="">All Municipalities</option>
                 @foreach(\App\Models\Municipality::where('is_active',true)->get() as $m)
                     <option value="{{ $m->id }}" {{ request('municipality_id')==$m->id ? 'selected' : '' }}>{{ $m->name }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Filter</button>
         </form>
     </div>
 </div>
 
 {{-- Office Cards Grid --}}
 @if($offices->isEmpty())
-<div style="text-align:center;padding:3rem 1rem;color:#9ca3af;background:#fff;border-radius:14px;border:1px solid #e5eaf0">
-    <i class="bi bi-building-x" style="font-size:2.5rem;display:block;margin-bottom:.75rem;color:#d1d5db"></i>
-    <div style="font-weight:600;font-size:.9rem">No offices found</div>
-    <a href="{{ route('citizen.offices') }}" style="color:var(--primary);font-size:.82rem">Clear filters</a>
-</div>
-@else
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
-    @foreach($offices as $office)
-    <a href="{{ route('citizen.offices.show', $office) }}" style="text-decoration:none;color:inherit;display:block">
-        <div style="background:#fff;border-radius:14px;border:1px solid #e5eaf0;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 3px rgba(0,0,0,.06)'">
-            {{-- Header --}}
-            <div style="background:linear-gradient(135deg,#0038a8,#0070f3);padding:1.25rem;display:flex;align-items:center;gap:.85rem">
-                @if($office->logo)
-                <img src="{{ Storage::url($office->logo) }}" alt="{{ $office->name }}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;border:2px solid rgba(255,255,255,.3)">
-                @else
-                <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;flex-shrink:0">
-                    <i class="bi bi-building"></i>
-                </div>
-                @endif
-                <div style="flex:1;min-width:0">
-                    <div style="color:#fff;font-weight:800;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $office->name }}</div>
-                    <div style="color:rgba(255,255,255,.65);font-size:.73rem">{{ $office->municipality->name }}</div>
-                </div>
-            </div>
-            {{-- Body --}}
-            <div style="padding:1rem">
-                @if($office->address)
-                <div style="display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.5rem">
-                    <i class="bi bi-geo-alt" style="color:#9ca3af;font-size:.85rem;margin-top:1px;flex-shrink:0"></i>
-                    <span style="font-size:.78rem;color:#6b7280;line-height:1.4">{{ $office->address }}</span>
-                </div>
-                @endif
-                @if($office->phone)
-                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
-                    <i class="bi bi-telephone" style="color:#9ca3af;font-size:.82rem;flex-shrink:0"></i>
-                    <span style="font-size:.78rem;color:#6b7280">{{ $office->phone }}</span>
-                </div>
-                @endif
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.75rem;padding-top:.75rem;border-top:1px solid #f3f4f6">
-                    <span style="font-size:.75rem;color:#6b7280"><i class="bi bi-grid-3x3-gap me-1"></i>{{ $office->services->count() }} services</span>
-                    @php $rating = $office->averageRating(); @endphp
-                    @if($rating)
-                    <span style="display:flex;align-items:center;gap:.25rem;font-size:.75rem;font-weight:600;color:#374151">
-                        <i class="bi bi-star-fill" style="color:#f59e0b;font-size:.7rem"></i>{{ number_format($rating,1) }}
-                    </span>
-                    @endif
-                </div>
-            </div>
+    <div class="card text-center py-5">
+        <div class="card-body">
+            <i class="bi bi-building-x text-muted d-block mb-3" style="font-size:2.5rem;"></i>
+            <div class="fw-semibold text-sm mb-1">No offices found</div>
+            <a href="{{ route('citizen.offices') }}" class="text-sm">Clear filters</a>
         </div>
-    </a>
-    @endforeach
-</div>
-<div style="margin-top:1rem">{{ $offices->links() }}</div>
+    </div>
+@else
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+        @foreach($offices as $office)
+            <a href="{{ route('citizen.offices.show', $office) }}" class="text-decoration-none text-reset d-block">
+                <div class="office-card-wrap">
+                    {{-- Header --}}
+                    <div class="office-card-header">
+                        @if($office->logo)
+                            <img src="{{ Storage::url($office->logo) }}" alt="{{ $office->name }}" class="office-card-logo">
+                        @else
+                            <div class="office-card-logo-placeholder">
+                                <i class="bi bi-building"></i>
+                            </div>
+                        @endif
+                        <div class="flex-grow-1" style="min-width:0;">
+                            <div class="office-card-name">{{ $office->name }}</div>
+                            <div class="office-card-municipality">{{ $office->municipality->name }}</div>
+                        </div>
+                    </div>
+                    {{-- Body --}}
+                    <div class="office-card-body">
+                        @if($office->address)
+                            <div class="office-card-meta">
+                                <i class="bi bi-geo-alt office-card-meta-icon"></i>
+                                <span class="office-card-meta-text">{{ $office->address }}</span>
+                            </div>
+                        @endif
+                        @if($office->phone)
+                            <div class="office-card-meta">
+                                <i class="bi bi-telephone office-card-meta-icon" style="font-size:.82rem;"></i>
+                                <span class="office-card-meta-text">{{ $office->phone }}</span>
+                            </div>
+                        @endif
+                        <div class="office-card-footer">
+                            <span class="text-xs text-muted"><i class="bi bi-grid-3x3-gap me-1"></i>{{ $office->services->count() }} services</span>
+                            @php $rating = $office->averageRating(); @endphp
+                            @if($rating)
+                                <span class="d-flex align-items-center gap-1 text-xs fw-semibold">
+                                    <i class="bi bi-star-fill text-warning" style="font-size:.7rem;"></i>{{ number_format($rating,1) }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </a>
+        @endforeach
+    </div>
+    <div class="mt-3">{{ $offices->links() }}</div>
 @endif
 @endsection

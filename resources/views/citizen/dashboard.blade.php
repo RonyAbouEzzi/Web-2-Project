@@ -17,8 +17,8 @@
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
-                        <span class="d-block text-muted mb-1" style="font-size:.76rem;">Active</span>
-                        <h3 class="mb-0" style="font-size:1.5rem; font-weight:800;">{{ $activeRequests->count() }}</h3>
+                        <span class="d-block text-muted stat-label mb-1">Active</span>
+                        <h3 class="mb-0 stat-value">{{ $activeRequests->count() }}</h3>
                     </div>
                     <span class="stat-card-icon bg-teal"><i class="bi bi-activity"></i></span>
                 </div>
@@ -30,8 +30,8 @@
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
-                        <span class="d-block text-muted mb-1" style="font-size:.76rem;">Pending</span>
-                        <h3 class="mb-0" style="font-size:1.5rem; font-weight:800;">{{ $allRequests->where('status', 'pending')->count() }}</h3>
+                        <span class="d-block text-muted stat-label mb-1">Pending</span>
+                        <h3 class="mb-0 stat-value">{{ $allRequests->where('status', 'pending')->count() }}</h3>
                     </div>
                     <span class="stat-card-icon bg-amber"><i class="bi bi-hourglass-split"></i></span>
                 </div>
@@ -43,8 +43,8 @@
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
-                        <span class="d-block text-muted mb-1" style="font-size:.76rem;">Completed</span>
-                        <h3 class="mb-0" style="font-size:1.5rem; font-weight:800;">{{ $allRequests->where('status', 'completed')->count() }}</h3>
+                        <span class="d-block text-muted stat-label mb-1">Completed</span>
+                        <h3 class="mb-0 stat-value">{{ $allRequests->where('status', 'completed')->count() }}</h3>
                     </div>
                     <span class="stat-card-icon bg-emerald"><i class="bi bi-check-circle"></i></span>
                 </div>
@@ -56,8 +56,8 @@
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div>
-                        <span class="d-block text-muted mb-1" style="font-size:.76rem;">Unpaid</span>
-                        <h3 class="mb-0" style="font-size:1.5rem; font-weight:800;">{{ $allRequests->where('payment_status', '!=', 'paid')->count() }}</h3>
+                        <span class="d-block text-muted stat-label mb-1">Unpaid</span>
+                        <h3 class="mb-0 stat-value">{{ $allRequests->where('payment_status', '!=', 'paid')->count() }}</h3>
                     </div>
                     <span class="stat-card-icon bg-rose"><i class="bi bi-credit-card"></i></span>
                 </div>
@@ -128,8 +128,8 @@
                 @else
                     <div class="p-4 text-center">
                         <div class="mb-2"><i class="bi bi-inbox text-muted" style="font-size:2rem;"></i></div>
-                        <div class="fw-semibold mb-1" style="font-size:.88rem;">No service requests yet</div>
-                        <div class="text-muted mb-3" style="font-size:.8rem;">Start by browsing available municipality services.</div>
+                        <div class="fw-semibold mb-1 text-md">No service requests yet</div>
+                        <div class="text-muted mb-3 text-sm">Start by browsing available municipality services.</div>
                         <a href="{{ route('citizen.offices') }}" class="btn btn-sm btn-primary">Browse services</a>
                     </div>
                 @endif
@@ -149,10 +149,10 @@
                         @foreach($upcomingAppointments as $appointment)
                             <div class="border rounded-3 p-3">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="fw-semibold" style="font-size:.84rem;">{{ $appointment->office->name }}</span>
+                                    <span class="fw-semibold text-md">{{ $appointment->office->name }}</span>
                                     <x-status-pill :status="$appointment->status" />
                                 </div>
-                                <div class="text-muted" style="font-size:.76rem;">
+                                <div class="text-muted text-xs">
                                     <i class="bi bi-calendar-event me-1"></i>{{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y') }}
                                     <span class="mx-1">&middot;</span>
                                     <i class="bi bi-clock me-1"></i>{{ $appointment->appointment_time }}
@@ -161,7 +161,7 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="text-muted text-center" style="font-size:.84rem;">No upcoming appointments.</div>
+                    <div class="text-muted text-center text-md">No upcoming appointments.</div>
                 @endif
             </div>
         </div>
@@ -182,17 +182,17 @@
                         @foreach($recentNotifications as $notification)
                             <div class="list-group-item px-0 d-flex justify-content-between align-items-start bg-transparent border-bottom">
                                 <div>
-                                    <div class="fw-semibold" style="font-size:.84rem;">{{ $notification->data['message'] ?? 'Notification received' }}</div>
-                                    <div class="text-muted" style="font-size:.72rem;">{{ $notification->created_at->diffForHumans() }}</div>
+                                    <div class="fw-semibold text-md">{{ $notification->data['message'] ?? 'Notification received' }}</div>
+                                    <div class="text-muted text-xs">{{ $notification->created_at->diffForHumans() }}</div>
                                 </div>
                                 @if(is_null($notification->read_at))
-                                    <span class="badge rounded-pill bg-info-subtle border border-info-subtle" style="font-size:.62rem;">new</span>
+                                    <span class="badge rounded-pill bg-info-subtle border border-info-subtle text-2xs">new</span>
                                 @endif
                             </div>
                         @endforeach
                     </div>
                 @else
-                    <div class="text-muted text-center" style="font-size:.84rem;">No notifications to display.</div>
+                    <div class="text-muted text-center text-md">No notifications to display.</div>
                 @endif
             </div>
         </div>
