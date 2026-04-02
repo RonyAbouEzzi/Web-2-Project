@@ -4,675 +4,910 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Municipal e-services platform for Lebanese municipalities.">
-    <title>Municipal E-Services Platform</title>
+    <title>Municipal E-Services — Lebanon</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital,wght@0,400;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     <style>
+        /* ── Page-level overrides for the landing page ── */
         :root {
-            --primary: #0D9488;
-            --primary-dark: #0b7f75;
-            --primary-deeper: #0a6e66;
-            --primary-soft: #ccfbf1;
-            --bg: #f5f5f4;
-            --surface: #ffffff;
-            --border: #e7e5e4;
-            --text: #1c1917;
-            --muted: #6b7280;
+            --cream: #F5F0E8;
+            --ink:   #1A1714;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: var(--text);
-            background: var(--bg);
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--cream);
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* ── Navbar ──────────────────────── */
-        .site-nav {
+        /* ── NAV ──────────────────────────────── */
+        .lp-nav {
             position: sticky;
             top: 0;
-            z-index: 100;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            background: rgba(255,255,255,0.85);
-            border-bottom: 1px solid var(--border);
-            padding: 0.7rem 0;
-        }
-
-        .brand {
-            display: inline-flex;
+            z-index: 200;
+            background: rgba(245,240,232,0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding: 0 2rem;
+            height: 58px;
+            display: flex;
             align-items: center;
-            gap: 0.65rem;
-            text-decoration: none;
-            color: inherit;
+            justify-content: space-between;
         }
 
-        .brand-mark {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: var(--primary);
-            display: inline-flex;
+        .lp-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+            color: var(--ink);
+        }
+
+        .lp-brand-mark {
+            width: 36px;
+            height: 36px;
+            background: var(--ink);
+            border-radius: 8px;
+            display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            flex-shrink: 0;
         }
 
-        .brand-name {
+        .lp-brand-text strong {
+            display: block;
+            font-size: 0.875rem;
             font-weight: 800;
-            font-size: 0.95rem;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
         }
 
-        .brand-tagline {
-            color: var(--muted);
-            font-size: 0.68rem;
+        .lp-brand-text span {
+            display: block;
+            font-size: 0.625rem;
+            color: #78716C;
+            font-weight: 400;
+            letter-spacing: 0.01em;
         }
 
-        /* ── Hero ────────────────────────── */
-        .hero {
-            background: linear-gradient(165deg, #0D9488 0%, #0f766e 40%, #115e59 100%);
-            padding: 4.5rem 0 3.5rem;
+        .lp-nav-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+        .lp-btn-ghost {
+            background: none;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #57534E;
+            padding: 0.4rem 0.875rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: color 0.15s, background 0.15s;
+            font-family: 'Inter', sans-serif;
+        }
+        .lp-btn-ghost:hover { color: var(--ink); background: rgba(0,0,0,0.05); }
+
+        .lp-btn-black {
+            background: var(--ink);
+            color: #fff;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.45rem 1.125rem;
+            border-radius: 7px;
+            text-decoration: none;
+            transition: background 0.15s;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: -0.01em;
+        }
+        .lp-btn-black:hover { background: #2D2926; color: #fff; }
+
+        /* ── HERO ─────────────────────────────── */
+        .lp-hero {
+            min-height: calc(100vh - 58px);
+            display: flex;
+            align-items: center;
             position: relative;
             overflow: hidden;
+            padding: 5rem 0 4rem;
         }
 
-        .hero::before {
+        /* Warm gradient glow — top-right, behind card */
+        .lp-hero::before {
             content: '';
             position: absolute;
-            top: -120px;
-            right: -80px;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.04);
+            top: -10%;
+            right: -5%;
+            width: 65%;
+            height: 90%;
+            background: radial-gradient(ellipse at 60% 30%,
+                rgba(253, 224, 71, 0.28) 0%,
+                rgba(251, 191, 36, 0.14) 35%,
+                rgba(245, 240, 232, 0)   65%);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .hero::after {
+        /* Subtle secondary warm glow bottom-left */
+        .lp-hero::after {
             content: '';
             position: absolute;
-            bottom: -200px;
-            left: -100px;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.03);
+            bottom: -20%;
+            left: -8%;
+            width: 40%;
+            height: 60%;
+            background: radial-gradient(ellipse at 40% 60%,
+                rgba(253, 224, 71, 0.10) 0%,
+                transparent 60%);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .hero-inner {
+        .lp-hero-inner {
             position: relative;
-            z-index: 2;
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 430px;
+            align-items: center;
+            gap: 4rem;
         }
 
-        .hero-badge {
+        /* Eyebrow label */
+        .lp-eyebrow {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #78716C;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Big serif headline */
+        .lp-headline {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: clamp(3rem, 5.5vw, 4.75rem);
+            line-height: 1.04;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            margin-bottom: 1.625rem;
+        }
+
+        .lp-sub {
+            font-size: 1rem;
+            line-height: 1.72;
+            color: #78716C;
+            max-width: 480px;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+
+        .lp-cta {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            flex-wrap: wrap;
+        }
+
+        .lp-cta-primary {
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(4px);
+            gap: 0.5rem;
+            background: var(--ink);
             color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            padding: 0.75rem 1.625rem;
+            border-radius: 8px;
+            text-decoration: none;
+            letter-spacing: -0.01em;
+            transition: background 0.15s;
+        }
+        .lp-cta-primary:hover { background: #2D2926; color: #fff; }
+        .lp-cta-primary .arrow {
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+        .lp-cta-primary:hover .arrow { transform: translateX(3px); }
+
+        .lp-cta-secondary {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: #57534E;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: color 0.15s, background 0.15s;
+            font-family: 'Inter', sans-serif;
+        }
+        .lp-cta-secondary:hover { color: var(--ink); background: rgba(0,0,0,0.04); }
+
+        /* ── PLATFORM CARD ─────────────────────── */
+        .lp-card {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.09);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow:
+                0 2px 4px rgba(0,0,0,0.04),
+                0 8px 24px rgba(0,0,0,0.07),
+                0 24px 64px rgba(0,0,0,0.06);
+            position: relative;
+        }
+
+        .lp-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.125rem 1.5rem;
+            border-bottom: 1px solid #F0EDE8;
+        }
+
+        .lp-card-title {
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #A8A29E;
+        }
+
+        .lp-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
             font-size: 0.72rem;
             font-weight: 600;
-            padding: 0.35rem 0.85rem;
-            border-radius: 50px;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(255,255,255,0.2);
+            color: #0D9488;
+        }
+        .lp-live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #0D9488;
+            animation: livePulse 2s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%,100% { opacity:1; transform:scale(1); }
+            50%      { opacity:0.45; transform:scale(0.8); }
         }
 
-        .hero h1 {
-            font-size: clamp(2rem, 4.5vw, 3.2rem);
-            font-weight: 800;
-            line-height: 1.12;
-            letter-spacing: -0.025em;
-            color: #fff;
-            margin-bottom: 1.2rem;
-            max-width: 650px;
+        /* 2×2 stats grid */
+        .lp-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
         }
 
-        .hero p {
-            color: rgba(255,255,255,0.8);
-            font-size: 1.05rem;
-            line-height: 1.7;
-            max-width: 540px;
-            margin-bottom: 2rem;
+        .lp-stat {
+            padding: 1.375rem 1.5rem;
+            border-right: 1px solid #F0EDE8;
+            border-bottom: 1px solid #F0EDE8;
         }
+        .lp-stat:nth-child(even)  { border-right: none; }
+        .lp-stat:nth-last-child(-n+2) { border-bottom: none; }
 
-        .hero-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-bottom: 3rem;
-        }
-
-        .hero-actions .btn-light {
-            background: #fff;
-            border: none;
-            color: var(--primary-dark);
+        .lp-stat-label {
+            font-size: 0.6rem;
             font-weight: 700;
-            padding: 0.65rem 1.6rem;
-            border-radius: 0.55rem;
-            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #A8A29E;
+            margin-bottom: 0.375rem;
         }
 
-        .hero-actions .btn-light:hover {
-            background: #f0fdfa;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-        }
-
-        .hero-actions .btn-outline-light {
-            border: 1.5px solid rgba(255,255,255,0.5);
-            color: #fff;
-            font-weight: 600;
-            padding: 0.65rem 1.6rem;
-            border-radius: 0.55rem;
-            font-size: 0.9rem;
-            background: transparent;
-        }
-
-        .hero-actions .btn-outline-light:hover {
-            background: rgba(255,255,255,0.12);
-            border-color: rgba(255,255,255,0.8);
-        }
-
-        /* Hero stat strip */
-        .hero-stats {
-            display: flex;
-            gap: 2.5rem;
-            flex-wrap: wrap;
-        }
-
-        .hero-stat {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .hero-stat-value {
-            font-size: 1.3rem;
+        .lp-stat-value {
+            font-size: 2rem;
             font-weight: 800;
-            color: #fff;
+            line-height: 1;
+            color: var(--ink);
+            letter-spacing: -0.03em;
+        }
+        .lp-stat-value.accent { color: #0D9488; }
+
+        /* Recent activity */
+        .lp-activity-hd {
+            padding: 0.875rem 1.5rem 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #A8A29E;
+            border-top: 1px solid #F0EDE8;
         }
 
-        .hero-stat-label {
-            font-size: 0.74rem;
-            color: rgba(255,255,255,0.6);
+        .lp-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.625rem 1.5rem;
+            border-top: 1px solid #F5F2EF;
+        }
+
+        .lp-row-ref {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+        }
+        .lp-row-type {
+            font-size: 0.72rem;
+            color: #A8A29E;
             margin-top: 0.1rem;
         }
 
-        /* ── Features ────────────────────── */
-        .section {
-            padding: 4rem 0;
+        /* Activity status chips */
+        .chip {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 0.275em 0.7em;
+            border-radius: 50px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .chip-approved  { background:#CCFBF1; color:#0F766E; border-color:#99F6E4; }
+        .chip-inreview  { background:#E0F2FE; color:#0369A1; border-color:#BAE6FD; }
+        .chip-pending   { background:#FEF3C7; color:#92400E; border-color:#FDE68A; }
+
+        /* ── FEATURES ──────────────────────────── */
+        .lp-section {
+            padding: 5rem 0;
         }
 
-        .section-label {
+        .lp-section-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .lp-tag {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            background: var(--primary-soft);
-            color: var(--primary-dark);
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
-            padding: 0.3rem 0.7rem;
-            border-radius: 50px;
-            margin-bottom: 0.85rem;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            background: #CCFBF1;
+            color: #0F766E;
+            padding: 0.3rem 0.75rem;
+            border-radius: 50px;
+            margin-bottom: 1rem;
         }
 
-        .section-title {
-            font-size: 1.75rem;
-            font-weight: 800;
-            letter-spacing: -0.015em;
-            margin-bottom: 0.5rem;
+        .lp-section-title {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: clamp(1.75rem, 3vw, 2.25rem);
+            color: var(--ink);
+            margin-bottom: 0.625rem;
+            letter-spacing: -0.01em;
+            line-height: 1.15;
         }
 
-        .section-desc {
-            color: var(--muted);
-            font-size: 0.95rem;
-            line-height: 1.65;
-            max-width: 520px;
-            margin-bottom: 2.5rem;
+        .lp-section-desc {
+            font-size: 0.9375rem;
+            color: #78716C;
+            line-height: 1.7;
+            max-width: 480px;
+            margin-bottom: 2.75rem;
         }
 
-        .feature-card {
+        .lp-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .lp-feature {
             background: #fff;
-            border: 1px solid var(--border);
+            border: 1px solid #EAE6DF;
             border-radius: 14px;
             padding: 1.5rem;
-            height: 100%;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-
-        .feature-card:hover {
-            border-color: #99f6e4;
-            box-shadow: 0 8px 25px rgba(13,148,136,0.06);
+        .lp-feature:hover {
+            border-color: #99F6E4;
+            box-shadow: 0 8px 28px rgba(13,148,136,0.07);
         }
 
-        .feature-icon {
+        .lp-fi {
             width: 46px;
             height: 46px;
-            border-radius: 12px;
-            display: inline-flex;
+            border-radius: 11px;
+            display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.15rem;
             margin-bottom: 1rem;
         }
+        .fi-t { background:#CCFBF1; color:#0F766E; }
+        .fi-s { background:#E0F2FE; color:#0369A1; }
+        .fi-a { background:#FEF3C7; color:#B45309; }
+        .fi-v { background:#EDE9FE; color:#6D28D9; }
+        .fi-e { background:#D1FAE5; color:#047857; }
+        .fi-r { background:#FFE4E6; color:#BE123C; }
 
-        .fi-teal { background: #ccfbf1; color: #0f766e; }
-        .fi-sky { background: #e0f2fe; color: #0369a1; }
-        .fi-amber { background: #fef3c7; color: #b45309; }
-        .fi-violet { background: #ede9fe; color: #6d28d9; }
-        .fi-emerald { background: #dcfce7; color: #047857; }
-        .fi-rose { background: #ffe4e6; color: #be123c; }
-
-        .feature-card h3 {
-            font-size: 0.95rem;
+        .lp-feature h3 {
+            font-size: 0.9375rem;
             font-weight: 700;
+            color: var(--ink);
             margin-bottom: 0.4rem;
+            letter-spacing: -0.01em;
         }
-
-        .feature-card p {
-            color: var(--muted);
+        .lp-feature p {
             font-size: 0.84rem;
-            line-height: 1.6;
+            color: #78716C;
+            line-height: 1.65;
             margin: 0;
         }
 
-        /* ── How It Works ────────────────── */
-        .steps-section {
+        /* ── STEPS ─────────────────────────────── */
+        .lp-steps-section {
             background: #fff;
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+            border-top: 1px solid #EAE6DF;
+            border-bottom: 1px solid #EAE6DF;
         }
 
-        .step-item {
+        .lp-steps-layout {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .lp-step {
             display: flex;
             gap: 1.25rem;
+            padding: 1.375rem 0;
             align-items: flex-start;
-            padding: 1.25rem 0;
         }
+        .lp-step + .lp-step { border-top: 1px solid #F5F2EF; }
 
-        .step-item + .step-item {
-            border-top: 1px solid #f0efee;
-        }
-
-        .step-num {
-            width: 40px;
-            height: 40px;
+        .lp-step-n {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: var(--primary);
+            background: var(--ink);
             color: #fff;
+            font-size: 0.8rem;
             font-weight: 800;
-            font-size: 0.88rem;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
 
-        .step-item h4 {
-            font-size: 0.92rem;
+        .lp-step h4 {
+            font-size: 0.9rem;
             font-weight: 700;
-            margin: 0 0 0.25rem;
+            color: var(--ink);
+            margin-bottom: 0.3rem;
+            letter-spacing: -0.01em;
         }
-
-        .step-item p {
-            font-size: 0.82rem;
-            color: var(--muted);
+        .lp-step p {
+            font-size: 0.84rem;
+            color: #78716C;
+            line-height: 1.65;
             margin: 0;
-            line-height: 1.6;
         }
 
-        /* ── Roles ───────────────────────── */
-        .role-card {
+        /* ── ROLES ─────────────────────────────── */
+        .lp-grid-roles {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .lp-role {
             background: #fff;
-            border: 1px solid var(--border);
+            border: 1px solid #EAE6DF;
             border-radius: 14px;
             padding: 1.5rem;
-            height: 100%;
             transition: border-color 0.2s;
         }
+        .lp-role:hover { border-color: #99F6E4; }
 
-        .role-card:hover {
-            border-color: #99f6e4;
-        }
-
-        .role-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            display: inline-flex;
+        .lp-role-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 9px;
+            display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1rem;
-            margin-bottom: 0.85rem;
+            margin-bottom: 0.875rem;
         }
 
-        .role-card h3 {
-            font-size: 0.95rem;
+        .lp-role h3 {
+            font-size: 0.9375rem;
             font-weight: 700;
-            margin-bottom: 0.7rem;
+            color: var(--ink);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
         }
 
-        .role-card ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .role-card li {
-            font-size: 0.82rem;
-            color: #44403c;
+        .lp-role ul { list-style: none; padding: 0; }
+        .lp-role li {
+            font-size: 0.84rem;
+            color: #57534E;
             padding: 0.3rem 0;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
+        .lp-role li i { color: #0D9488; font-size: 0.72rem; flex-shrink: 0; }
 
-        .role-card li .bi-check-circle-fill {
-            color: var(--primary);
-            font-size: 0.72rem;
-            flex-shrink: 0;
-        }
-
-        /* ── CTA Banner ──────────────────── */
-        .cta-banner {
-            background: linear-gradient(135deg, #0D9488 0%, #115e59 100%);
+        /* ── CTA BANNER ────────────────────────── */
+        .lp-banner {
+            background: var(--ink);
             border-radius: 16px;
-            padding: 3rem 2.5rem;
+            padding: 3.5rem 3rem;
             color: #fff;
             position: relative;
             overflow: hidden;
         }
-
-        .cta-banner::before {
+        .lp-banner::before {
             content: '';
             position: absolute;
-            top: -60px;
-            right: -60px;
-            width: 250px;
-            height: 250px;
+            top: -80px; right: -80px;
+            width: 300px; height: 300px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.04);
         }
-
-        .cta-banner h2 {
-            font-size: 1.6rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
+        .lp-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -120px; left: -60px;
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.03);
+        }
+        .lp-banner h2 {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: clamp(1.75rem, 3vw, 2.25rem);
+            margin-bottom: 0.75rem;
+            position: relative;
+            letter-spacing: -0.01em;
+        }
+        .lp-banner p {
+            color: rgba(255,255,255,0.65);
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            max-width: 440px;
+            margin-bottom: 2rem;
             position: relative;
         }
-
-        .cta-banner p {
-            color: rgba(255,255,255,0.75);
-            font-size: 0.92rem;
-            margin-bottom: 1.5rem;
-            max-width: 450px;
-            position: relative;
-        }
-
-        .cta-banner .btn {
-            position: relative;
-        }
-
-        /* ── Footer ──────────────────────── */
-        .site-footer {
-            padding: 2rem 0;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-inner {
-            display: flex;
-            justify-content: space-between;
+        .lp-banner-btn {
+            display: inline-flex;
             align-items: center;
-            flex-wrap: wrap;
             gap: 0.5rem;
-            color: #78716c;
+            background: #fff;
+            color: var(--ink);
+            font-size: 0.9375rem;
+            font-weight: 700;
+            padding: 0.75rem 1.75rem;
+            border-radius: 8px;
+            text-decoration: none;
+            position: relative;
+            transition: background 0.15s;
+            letter-spacing: -0.01em;
+        }
+        .lp-banner-btn:hover { background: #F5F0E8; color: var(--ink); }
+
+        /* ── FOOTER ────────────────────────────── */
+        .lp-footer {
+            border-top: 1px solid #EAE6DF;
+            background: #fff;
+            padding: 1.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             font-size: 0.78rem;
+            color: #78716C;
         }
 
-        /* ── Responsive ──────────────────── */
-        @media (max-width: 767.98px) {
-            .hero { padding: 3rem 0 2.5rem; }
-            .hero h1 { font-size: 1.8rem; }
-            .hero p { font-size: 0.92rem; }
-            .hero-stats { gap: 1.5rem; }
-            .section { padding: 3rem 0; }
-            .section-title { font-size: 1.4rem; }
-            .cta-banner { padding: 2rem 1.5rem; }
+        /* ── RESPONSIVE ────────────────────────── */
+        @media (max-width: 1023px) {
+            .lp-hero-inner { grid-template-columns: 1fr; gap: 3rem; }
+            .lp-card { max-width: 480px; }
+            .lp-grid-3 { grid-template-columns: repeat(2, 1fr); }
+            .lp-steps-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+            .lp-grid-roles { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 639px) {
+            .lp-nav { padding: 0 1rem; }
+            .lp-hero-inner { padding: 0 1rem; }
+            .lp-section-inner { padding: 0 1rem; }
+            .lp-headline { font-size: 2.5rem; }
+            .lp-grid-3 { grid-template-columns: 1fr; }
+            .lp-grid-roles { grid-template-columns: 1fr; }
+            .lp-banner { padding: 2.25rem 1.5rem; }
+            .lp-footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+            .lp-hero { padding: 3.5rem 0; min-height: auto; }
         }
     </style>
 </head>
 <body>
 
-    {{-- ── Navigation ──────────────────────────────── --}}
-    <header class="site-nav">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
-                <a href="{{ route('home') }}" class="brand">
-                    <span class="brand-mark"><i class="bi bi-building-check"></i></span>
-                    <span>
-                        <span class="brand-name d-block">Municipal E-Services</span>
-                        <span class="brand-tagline d-block">Lebanese Municipalities</span>
+{{-- ── NAV ────────────────────────────────────────────── --}}
+<nav class="lp-nav">
+    <a href="{{ route('home') }}" class="lp-brand">
+        <span class="lp-brand-mark"><i class="bi bi-building-check"></i></span>
+        <div class="lp-brand-text">
+            <strong>E-Services</strong>
+            <span>Lebanon Gov Portal</span>
+        </div>
+    </a>
+    <div class="lp-nav-actions">
+        <a href="{{ route('login') }}" class="lp-btn-ghost">Sign in</a>
+        <a href="{{ route('register') }}" class="lp-btn-black">Get started</a>
+    </div>
+</nav>
+
+{{-- ── HERO ─────────────────────────────────────────────── --}}
+<section class="lp-hero">
+    <div class="lp-hero-inner">
+
+        {{-- Left: headline --}}
+        <div>
+            <p class="lp-eyebrow">Municipal E-Services &mdash; Lebanon</p>
+
+            <h1 class="lp-headline">
+                Government<br>
+                services, made<br>
+                <em>simple.</em>
+            </h1>
+
+            <p class="lp-sub">
+                Submit requests, upload documents, pay fees, and track progress
+                through a single platform built for Lebanese municipalities.
+                No queues, no paperwork.
+            </p>
+
+            <div class="lp-cta">
+                <a href="{{ route('register') }}" class="lp-cta-primary">
+                    Create free account <span class="arrow">&rarr;</span>
+                </a>
+                <a href="{{ route('login') }}" class="lp-cta-secondary">Sign in</a>
+            </div>
+        </div>
+
+        {{-- Right: floating platform card --}}
+        <div>
+            <div class="lp-card">
+
+                <div class="lp-card-header">
+                    <span class="lp-card-title">Platform Overview</span>
+                    <span class="lp-live">
+                        <span class="lp-live-dot"></span> Live
                     </span>
-                </a>
-                <div class="d-flex gap-2 align-items-center">
-                    <a href="{{ route('login') }}" class="btn btn-sm btn-outline-secondary px-3" style="border-radius:.45rem; font-weight:600;">Log in</a>
-                    <a href="{{ route('register') }}" class="btn btn-sm px-3" style="border-radius:.45rem; font-weight:600; background:var(--primary); border-color:var(--primary); color:#fff;">Get started</a>
                 </div>
+
+                <div class="lp-stats">
+                    <div class="lp-stat">
+                        <div class="lp-stat-label">Municipalities</div>
+                        <div class="lp-stat-value accent">3</div>
+                    </div>
+                    <div class="lp-stat">
+                        <div class="lp-stat-label">Active Offices</div>
+                        <div class="lp-stat-value">3</div>
+                    </div>
+                    <div class="lp-stat">
+                        <div class="lp-stat-label">Services</div>
+                        <div class="lp-stat-value">21</div>
+                    </div>
+                    <div class="lp-stat">
+                        <div class="lp-stat-label">Requests</div>
+                        <div class="lp-stat-value">0</div>
+                    </div>
+                </div>
+
+                <div class="lp-activity-hd">Recent Activity</div>
+
+                <div class="lp-row">
+                    <div>
+                        <div class="lp-row-ref">SRQ-2024-00041</div>
+                        <div class="lp-row-type">Birth Certificate</div>
+                    </div>
+                    <span class="chip chip-approved">Approved</span>
+                </div>
+                <div class="lp-row">
+                    <div>
+                        <div class="lp-row-ref">SRQ-2024-00038</div>
+                        <div class="lp-row-type">Building Permit</div>
+                    </div>
+                    <span class="chip chip-inreview">In Review</span>
+                </div>
+                <div class="lp-row">
+                    <div>
+                        <div class="lp-row-ref">SRQ-2024-00031</div>
+                        <div class="lp-row-type">Land Registration</div>
+                    </div>
+                    <span class="chip chip-pending">Pending</span>
+                </div>
+
             </div>
         </div>
-    </header>
 
-    {{-- ── Hero ────────────────────────────────────── --}}
-    <section class="hero">
-        <div class="container hero-inner">
-            <span class="hero-badge"><i class="bi bi-shield-check"></i> Official Government Platform</span>
-            <h1>Access municipal services without visiting the office.</h1>
-            <p>Submit requests, upload documents, pay fees, and track your application status — all online. Built for citizens, municipal offices, and administrators across Lebanon.</p>
-            <div class="hero-actions">
-                <a href="{{ route('register') }}" class="btn btn-light"><i class="bi bi-arrow-right me-1"></i> Create free account</a>
-                <a href="{{ route('login') }}" class="btn btn-outline-light">Sign in to your account</a>
+    </div>
+</section>
+
+{{-- ── FEATURES ──────────────────────────────────────────── --}}
+<section class="lp-section" style="background:#fff; border-top:1px solid #EAE6DF; border-bottom:1px solid #EAE6DF;">
+    <div class="lp-section-inner">
+        <span class="lp-tag"><i class="bi bi-grid-3x3-gap-fill"></i> Platform capabilities</span>
+        <h2 class="lp-section-title">Everything you need in one place</h2>
+        <p class="lp-section-desc">A complete digital workflow replacing in-person visits with secure, trackable online processes.</p>
+
+        <div class="lp-grid-3">
+            <div class="lp-feature">
+                <div class="lp-fi fi-t"><i class="bi bi-credit-card-2-front"></i></div>
+                <h3>Online payments</h3>
+                <p>Pay service fees directly through the platform — credit card and cryptocurrency supported.</p>
             </div>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <span class="hero-stat-value">24/7</span>
-                    <span class="hero-stat-label">Online availability</span>
-                </div>
-                <div class="hero-stat">
-                    <span class="hero-stat-value">Real-time</span>
-                    <span class="hero-stat-label">Status notifications</span>
-                </div>
-                <div class="hero-stat">
-                    <span class="hero-stat-value">Secure</span>
-                    <span class="hero-stat-label">2FA & encrypted data</span>
-                </div>
-                <div class="hero-stat">
-                    <span class="hero-stat-value">Multi-office</span>
-                    <span class="hero-stat-label">All municipalities</span>
-                </div>
+            <div class="lp-feature">
+                <div class="lp-fi fi-s"><i class="bi bi-qr-code-scan"></i></div>
+                <h3>QR code tracking</h3>
+                <p>Every request gets a unique QR code for instant status lookup. No login required.</p>
             </div>
-        </div>
-    </section>
-
-    {{-- ── Features ────────────────────────────────── --}}
-    <section class="section">
-        <div class="container">
-            <span class="section-label"><i class="bi bi-grid-3x3-gap-fill"></i> Platform capabilities</span>
-            <h2 class="section-title">Everything you need in one place</h2>
-            <p class="section-desc">A complete digital workflow replacing in-person visits with secure, trackable online processes.</p>
-
-            <div class="row g-3">
-                <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
-                        <span class="feature-icon fi-teal"><i class="bi bi-credit-card-2-front"></i></span>
-                        <h3>Online payments</h3>
-                        <p>Pay service fees directly through the platform. Supports standard and cryptocurrency payment methods.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
-                        <span class="feature-icon fi-sky"><i class="bi bi-diagram-3"></i></span>
-                        <h3>Request tracking</h3>
-                        <p>Every request gets a unique reference number with a full status timeline visible to both citizens and offices.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
-                        <span class="feature-icon fi-amber"><i class="bi bi-calendar-check"></i></span>
-                        <h3>Appointment scheduling</h3>
-                        <p>Book and manage appointments tied to your service requests with confirmation and reminders.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
-                        <span class="feature-icon fi-violet"><i class="bi bi-bell"></i></span>
-                        <h3>Smart notifications</h3>
-                        <p>Get alerted on status changes, required documents, payment deadlines, and appointment confirmations.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
-                        <span class="feature-icon fi-emerald"><i class="bi bi-file-earmark-arrow-up"></i></span>
-                        <h3>Document uploads</h3>
-                        <p>Attach supporting documents digitally when submitting requests. Offices can request additional files.</p>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
-                        <span class="feature-icon fi-rose"><i class="bi bi-chat-left-text"></i></span>
-                        <h3>Direct messaging</h3>
-                        <p>Communicate with the processing office about your request through secure in-platform messaging.</p>
-                    </div>
-                </div>
+            <div class="lp-feature">
+                <div class="lp-fi fi-a"><i class="bi bi-calendar-check"></i></div>
+                <h3>Appointment booking</h3>
+                <p>Book and manage appointments tied to your service requests with reminders.</p>
+            </div>
+            <div class="lp-feature">
+                <div class="lp-fi fi-v"><i class="bi bi-bell"></i></div>
+                <h3>Real-time notifications</h3>
+                <p>Get alerted on status changes, document requests, and payment deadlines instantly.</p>
+            </div>
+            <div class="lp-feature">
+                <div class="lp-fi fi-e"><i class="bi bi-file-earmark-arrow-up"></i></div>
+                <h3>Document uploads</h3>
+                <p>Attach supporting documents digitally. Offices can request additional files as needed.</p>
+            </div>
+            <div class="lp-feature">
+                <div class="lp-fi fi-r"><i class="bi bi-currency-exchange"></i></div>
+                <h3>Multi-currency fees</h3>
+                <p>View service fees in USD, LBP, and EUR with live exchange rates automatically.</p>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    {{-- ── How It Works ────────────────────────────── --}}
-    <section class="steps-section section">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <span class="section-label"><i class="bi bi-signpost-split"></i> How it works</span>
-                    <h2 class="section-title">Simple, predictable process</h2>
-                    <p class="section-desc mb-0">From registration to service completion, every step is transparent and trackable.</p>
+{{-- ── HOW IT WORKS ─────────────────────────────────────── --}}
+<section class="lp-section lp-steps-section">
+    <div class="lp-section-inner">
+        <div class="lp-steps-layout">
+            <div>
+                <span class="lp-tag"><i class="bi bi-signpost-split"></i> How it works</span>
+                <h2 class="lp-section-title">Simple, predictable process</h2>
+                <p class="lp-section-desc mb-0" style="margin-bottom:0;">From registration to completion, every step is transparent and trackable.</p>
+            </div>
+            <div>
+                <div class="lp-step">
+                    <span class="lp-step-n">1</span>
+                    <div>
+                        <h4>Register and verify your profile</h4>
+                        <p>Create an account with email, Google, or GitHub. Enable two-factor authentication for added security.</p>
+                    </div>
                 </div>
-                <div class="col-lg-7 offset-lg-1">
-                    <div class="step-item">
-                        <span class="step-num">1</span>
-                        <div>
-                            <h4>Register and verify your profile</h4>
-                            <p>Create an account with email or social login. Set up your profile and optionally enable two-factor authentication.</p>
-                        </div>
+                <div class="lp-step">
+                    <span class="lp-step-n">2</span>
+                    <div>
+                        <h4>Select a municipality and submit a request</h4>
+                        <p>Browse offices, review available services, and submit with any required supporting documents.</p>
                     </div>
-                    <div class="step-item">
-                        <span class="step-num">2</span>
-                        <div>
-                            <h4>Select a municipality and submit a request</h4>
-                            <p>Browse offices, review available services, and submit your request with any required supporting documents.</p>
-                        </div>
+                </div>
+                <div class="lp-step">
+                    <span class="lp-step-n">3</span>
+                    <div>
+                        <h4>Track progress and pay fees</h4>
+                        <p>Monitor your request in real time. Pay online via card or cryptocurrency when ready.</p>
                     </div>
-                    <div class="step-item">
-                        <span class="step-num">3</span>
-                        <div>
-                            <h4>Track progress and pay fees</h4>
-                            <p>Monitor your request status in real time. When the office sets a fee, complete payment online to proceed.</p>
-                        </div>
-                    </div>
-                    <div class="step-item">
-                        <span class="step-num">4</span>
-                        <div>
-                            <h4>Get your result</h4>
-                            <p>Receive outcome digitally, download receipts and certificates, or attend a scheduled appointment at the office.</p>
-                        </div>
+                </div>
+                <div class="lp-step">
+                    <span class="lp-step-n">4</span>
+                    <div>
+                        <h4>Receive your result</h4>
+                        <p>Get your outcome digitally, download receipts and certificates, or attend a scheduled appointment.</p>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    {{-- ── Built For Every Role ────────────────────── --}}
-    <section class="section">
-        <div class="container">
-            <div class="text-center mb-4">
-                <span class="section-label"><i class="bi bi-people"></i> Multi-role platform</span>
-                <h2 class="section-title">Designed for every user in the process</h2>
-                <p class="section-desc mx-auto">Each role gets a tailored dashboard with tools specific to their tasks.</p>
+{{-- ── BUILT FOR EVERY ROLE ────────────────────────────── --}}
+<section class="lp-section" style="background:#fff; border-top:1px solid #EAE6DF; border-bottom:1px solid #EAE6DF;">
+    <div class="lp-section-inner">
+        <div style="text-align:center; margin-bottom:2.75rem;">
+            <span class="lp-tag"><i class="bi bi-people"></i> Multi-role platform</span>
+            <h2 class="lp-section-title">Designed for every user in the process</h2>
+            <p class="lp-section-desc" style="margin:0 auto;">Each role gets a tailored dashboard with tools specific to their tasks.</p>
+        </div>
+
+        <div class="lp-grid-roles">
+            <div class="lp-role">
+                <div class="lp-role-icon fi-t"><i class="bi bi-person"></i></div>
+                <h3>Citizens</h3>
+                <ul>
+                    <li><i class="bi bi-check-circle-fill"></i>Submit and track service requests</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Pay fees and download receipts</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Book appointments with offices</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Receive real-time notifications</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Track via QR code — no login needed</li>
+                </ul>
             </div>
-
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="role-card">
-                        <span class="role-icon fi-teal"><i class="bi bi-person"></i></span>
-                        <h3>Citizens</h3>
-                        <ul>
-                            <li><i class="bi bi-check-circle-fill"></i> Submit and track service requests</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Pay fees and download receipts</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Book appointments with offices</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Receive real-time notifications</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Message offices about requests</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="role-card">
-                        <span class="role-icon fi-sky"><i class="bi bi-buildings"></i></span>
-                        <h3>Office Users</h3>
-                        <ul>
-                            <li><i class="bi bi-check-circle-fill"></i> Review and process requests</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Manage services and fees</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Handle appointments and schedules</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Respond to citizen feedback</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Generate reports and documents</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="role-card">
-                        <span class="role-icon fi-amber"><i class="bi bi-shield-lock"></i></span>
-                        <h3>Administrators</h3>
-                        <ul>
-                            <li><i class="bi bi-check-circle-fill"></i> Manage municipalities and offices</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Oversee all platform users</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Monitor requests and revenue</li>
-                            <li><i class="bi bi-check-circle-fill"></i> View analytics and reports</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Configure platform settings</li>
-                        </ul>
-                    </div>
-                </div>
+            <div class="lp-role">
+                <div class="lp-role-icon fi-s"><i class="bi bi-buildings"></i></div>
+                <h3>Office Users</h3>
+                <ul>
+                    <li><i class="bi bi-check-circle-fill"></i>Review and process requests</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Manage services and fees</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Handle appointments and schedules</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Respond to citizen feedback</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Generate PDF reports and documents</li>
+                </ul>
+            </div>
+            <div class="lp-role">
+                <div class="lp-role-icon fi-a"><i class="bi bi-shield-lock"></i></div>
+                <h3>Administrators</h3>
+                <ul>
+                    <li><i class="bi bi-check-circle-fill"></i>Manage municipalities and offices</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Oversee all platform users</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Monitor requests and revenue</li>
+                    <li><i class="bi bi-check-circle-fill"></i>View analytics and reports</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Configure platform settings</li>
+                </ul>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    {{-- ── CTA Banner ──────────────────────────────── --}}
-    <section class="section pt-0">
-        <div class="container">
-            <div class="cta-banner">
-                <h2>Ready to get started?</h2>
-                <p>Join the platform and access municipal services from the comfort of your home. Registration takes less than a minute.</p>
-                <a href="{{ route('register') }}" class="btn btn-light btn-lg" style="font-weight:700; border-radius:.55rem; color:var(--primary-dark);">
-                    <i class="bi bi-arrow-right me-1"></i> Create your free account
-                </a>
-            </div>
+{{-- ── CTA ───────────────────────────────────────────────── --}}
+<section class="lp-section">
+    <div class="lp-section-inner">
+        <div class="lp-banner">
+            <h2>Ready to get started?</h2>
+            <p>Join the platform and access municipal services from anywhere. Registration takes less than a minute.</p>
+            <a href="{{ route('register') }}" class="lp-banner-btn">
+                Create your free account <span>&rarr;</span>
+            </a>
         </div>
-    </section>
+    </div>
+</section>
 
-    {{-- ── Footer ──────────────────────────────────── --}}
-    <footer class="site-footer">
-        <div class="container">
-            <div class="footer-inner">
-                <span>Municipal E-Services Platform &mdash; Lebanese Municipalities</span>
-                <span>&copy; {{ now()->year }} All rights reserved</span>
-            </div>
-        </div>
-    </footer>
+{{-- ── FOOTER ────────────────────────────────────────────── --}}
+<footer class="lp-footer">
+    <div style="display:flex;align-items:center;gap:0.625rem;">
+        <span style="width:22px;height:22px;background:var(--ink);border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem;">
+            <i class="bi bi-building-check"></i>
+        </span>
+        <span>Municipal E-Services &mdash; Lebanese Municipalities</span>
+    </div>
+    <span>&copy; {{ now()->year }} All rights reserved</span>
+</footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

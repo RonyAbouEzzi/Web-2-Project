@@ -1,24 +1,13 @@
 @props(['status' => 'pending'])
 
 @php
-    $normalized = strtolower(str_replace(' ', '_', $status));
-    $map = [
-        'pending' => 'warning',
-        'in_review' => 'info',
-        'approved' => 'success',
-        'completed' => 'success',
-        'paid' => 'success',
-        'rejected' => 'danger',
-        'cancelled' => 'danger',
-        'unpaid' => 'danger',
-        'missing_documents' => 'danger',
-        'confirmed' => 'success',
-        'scheduled' => 'info',
+    $normalized = strtolower(str_replace([' ', '-'], '_', $status));
+    $validStates = [
+        'pending', 'in_review', 'approved', 'completed', 'rejected',
+        'missing_documents', 'paid', 'unpaid', 'confirmed', 'scheduled', 'cancelled',
     ];
-
-    $color = $map[$normalized] ?? 'secondary';
+    $cls = in_array($normalized, $validStates) ? 'es-pill-' . $normalized : 'es-pill-secondary';
+    $label = ucwords(str_replace('_', ' ', $normalized));
 @endphp
 
-<span {{ $attributes->merge(['class' => 'badge rounded-pill text-uppercase bg-' . $color . '-subtle border border-' . $color . '-subtle']) }} style="font-size:.66rem; letter-spacing:.04em;">
-    {{ str_replace('_', ' ', $normalized) }}
-</span>
+<span {{ $attributes->merge(['class' => 'es-pill ' . $cls]) }}>{{ $label }}</span>

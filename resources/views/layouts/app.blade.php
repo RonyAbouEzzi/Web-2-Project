@@ -1,380 +1,484 @@
 <!DOCTYPE html>
-<html lang="en" class="layout-menu-fixed layout-compact" data-assets-path="{{ asset('/assets') . '/' }}" dir="ltr" data-skin="default" data-base-url="{{ url('/') }}" data-framework="laravel" data-bs-theme="light" data-template="vertical-menu-template">
-
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <title>@yield('title', 'Dashboard') | {{ config('variables.templateName', 'E-Services') }}</title>
 
-    <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}">
+    {{-- Fonts --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Include Sneat Styles (Vite-processed SCSS) -->
-    @include('layouts.sections.styles')
+    {{-- Bootstrap 5 --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Include Sneat Scripts for helpers & config -->
-    @include('layouts.sections.scriptsIncludes')
+    {{-- Bootstrap Icons --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    {{-- Design System --}}
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <style>
+        /* Dashboard refinements */
+        body { background: #F5F0E8; }
+
+        .es-sidebar {
+            background: #fff;
+            border-right: 1px solid #EAE6DF;
+        }
+
+        .es-sidebar-brand {
+            border-bottom: 1px solid #EAE6DF;
+        }
+
+        /* Black brand mark in dashboard too */
+        .es-brand-mark {
+            background: #1A1714;
+            border-radius: 8px;
+            width: 34px;
+            height: 34px;
+        }
+
+        .es-brand-name {
+            font-size: 0.875rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+
+        .es-brand-sub {
+            font-size: 0.6rem;
+            letter-spacing: 0.01em;
+        }
+
+        /* Nav links */
+        .es-nav-link {
+            color: #78716C;
+            border-radius: 7px;
+            margin: 0.0625rem 0.625rem;
+            font-size: 0.875rem;
+        }
+        .es-nav-link:hover {
+            background: #F5F0E8;
+            color: #1A1714;
+        }
+        .es-nav-link.active {
+            background: #CCFBF1;
+            color: #0D9488;
+        }
+
+        /* Topbar */
+        .es-topbar {
+            background: #fff;
+            border-bottom: 1px solid #EAE6DF;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        /* Content area */
+        .es-content {
+            background: #F5F0E8;
+        }
+
+        /* Cards get subtle warmth */
+        .card {
+            border-color: #EAE6DF;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .card-header {
+            border-bottom-color: #F0EDE8;
+        }
+
+        /* Tables look cleaner */
+        .table th {
+            background: #FAF8F4;
+            border-bottom-color: #EAE6DF;
+        }
+        .table td {
+            border-bottom-color: #F0EDE8;
+        }
+        .table-hover tbody tr:hover > td {
+            background: #FAF8F4;
+        }
+
+        /* Footer */
+        .es-footer {
+            border-top-color: #EAE6DF;
+            background: #fff;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: #0D9488;
+            border-color: #0D9488;
+        }
+        .btn-primary:hover {
+            background: #0B7F76;
+            border-color: #0B7F76;
+        }
+
+        /* Breadcrumb on cream background */
+        .breadcrumb {
+            background: transparent;
+        }
+    </style>
 
     @yield('vendor-style')
     @yield('page-style')
     @stack('styles')
 </head>
-
 <body>
+
 @auth
 @php
     $user = auth()->user();
     $baseHome = match ($user->role) {
-        'admin' => route('admin.dashboard'),
+        'admin'       => route('admin.dashboard'),
         'office_user' => route('office.dashboard'),
-        default => route('citizen.dashboard')
+        default       => route('citizen.dashboard'),
     };
-    $pendingOfficeRequests = $user->isOfficeUser() ? ($user->offices()->first()?->requests()->where('status', 'pending')->count() ?? 0) : 0;
-    $activeCitizenRequests = $user->isCitizen() ? $user->serviceRequests()->whereNotIn('status', ['completed', 'rejected'])->count() : 0;
+    $pendingOfficeRequests = $user->isOfficeUser()
+        ? ($user->offices()->first()?->requests()->where('status', 'pending')->count() ?? 0)
+        : 0;
+    $activeCitizenRequests = $user->isCitizen()
+        ? $user->serviceRequests()->whereNotIn('status', ['completed', 'rejected'])->count()
+        : 0;
     $unreadCount = $user->unreadNotifications()->count();
 @endphp
 
-<div class="layout-wrapper layout-content-navbar">
-    <div class="layout-container">
+{{-- Sidebar overlay (mobile) --}}
+<div class="es-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-        {{-- ── Sidebar Menu ────────────────────────────────────────── --}}
-        <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-            <div class="app-brand demo">
-                <a href="{{ $baseHome }}" class="app-brand-link">
-                    <span class="app-brand-logo demo">@include('_partials.macros',['width'=>'25'])</span>
-                    <span class="app-brand-text demo menu-text fw-bold ms-2">{{ config('variables.templateName', 'E-Services') }}</span>
+<div class="es-wrapper">
+
+    {{-- ── Sidebar ──────────────────────────────────────────── --}}
+    <aside class="es-sidebar" id="esSidebar">
+
+        {{-- Brand --}}
+        <a href="{{ $baseHome }}" class="es-sidebar-brand">
+            <span class="es-brand-mark" style="background:#1A1714;"><i class="bi bi-building-check"></i></span>
+            <span>
+                <span class="es-brand-name d-block">{{ config('variables.templateName', 'E-Services') }}</span>
+                <span class="es-brand-sub">Lebanon Gov Portal</span>
+            </span>
+        </a>
+
+        {{-- Navigation --}}
+        <nav class="es-nav">
+
+            @if($user->isAdmin())
+                <span class="es-nav-section">Administration</span>
+
+                <a href="{{ route('admin.dashboard') }}"
+                   class="es-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span class="es-nav-label">Dashboard</span>
                 </a>
-                <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
-                    <i class="icon-base bx bx-chevron-left icon-sm d-flex align-items-center justify-content-center"></i>
+                <a href="{{ route('admin.municipalities') }}"
+                   class="es-nav-link {{ request()->routeIs('admin.municipalities*') ? 'active' : '' }}">
+                    <i class="bi bi-map"></i>
+                    <span class="es-nav-label">Municipalities</span>
                 </a>
-            </div>
+                <a href="{{ route('admin.offices') }}"
+                   class="es-nav-link {{ request()->routeIs('admin.offices*') ? 'active' : '' }}">
+                    <i class="bi bi-buildings"></i>
+                    <span class="es-nav-label">Offices</span>
+                </a>
+                <a href="{{ route('admin.users') }}"
+                   class="es-nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
+                    <i class="bi bi-people"></i>
+                    <span class="es-nav-label">Users</span>
+                </a>
+                <a href="{{ route('admin.reports') }}"
+                   class="es-nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart-line"></i>
+                    <span class="es-nav-label">Reports</span>
+                </a>
+                <a href="{{ Route::has('admin.settings') ? route('admin.settings') : route('security.2fa') }}"
+                   class="es-nav-link {{ request()->routeIs('admin.settings') || request()->routeIs('security.2fa') ? 'active' : '' }}">
+                    <i class="bi bi-gear"></i>
+                    <span class="es-nav-label">Settings</span>
+                </a>
 
-            <div class="menu-divider mt-0"></div>
-            <div class="menu-inner-shadow"></div>
+            @elseif($user->isOfficeUser())
+                <span class="es-nav-section">Office Panel</span>
 
-            <ul class="menu-inner py-1">
-                @if($user->isAdmin())
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Administration</span>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <a href="{{ route('admin.dashboard') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-home-smile"></i>
-                            <div>Dashboard</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.municipalities*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.municipalities') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-map"></i>
-                            <div>Municipalities</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.offices*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.offices') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-building-house"></i>
-                            <div>Offices</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.users') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-group"></i>
-                            <div>Users</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
-                        <a href="{{ route('admin.reports') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-bar-chart-alt-2"></i>
-                            <div>Reports</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('admin.settings') || request()->routeIs('security.2fa') ? 'active' : '' }}">
-                        <a href="{{ Route::has('admin.settings') ? route('admin.settings') : route('security.2fa') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-cog"></i>
-                            <div>Settings</div>
-                        </a>
-                    </li>
+                <a href="{{ route('office.dashboard') }}"
+                   class="es-nav-link {{ request()->routeIs('office.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span class="es-nav-label">Dashboard</span>
+                </a>
+                <a href="{{ route('office.services') }}"
+                   class="es-nav-link {{ request()->routeIs('office.services*') ? 'active' : '' }}">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                    <span class="es-nav-label">Services</span>
+                </a>
+                <a href="{{ route('office.requests') }}"
+                   class="es-nav-link {{ request()->routeIs('office.requests*') ? 'active' : '' }}">
+                    <i class="bi bi-inbox"></i>
+                    <span class="es-nav-label">Requests</span>
+                    @if($pendingOfficeRequests > 0)
+                        <span class="es-nav-badge">{{ $pendingOfficeRequests }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('office.appointments') }}"
+                   class="es-nav-link {{ request()->routeIs('office.appointments*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar-check"></i>
+                    <span class="es-nav-label">Appointments</span>
+                </a>
+                <a href="{{ route('office.feedback') }}"
+                   class="es-nav-link {{ request()->routeIs('office.feedback*') ? 'active' : '' }}">
+                    <i class="bi bi-chat-left-text"></i>
+                    <span class="es-nav-label">Feedback</span>
+                </a>
+                <a href="{{ route('office.profile') }}"
+                   class="es-nav-link {{ request()->routeIs('office.profile*') ? 'active' : '' }}">
+                    <i class="bi bi-id-card"></i>
+                    <span class="es-nav-label">Profile</span>
+                </a>
 
-                @elseif($user->isOfficeUser())
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Office Panel</span>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('office.dashboard') ? 'active' : '' }}">
-                        <a href="{{ route('office.dashboard') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-home-smile"></i>
-                            <div>Dashboard</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('office.services*') ? 'active' : '' }}">
-                        <a href="{{ route('office.services') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-grid-alt"></i>
-                            <div>Services</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('office.requests*') ? 'active' : '' }}">
-                        <a href="{{ route('office.requests') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-inbox"></i>
-                            <div>Requests</div>
-                            @if($pendingOfficeRequests > 0)
-                                <div class="badge rounded-pill bg-warning text-uppercase ms-auto">{{ $pendingOfficeRequests }}</div>
-                            @endif
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('office.appointments*') ? 'active' : '' }}">
-                        <a href="{{ route('office.appointments') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-calendar-check"></i>
-                            <div>Appointments</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('office.feedback*') ? 'active' : '' }}">
-                        <a href="{{ route('office.feedback') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-chat"></i>
-                            <div>Feedback</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('office.profile*') ? 'active' : '' }}">
-                        <a href="{{ route('office.profile') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-id-card"></i>
-                            <div>Profile</div>
-                        </a>
-                    </li>
+            @else
+                <span class="es-nav-section">Citizen Portal</span>
 
-                @else
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Citizen Portal</span>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('citizen.dashboard') ? 'active' : '' }}">
-                        <a href="{{ route('citizen.dashboard') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-home-smile"></i>
-                            <div>Dashboard</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('citizen.offices*') || request()->routeIs('citizen.services*') ? 'active' : '' }}">
-                        <a href="{{ route('citizen.offices') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-check-square"></i>
-                            <div>Services</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('citizen.requests*') ? 'active' : '' }}">
-                        <a href="{{ route('citizen.requests') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-file"></i>
-                            <div>My Requests</div>
-                            @if($activeCitizenRequests > 0)
-                                <div class="badge rounded-pill bg-warning text-uppercase ms-auto">{{ $activeCitizenRequests }}</div>
-                            @endif
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="{{ route('citizen.requests') }}?appointments=1" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-calendar-event"></i>
-                            <div>Appointments</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="{{ route('citizen.requests') }}?payment_status=unpaid" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-credit-card"></i>
-                            <div>Payments</div>
-                        </a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('citizen.profile*') ? 'active' : '' }}">
-                        <a href="{{ route('citizen.profile') }}" class="menu-link">
-                            <i class="menu-icon icon-base bx bx-user"></i>
-                            <div>Profile</div>
-                        </a>
-                    </li>
-                @endif
-            </ul>
-        </aside>
-        {{-- ── / Sidebar Menu ──────────────────────────────────────── --}}
+                <a href="{{ route('citizen.dashboard') }}"
+                   class="es-nav-link {{ request()->routeIs('citizen.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span class="es-nav-label">Dashboard</span>
+                </a>
+                <a href="{{ route('citizen.offices') }}"
+                   class="es-nav-link {{ request()->routeIs('citizen.offices*') || request()->routeIs('citizen.services*') ? 'active' : '' }}">
+                    <i class="bi bi-search"></i>
+                    <span class="es-nav-label">Browse Services</span>
+                </a>
+                <a href="{{ route('citizen.requests') }}"
+                   class="es-nav-link {{ request()->routeIs('citizen.requests*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span class="es-nav-label">My Requests</span>
+                    @if($activeCitizenRequests > 0)
+                        <span class="es-nav-badge">{{ $activeCitizenRequests }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('citizen.requests') }}?appointments=1"
+                   class="es-nav-link">
+                    <i class="bi bi-calendar-event"></i>
+                    <span class="es-nav-label">Appointments</span>
+                </a>
+                <a href="{{ route('citizen.requests') }}?payment_status=unpaid"
+                   class="es-nav-link">
+                    <i class="bi bi-credit-card"></i>
+                    <span class="es-nav-label">Payments</span>
+                </a>
+                <a href="{{ route('citizen.profile') }}"
+                   class="es-nav-link {{ request()->routeIs('citizen.profile*') ? 'active' : '' }}">
+                    <i class="bi bi-person"></i>
+                    <span class="es-nav-label">Profile</span>
+                </a>
+            @endif
 
-        {{-- ── Layout Page ─────────────────────────────────────────── --}}
-        <div class="layout-page">
+            {{-- Shared bottom links --}}
+            <span class="es-nav-section" style="margin-top:1.5rem;">Account</span>
+            <a href="{{ route('security.2fa') }}"
+               class="es-nav-link {{ request()->routeIs('security.2fa') ? 'active' : '' }}">
+                <i class="bi bi-shield-check"></i>
+                <span class="es-nav-label">Security</span>
+            </a>
+            <form action="{{ route('logout') }}" method="POST" class="m-0">
+                @csrf
+                <button type="submit" class="es-nav-link w-100 text-start border-0 bg-transparent"
+                        style="cursor:pointer; color:var(--es-muted);">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span class="es-nav-label">Log Out</span>
+                </button>
+            </form>
 
-            <!-- Navbar -->
-            <nav class="layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
-                <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
-                    <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
-                        <i class="icon-base bx bx-menu icon-md"></i>
-                    </a>
+        </nav>
+    </aside>
+    {{-- ── / Sidebar ─────────────────────────────────────────── --}}
+
+    {{-- ── Main ────────────────────────────────────────────────── --}}
+    <div class="es-main">
+
+        {{-- Topbar --}}
+        <header class="es-topbar">
+            <button class="es-topbar-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <h1 class="es-topbar-title">@yield('page-title', 'Dashboard')</h1>
+
+            <div class="es-topbar-right">
+
+                {{-- Notifications --}}
+                <div class="dropdown">
+                    <button class="es-topbar-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                        <i class="bi bi-bell"></i>
+                        @if($unreadCount > 0)
+                            <span class="es-notif-dot"></span>
+                        @endif
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" style="width:310px; max-height:380px; overflow-y:auto; padding:.5rem 0;">
+                        <li>
+                            <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom" style="border-color:var(--es-border)!important;">
+                                <span style="font-size:.82rem; font-weight:700; color:var(--es-text);">Notifications</span>
+                                @if($unreadCount > 0)
+                                    <span class="badge rounded-pill" style="background:var(--es-primary-s); color:var(--es-primary); font-size:.65rem;">{{ $unreadCount }} new</span>
+                                @endif
+                            </div>
+                        </li>
+                        @forelse($user->unreadNotifications->take(6) as $notification)
+                            <li>
+                                <div class="dropdown-item py-2" style="border-radius:0;">
+                                    <div style="font-size:.82rem; font-weight:600; color:var(--es-text); line-height:1.4;">
+                                        {{ $notification->data['message'] ?? 'New notification' }}
+                                    </div>
+                                    <div style="font-size:.72rem; color:var(--es-muted); margin-top:.2rem;">
+                                        {{ $notification->created_at->diffForHumans() }}
+                                    </div>
+                                </div>
+                            </li>
+                        @empty
+                            <li>
+                                <div class="text-center py-4" style="color:var(--es-muted); font-size:.84rem;">
+                                    <i class="bi bi-bell-slash d-block mb-1" style="font-size:1.5rem; opacity:.4;"></i>
+                                    No new notifications
+                                </div>
+                            </li>
+                        @endforelse
+                    </ul>
                 </div>
 
-                <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-                    <div class="navbar-nav align-items-center">
-                        <h1 class="mb-0" style="font-size:.95rem; font-weight:700;">@yield('page-title', 'Dashboard')</h1>
+                {{-- User menu --}}
+                <div class="dropdown ms-1">
+                    <div class="es-avatar" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
                     </div>
-
-                    <ul class="navbar-nav flex-row align-items-center ms-auto">
-                        {{-- Notifications --}}
-                        <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
-                            <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                                <span class="position-relative">
-                                    <i class="icon-base bx bx-bell icon-md"></i>
-                                    @if($unreadCount > 0)
-                                        <span class="badge rounded-pill bg-danger badge-dot badge-notifications border"></span>
-                                    @endif
-                                </span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" style="width:320px; max-height:380px; overflow-y:auto;">
-                                <li class="dropdown-menu-header border-bottom">
-                                    <div class="dropdown-header d-flex align-items-center py-3">
-                                        <h6 class="mb-0 me-auto">Notifications</h6>
-                                        @if($unreadCount > 0)
-                                            <span class="badge rounded-pill bg-label-primary">{{ $unreadCount }} New</span>
-                                        @endif
-                                    </div>
-                                </li>
-                                @forelse($user->unreadNotifications->take(6) as $notification)
-                                    <li>
-                                        <div class="dropdown-item text-wrap py-2">
-                                            <div class="fw-semibold text-heading" style="font-size:.8rem;">{{ $notification->data['message'] ?? 'New notification' }}</div>
-                                            <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                        </div>
-                                    </li>
-                                @empty
-                                    <li>
-                                        <div class="dropdown-item text-muted py-3 text-center">No new notifications</div>
-                                    </li>
-                                @endforelse
-                            </ul>
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width:210px;">
+                        <li>
+                            <div class="px-3 py-2 border-bottom" style="border-color:var(--es-border)!important;">
+                                <div style="font-size:.875rem; font-weight:700; color:var(--es-text);">{{ $user->name }}</div>
+                                <div style="font-size:.72rem; color:var(--es-muted);">{{ ucfirst(str_replace('_', ' ', $user->role)) }}</div>
+                            </div>
                         </li>
-
-                        {{-- User --}}
-                        <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                            <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
-                                <div class="avatar avatar-online">
-                                    <span class="avatar-initial rounded-circle bg-label-primary">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="javascript:void(0);">
-                                        <div class="d-flex">
-                                            <div class="flex-shrink-0 me-3">
-                                                <div class="avatar avatar-online">
-                                                    <span class="avatar-initial rounded-circle bg-label-primary">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
-                                                </div>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-0">{{ $user->name }}</h6>
-                                                <small class="text-muted">{{ ucfirst(str_replace('_', ' ', $user->role)) }}</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li><div class="dropdown-divider my-1"></div></li>
-                                @if($user->isCitizen())
-                                    <li><a class="dropdown-item" href="{{ route('citizen.profile') }}"><i class="icon-base bx bx-user icon-md me-3"></i><span>Profile</span></a></li>
-                                @elseif($user->isOfficeUser())
-                                    <li><a class="dropdown-item" href="{{ route('office.profile') }}"><i class="icon-base bx bx-id-card icon-md me-3"></i><span>Profile</span></a></li>
-                                @endif
-                                <li><a class="dropdown-item" href="{{ route('security.2fa') }}"><i class="icon-base bx bx-shield icon-md me-3"></i><span>Security</span></a></li>
-                                <li><div class="dropdown-divider my-1"></div></li>
-                                <li>
-                                    <form action="{{ route('logout') }}" method="POST" class="m-0">
-                                        @csrf
-                                        <button class="dropdown-item" type="submit">
-                                            <i class="icon-base bx bx-power-off icon-md me-3"></i><span>Log Out</span>
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
+                        @if($user->isCitizen())
+                            <li><a class="dropdown-item mt-1" href="{{ route('citizen.profile') }}">
+                                <i class="bi bi-person me-2" style="color:var(--es-muted);"></i>Profile
+                            </a></li>
+                        @elseif($user->isOfficeUser())
+                            <li><a class="dropdown-item mt-1" href="{{ route('office.profile') }}">
+                                <i class="bi bi-id-card me-2" style="color:var(--es-muted);"></i>Profile
+                            </a></li>
+                        @endif
+                        <li><a class="dropdown-item" href="{{ route('security.2fa') }}">
+                            <i class="bi bi-shield-check me-2" style="color:var(--es-muted);"></i>Security
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="{{ route('logout') }}" method="POST" class="m-0">
+                                @csrf
+                                <button class="dropdown-item text-danger" type="submit">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Log Out
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </div>
-            </nav>
-            <!-- / Navbar -->
 
-            <!-- Content wrapper -->
-            <div class="content-wrapper">
-                <div class="container-xxl flex-grow-1 container-p-y">
-
-                    {{-- Breadcrumbs --}}
-                    @php $segments = request()->segments(); @endphp
-                    @if(count($segments) > 0)
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ $baseHome }}">Home</a></li>
-                            @foreach($segments as $i => $segment)
-                                @php
-                                    $label = ucfirst(str_replace('-', ' ', $segment));
-                                    $isLast = $i === count($segments) - 1;
-                                @endphp
-                                @if($isLast)
-                                    <li class="breadcrumb-item active" aria-current="page">{{ $label }}</li>
-                                @else
-                                    <li class="breadcrumb-item">{{ $label }}</li>
-                                @endif
-                            @endforeach
-                        </ol>
-                    </nav>
-                    @endif
-
-                    {{-- Flash Messages --}}
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-                    @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-                    @if(session('info'))
-                        <div class="alert alert-info alert-dismissible fade show" role="alert">
-                            {{ session('info') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-                    @if($errors->any())
-                        <div class="alert alert-danger" role="alert">
-                            <ul class="mb-0 ps-3">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    {{-- Page Content --}}
-                    @yield('content')
-
-                </div>
-
-                <!-- Footer -->
-                <footer class="content-footer footer bg-footer-theme">
-                    <div class="container-xxl">
-                        <div class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
-                            <div class="text-body">
-                                &copy; <script>document.write(new Date().getFullYear())</script> Municipal E-Services Platform
-                            </div>
-                        </div>
-                    </div>
-                </footer>
-                <!-- / Footer -->
-
-                <div class="content-backdrop fade"></div>
             </div>
-            <!--/ Content wrapper -->
-        </div>
-        <!-- / Layout page -->
-    </div>
+        </header>
+        {{-- / Topbar --}}
 
-    <!-- Overlay -->
-    <div class="layout-overlay layout-menu-toggle"></div>
-    <!-- Drag Target Area To SlideIn Menu On Small Screens -->
-    <div class="drag-target"></div>
+        {{-- Content --}}
+        <main class="es-content">
+
+            {{-- Breadcrumb --}}
+            @php $segments = request()->segments(); @endphp
+            @if(count($segments) > 1)
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ $baseHome }}">Home</a></li>
+                    @foreach($segments as $i => $segment)
+                        @php
+                            $label = ucfirst(str_replace('-', ' ', $segment));
+                            $isLast = ($i === count($segments) - 1);
+                        @endphp
+                        @if($isLast)
+                            <li class="breadcrumb-item active">{{ $label }}</li>
+                        @else
+                            <li class="breadcrumb-item">{{ $label }}</li>
+                        @endif
+                    @endforeach
+                </ol>
+            </nav>
+            @endif
+
+            {{-- Flash messages --}}
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            @if(session('info'))
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>{{ session('info') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <ul class="mb-0 ps-3 mt-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            {{-- Page content --}}
+            @yield('content')
+
+        </main>
+
+        {{-- Footer --}}
+        <footer class="es-footer">
+            &copy; {{ now()->year }} Municipal E-Services Platform &mdash; Lebanese Municipalities
+        </footer>
+
+    </div>
+    {{-- ── / Main ───────────────────────────────────────────────── --}}
+
 </div>
+
 @endauth
 
 @guest
     @yield('content')
 @endguest
 
-<!-- Include Sneat Scripts (Vite-processed JS) -->
-@include('layouts.sections.scripts')
+{{-- Bootstrap JS --}}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+{{-- Sidebar toggle --}}
+<script>
+function toggleSidebar() {
+    document.getElementById('esSidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+    document.getElementById('esSidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+}
+</script>
+
 @stack('scripts')
 </body>
 </html>
