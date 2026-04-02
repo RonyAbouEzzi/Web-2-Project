@@ -1,366 +1,587 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Lebanon Government E-Services Platform — Access all municipal and government services online.">
-    <title>E-Services — Lebanon Government Digital Portal</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Submit requests, track progress, pay fees, and receive official documents from Lebanese municipalities — all online.">
+    <title>E-Services Lebanon — Municipal Digital Portal</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
     <style>
-    :root {
-        --navy: #060D1F; --navy-2: #0B1630; --navy-3: #1A3360;
-        --primary: #1E4080; --primary-lt: #EFF6FF;
-        --gold: #D4A017; --gold-lt: #FDF7DC;
-        --ink-900:#111318; --ink-700:#2D3748; --ink-500:#718096; --ink-300:#CBD5E0; --ink-100:#F7FAFC;
-        --white: #fff;
-        --font: 'Instrument Sans', system-ui, sans-serif;
-        --font-disp: 'Fraunces', Georgia, serif;
-        --r: 14px; --r-sm: 9px;
-    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+        --bg:      #F9F6F1;
+        --surface: #FFFFFF;
+        --border:  #E5E0D8;
+        --text:    #1C1917;
+        --muted:   #78716C;
+        --label:   #A8A29E;
+        --teal:    #0D9488;
+        --teal-dk: #0b7f75;
+        --font:    'Inter', system-ui, sans-serif;
+        --serif:   'Inter', system-ui, sans-serif;
+    }
+
     html { scroll-behavior: smooth; }
-    body { font-family: var(--font); background: var(--white); -webkit-font-smoothing: antialiased; color: var(--ink-700); }
-
-    /* ── Navbar ── */
-    .nav-bar {
-        position: sticky; top: 0; z-index: 100;
-        background: rgba(255,255,255,.92); backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-bottom: 1px solid rgba(0,0,0,.06);
-        padding: .7rem 1.5rem;
-        display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
     }
-    .nav-logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; }
-    .nav-logo .logo-mark {
-        width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
-        background: linear-gradient(135deg, var(--primary), #4B7CD0);
+
+    /* ─── NAV ─────────────────────────────────────────── */
+    .nav {
+        position: sticky; top: 0; z-index: 50;
+        padding: .9rem 0;
+        background: rgba(249,246,241,.88);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+        max-width: 1100px; margin: 0 auto; padding: 0 2rem;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand { display: flex; align-items: center; gap: .7rem; text-decoration: none; color: var(--text); }
+    .brand-icon {
+        width: 36px; height: 36px; border-radius: 9px;
+        background: var(--text);
         display: flex; align-items: center; justify-content: center;
-        color: #fff; font-size: .95rem;
-        box-shadow: 0 2px 8px rgba(30,64,128,.35);
+        color: var(--bg); font-size: .9rem; flex-shrink: 0;
     }
-    .nav-logo .logo-text { font-family: var(--font-disp); font-weight: 600; font-size: .92rem; color: var(--ink-900); letter-spacing: -.01em; font-style: italic; }
-    .nav-logo .logo-sub  { font-size: .66rem; color: var(--ink-500); font-family: var(--font); display: block; margin-top: -1px; }
-    .nav-actions { display: flex; align-items: center; gap: .5rem; }
-    .btn-nav {
-        display: inline-flex; align-items: center; gap: .35rem;
-        padding: .46rem 1.1rem; border-radius: var(--r-sm);
-        font-size: .82rem; font-weight: 600; text-decoration: none;
-        font-family: var(--font); transition: all .15s; border: 1.5px solid transparent; cursor: pointer;
+    .brand-name  { font-family: var(--serif); font-weight: 700; font-size: .95rem; }
+    .brand-sub   { font-size: .67rem; color: var(--label); display: block; margin-top: 1px; letter-spacing: .03em; }
+    .nav-links { display: flex; align-items: center; gap: .5rem; }
+    .btn-ghost {
+        padding: .4rem 1rem; border-radius: .4rem;
+        border: 1px solid var(--border); background: transparent;
+        color: var(--muted); font-family: var(--font); font-size: .82rem; font-weight: 600;
+        text-decoration: none; transition: all .15s; cursor: pointer;
     }
-    .btn-outline { border-color: var(--ink-300); color: var(--ink-700); background: transparent; }
-    .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-lt); }
-    .btn-solid { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .btn-solid:hover { background: #162F60; border-color: #162F60; color: #fff; box-shadow: 0 4px 14px rgba(30,64,128,.35); transform: translateY(-1px); }
+    .btn-ghost:hover { border-color: #c7c0b7; color: var(--text); }
+    .btn-dark {
+        padding: .42rem 1.1rem; border-radius: .4rem;
+        background: var(--text); border: none; color: var(--bg);
+        font-family: var(--font); font-size: .82rem; font-weight: 600;
+        text-decoration: none; transition: all .15s; cursor: pointer;
+    }
+    .btn-dark:hover { background: #2d2420; }
 
-    /* ── Hero ── */
+    /* ─── HERO ────────────────────────────────────────── */
     .hero {
-        background: var(--navy); position: relative; overflow: hidden;
-        padding: 6rem 1.5rem 5rem;
+        position: relative; overflow: hidden;
+        padding: 5.5rem 0 4rem;
+        background: var(--bg);
     }
-    /* Geometric grid overlay */
-    .hero::before {
-        content: '';
-        position: absolute; inset: 0;
-        background-image:
-            linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-        background-size: 40px 40px;
-    }
-    /* Glow orbs */
-    .hero-orb-1 {
-        position: absolute; top: -100px; right: -80px;
-        width: 500px; height: 500px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(30,64,128,.5) 0%, transparent 70%);
-        pointer-events: none;
-    }
-    .hero-orb-2 {
-        position: absolute; bottom: -120px; left: -60px;
-        width: 400px; height: 400px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(212,160,23,.18) 0%, transparent 70%);
-        pointer-events: none;
-    }
-    .hero-orb-3 {
-        position: absolute; top: 40%; left: 35%;
-        width: 300px; height: 300px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(75,124,208,.15) 0%, transparent 70%);
-        pointer-events: none;
+    /* Warm amber glow — top right */
+    .hero-glow {
+        position: absolute; pointer-events: none;
+        top: -140px; right: -140px;
+        width: 680px; height: 580px; border-radius: 50%;
+        background: radial-gradient(circle at 50% 40%,
+            rgba(253,224,130,.55) 0%,
+            rgba(254,243,199,.35) 35%,
+            transparent 70%);
+        z-index: 0;
     }
     .hero-inner {
-        position: relative; z-index: 2;
-        max-width: 740px; margin: 0 auto; text-align: center;
+        position: relative; z-index: 1;
+        max-width: 1100px; margin: 0 auto; padding: 0 2rem;
+        display: grid; grid-template-columns: 1fr 380px; gap: 4rem; align-items: start;
     }
     .hero-eyebrow {
+        font-size: .68rem; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; color: var(--label);
+        margin-bottom: 1.1rem; display: block;
+    }
+    .hero-h1 {
+        font-family: var(--serif); font-weight: 800;        font-size: clamp(2.6rem, 5.5vw, 4rem);
+        line-height: 1.06; letter-spacing: -.03em;
+        color: var(--text); margin-bottom: 1.25rem;
+        max-width: 14ch;
+    }
+    .hero-desc {
+        font-size: .97rem; line-height: 1.78; color: var(--muted);
+        max-width: 46ch; margin-bottom: 2rem;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 2.5rem; }
+    .btn-primary-hero {
         display: inline-flex; align-items: center; gap: .45rem;
-        background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14);
-        color: rgba(255,255,255,.7); border-radius: 99px;
-        padding: .3rem 1rem; font-size: .74rem; font-weight: 600;
-        letter-spacing: .04em; text-transform: uppercase; margin-bottom: 1.75rem;
+        padding: .65rem 1.5rem; border-radius: .4rem;
+        background: var(--text); border: none; color: #fff;
+        font-family: var(--font); font-size: .88rem; font-weight: 700;
+        text-decoration: none; transition: all .18s;
     }
-    .hero-eyebrow i { color: var(--gold); }
-    .hero h1 {
-        font-family: var(--font-disp); font-style: italic;
-        color: #fff; font-size: clamp(2rem,5.5vw,3.4rem);
-        font-weight: 700; line-height: 1.12; letter-spacing: -.03em;
-        margin-bottom: 1.35rem;
-    }
-    .hero h1 .highlight {
-        color: var(--gold); font-style: italic;
-    }
-    .hero-sub {
-        color: rgba(255,255,255,.58); font-size: clamp(.88rem,1.8vw,1.05rem);
-        line-height: 1.75; max-width: 560px; margin: 0 auto 2.25rem;
-    }
-    .hero-cta {
-        display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center;
-    }
-    .btn-hero-primary {
-        display: inline-flex; align-items: center; gap: .5rem;
-        background: var(--white); color: var(--primary);
-        padding: .75rem 2rem; border-radius: var(--r-sm); font-weight: 700;
-        font-size: .9rem; text-decoration: none; font-family: var(--font);
-        transition: all .18s; border: none; cursor: pointer;
-        box-shadow: 0 4px 20px rgba(0,0,0,.25);
-    }
-    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.35); color: var(--primary); }
-    .btn-hero-ghost {
-        display: inline-flex; align-items: center; gap: .5rem;
-        background: rgba(255,255,255,.08); color: rgba(255,255,255,.88);
-        padding: .75rem 2rem; border-radius: var(--r-sm); font-weight: 600;
-        font-size: .9rem; text-decoration: none; font-family: var(--font);
-        transition: all .18s; border: 1.5px solid rgba(255,255,255,.2);
-    }
-    .btn-hero-ghost:hover { background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.4); }
-
-    /* Hero stats strip */
-    .hero-stats {
-        display: flex; flex-wrap: wrap; justify-content: center;
-        gap: .5rem; margin-top: 3.5rem;
-    }
-    .hstat {
-        background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
-        border-radius: var(--r-sm); padding: .75rem 1.25rem; text-align: center;
-        min-width: 130px;
-    }
-    .hstat-num { font-family: var(--font-disp); font-style: italic; font-size: 1.75rem; font-weight: 700; color: var(--gold); line-height: 1; }
-    .hstat-lbl { font-size: .72rem; color: rgba(255,255,255,.45); margin-top: .2rem; font-weight: 500; letter-spacing: .02em; }
-
-    /* ── Trust bar ── */
-    .trust-bar {
-        background: var(--white); border-bottom: 1px solid #F0F4FA;
-        padding: 1.1rem 1.5rem;
-        display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-        gap: .6rem;
-    }
-    .trust-chip {
+    .btn-primary-hero:hover { background: #2d2420; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    .btn-outline-hero {
         display: inline-flex; align-items: center; gap: .45rem;
-        background: var(--ink-100); border-radius: 99px;
-        padding: .35rem .9rem; font-size: .76rem; font-weight: 600; color: var(--ink-700);
+        padding: .65rem 1.5rem; border-radius: .4rem;
+        border: 1px solid var(--border); background: transparent;
+        color: var(--muted); font-family: var(--font);
+        font-size: .88rem; font-weight: 600;
+        text-decoration: none; transition: all .15s;
     }
-    .trust-chip i { color: var(--primary); }
-
-    /* ── Section ── */
-    .section { padding: 5rem 1.5rem; }
-    .section-inner { max-width: 1100px; margin: 0 auto; }
-    .section-label { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--primary); margin-bottom: .5rem; }
-    .section-title {
-        font-family: var(--font-disp); font-style: italic;
-        font-size: clamp(1.5rem,3.5vw,2.2rem); font-weight: 700;
-        letter-spacing: -.03em; color: var(--ink-900); margin-bottom: .75rem;
+    .btn-outline-hero:hover { border-color: #c7c0b7; color: var(--text); }
+    /* Trust row */
+    .hero-trust { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+    .trust-item {
+        display: flex; align-items: center; gap: .38rem;
+        font-size: .77rem; color: var(--label);
     }
-    .section-sub { color: var(--ink-500); font-size: .9rem; line-height: 1.75; max-width: 560px; }
+    .trust-item i { font-size: .75rem; color: var(--teal); }
 
-    /* ── Feature cards ── */
-    .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 1.1rem; margin-top: 3rem; }
-    .feat-card {
-        background: var(--white); border: 1px solid #E2E8F0;
-        border-radius: var(--r); padding: 1.6rem;
-        transition: transform .22s ease, box-shadow .22s ease, border-color .22s;
+    /* Hero right panel */
+    .hero-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,.06), 0 20px 50px rgba(0,0,0,.05);
+    }
+    .hp-top {
+        padding: 1.25rem 1.4rem .75rem;
+        border-bottom: 1px solid var(--border);
+        display: flex; align-items: baseline; justify-content: space-between;
+    }
+    .hp-eyebrow {
+        font-size: .62rem; letter-spacing: .12em; text-transform: uppercase;
+        color: var(--label); font-weight: 600;
+    }
+    .hp-live {
+        display: flex; align-items: center; gap: .3rem;
+        font-size: .62rem; color: var(--teal); font-weight: 600;
+    }
+    .hp-live-dot {
+        width: 5px; height: 5px; border-radius: 50%;
+        background: var(--teal); animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .hp-stats { display: grid; grid-template-columns: 1fr 1fr; }
+    .hp-stat {
+        padding: 1rem 1.4rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .hp-stat:nth-child(odd) { border-right: 1px solid var(--border); }
+    .hp-stat-label {
+        font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
+        color: var(--label); font-weight: 600; margin-bottom: .3rem;
+    }
+    .hp-stat-val {
+        font-family: var(--serif); font-weight: 800;
+        font-size: 1.65rem; line-height: 1; color: var(--text);
+    }
+    .hp-stat-val.teal { color: var(--teal); }
+    .hp-requests { padding: .9rem 1.4rem; }
+    .hp-req-label {
+        font-size: .6rem; letter-spacing: .1em; text-transform: uppercase;
+        color: var(--label); font-weight: 600; margin-bottom: .65rem;
+    }
+    .hp-req {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: .45rem 0;
+        border-bottom: 1px solid #f0ece7;
+    }
+    .hp-req:last-child { border-bottom: none; }
+    .hp-req-ref { font-size: .73rem; color: var(--muted); font-weight: 600; }
+    .hp-req-svc { font-size: .68rem; color: var(--label); }
+    .hp-pill {
+        font-size: .58rem; font-weight: 700; letter-spacing: .05em;
+        text-transform: uppercase; padding: .15rem .5rem; border-radius: 99px;
+        border: 1px solid;
+    }
+    .hp-pill.approved { color: #0f766e; border-color: #99f6e4; background: #f0fdfb; }
+    .hp-pill.review   { color: #0369a1; border-color: #bae6fd; background: #f0f9ff; }
+    .hp-pill.pending  { color: #b45309; border-color: #fde68a; background: #fffbeb; }
+
+    /* ─── STATS STRIP ─────────────────────────────────── */
+    .stats-strip {
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        padding: 2.75rem 0;
+    }
+    .stats-inner {
+        max-width: 1100px; margin: 0 auto; padding: 0 2rem;
+        display: grid; grid-template-columns: repeat(4,1fr);
+        divide-x: var(--border);
+    }
+    .stat-cell {
+        text-align: center;
+        padding: 0 1rem;
+        border-right: 1px solid var(--border);
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-eyebrow {
+        font-size: .62rem; letter-spacing: .12em; text-transform: uppercase;
+        color: var(--label); font-weight: 600; margin-bottom: .5rem;
+        display: block;
+    }
+    .stat-number {
+        font-family: var(--serif); font-weight: 800;        font-size: 2.4rem; line-height: 1; color: var(--text);
+        display: block;
+    }
+    .stat-suffix { color: var(--teal); }
+
+    /* ─── SECTION COMMONS ──────────────────────────────── */
+    .section { padding: 5rem 0; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+    .sec-eyebrow {
+        font-size: .65rem; letter-spacing: .14em; text-transform: uppercase;
+        color: var(--label); font-weight: 600; display: block; margin-bottom: .7rem;
+    }
+    .sec-h2 {
+        font-family: var(--serif); font-weight: 800;        font-size: clamp(1.65rem, 3vw, 2.3rem); line-height: 1.1;
+        letter-spacing: -.025em; color: var(--text); margin-bottom: .7rem;
+    }
+    .sec-lead {
+        font-size: .95rem; line-height: 1.75; color: var(--muted);
+        max-width: 50ch; margin-bottom: 3rem;
+    }
+
+    /* ─── FEATURES ─────────────────────────────────────── */
+    .features-grid {
+        display: grid; grid-template-columns: repeat(3,1fr); gap: 1px;
+        background: var(--border); border: 1px solid var(--border); border-radius: 14px;
+        overflow: hidden;
+    }
+    .feat {
+        background: var(--surface); padding: 1.65rem 1.5rem;
+        transition: background .15s;
+    }
+    .feat:hover { background: #fdfcfa; }
+    .feat-eyebrow {
+        font-size: .6rem; letter-spacing: .12em; text-transform: uppercase;
+        color: var(--label); font-weight: 600; margin-bottom: .55rem; display: block;
+    }
+    .feat h3 { font-size: .9rem; font-weight: 700; color: var(--text); margin-bottom: .35rem; }
+    .feat p  { font-size: .81rem; color: var(--muted); line-height: 1.65; margin: 0; }
+    .feat-icon {
+        width: 34px; height: 34px; border-radius: 9px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .88rem; margin-bottom: .85rem;
+        border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+    }
+
+    /* ─── PROCESS ──────────────────────────────────────── */
+    .process-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .process-layout {
+        display: grid; grid-template-columns: 280px 1fr; gap: 5rem; align-items: start;
+    }
+    .process-sticky { position: sticky; top: 5rem; }
+    .process-step {
+        display: grid; grid-template-columns: 48px 1fr; gap: 1rem;
+        padding: 1.35rem 0; border-bottom: 1px solid var(--border);
+        align-items: start;
+    }
+    .process-step:last-child { border-bottom: none; }
+    .process-num {
+        font-family: var(--serif); font-weight: 800;        font-size: 1.3rem; color: var(--label); line-height: 1;
+        padding-top: .05rem;
+    }
+    .process-step h3 { font-size: .88rem; font-weight: 700; color: var(--text); margin-bottom: .3rem; }
+    .process-step p  { font-size: .8rem; color: var(--muted); line-height: 1.65; margin: 0; }
+
+    /* ─── ROLES ─────────────────────────────────────────── */
+    .roles-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; }
+    .role-card {
+        border: 1px solid var(--border); border-radius: 14px;
+        padding: 1.65rem; background: var(--surface);
+        transition: box-shadow .2s, border-color .2s;
+    }
+    .role-card:hover { border-color: #c7c0b7; box-shadow: 0 8px 28px rgba(0,0,0,.07); }
+    .role-eyebrow {
+        font-size: .6rem; letter-spacing: .12em; text-transform: uppercase;
+        font-weight: 600; color: var(--label); margin-bottom: .5rem; display: block;
+    }
+    .role-card h3 {
+        font-family: var(--serif); font-weight: 800;        font-size: 1.15rem; margin-bottom: 1.1rem; color: var(--text);
+    }
+    .role-feature {
+        display: flex; align-items: flex-start; gap: .5rem;
+        font-size: .8rem; color: var(--muted); padding: .3rem 0;
+        border-bottom: 1px solid #f0ece7;
+    }
+    .role-feature:last-child { border-bottom: none; }
+    .role-feature i { font-size: .72rem; color: var(--teal); margin-top: .18rem; flex-shrink: 0; }
+
+    /* ─── CTA ───────────────────────────────────────────── */
+    .cta-section {
+        padding: 5rem 0;
         position: relative; overflow: hidden;
     }
-    .feat-card::after {
-        content: '';
-        position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-        background: linear-gradient(90deg, var(--primary), #4B7CD0);
-        transform: scaleX(0); transform-origin: left;
-        transition: transform .28s ease;
+    .cta-glow {
+        position: absolute; pointer-events: none;
+        top: -120px; left: 50%; transform: translateX(-50%);
+        width: 700px; height: 500px; border-radius: 50%;
+        background: radial-gradient(circle,
+            rgba(253,224,130,.4) 0%,
+            rgba(254,243,199,.2) 40%,
+            transparent 70%);
     }
-    .feat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.1); border-color: #CBD5E0; }
-    .feat-card:hover::after { transform: scaleX(1); }
-    .feat-icon {
-        width: 50px; height: 50px; border-radius: 13px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.3rem; margin-bottom: 1.1rem;
+    .cta-inner {
+        position: relative; z-index: 1;
+        text-align: center;
+        max-width: 620px; margin: 0 auto; padding: 0 2rem;
     }
-    .feat-card h4 { font-size: .92rem; font-weight: 700; color: var(--ink-900); margin-bottom: .4rem; letter-spacing: -.01em; }
-    .feat-card p  { font-size: .8rem; color: var(--ink-500); line-height: 1.65; margin: 0; }
+    .cta-eyebrow { font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; color: var(--label); font-weight: 600; display: block; margin-bottom: .75rem; }
+    .cta-h2 {
+        font-family: var(--serif); font-weight: 800;        font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.03em;
+        line-height: 1.08; color: var(--text); margin-bottom: .85rem;
+    }
+    .cta-sub { font-size: .95rem; color: var(--muted); line-height: 1.7; margin-bottom: 2rem; }
+    .cta-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: .65rem; }
 
-    /* ── How it works ── */
-    .how-section { background: #F0F4FA; padding: 5rem 1.5rem; }
-    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1.5rem; margin-top: 3rem; }
-    .step { text-align: center; }
-    .step-num {
-        width: 52px; height: 52px; border-radius: 50%;
-        background: var(--navy); color: var(--gold);
-        display: flex; align-items: center; justify-content: center;
-        font-family: var(--font-disp); font-style: italic; font-size: 1.25rem; font-weight: 700;
-        margin: 0 auto 1rem;
+    /* ─── FOOTER ────────────────────────────────────────── */
+    .footer {
+        border-top: 1px solid var(--border); padding: 1.75rem 0;
+        background: var(--surface);
     }
-    .step h4 { font-size: .9rem; font-weight: 700; color: var(--ink-900); margin-bottom: .35rem; }
-    .step p  { font-size: .8rem; color: var(--ink-500); line-height: 1.65; margin: 0; }
+    .footer-inner {
+        max-width: 1100px; margin: 0 auto; padding: 0 2rem;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: .75rem;
+    }
+    .footer-brand { font-size: .78rem; color: var(--label); }
+    .footer-brand strong { color: var(--muted); }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a { font-size: .78rem; color: var(--label); text-decoration: none; transition: color .15s; }
+    .footer-links a:hover { color: var(--text); }
 
-    /* ── Roles ── */
-    .roles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 1.25rem; margin-top: 3rem; }
-    .role-card {
-        border-radius: var(--r); overflow: hidden;
-        border: 1px solid #E2E8F0; background: var(--white);
-        display: flex; flex-direction: column;
-        transition: transform .22s ease, box-shadow .22s ease;
-    }
-    .role-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,.1); }
-    .role-card-top { padding: 2rem 1.75rem 1.5rem; }
-    .role-icon {
-        width: 60px; height: 60px; border-radius: 16px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; margin-bottom: 1.1rem;
-    }
-    .role-card h3 { font-size: 1.05rem; font-weight: 700; color: var(--ink-900); margin-bottom: .45rem; letter-spacing: -.01em; }
-    .role-card p  { font-size: .82rem; color: var(--ink-500); line-height: 1.7; margin: 0; }
-    .role-card-foot { border-top: 1px solid #F0F4FA; padding: 1rem 1.75rem; margin-top: auto; }
-    .role-card-foot a {
-        display: inline-flex; align-items: center; gap: .45rem;
-        font-size: .82rem; font-weight: 700; text-decoration: none;
-        transition: gap .18s;
-    }
-    .role-card-foot a:hover { gap: .65rem; }
+    /* ─── SCROLL REVEAL ─────────────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .55s ease, transform .55s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    .d1 { transition-delay: .08s; }
+    .d2 { transition-delay: .16s; }
+    .d3 { transition-delay: .24s; }
+    .d4 { transition-delay: .32s; }
 
-    /* ── Footer ── */
-    footer {
-        background: var(--navy); color: rgba(255,255,255,.4);
-        padding: 2rem 1.5rem; text-align: center;
+    /* ─── RESPONSIVE ────────────────────────────────────── */
+    @media(max-width:1024px) {
+        .hero-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+        .hero-panel { max-width: 440px; }
+        .process-layout { grid-template-columns: 1fr; gap: 2rem; }
+        .process-sticky { position: static; }
+        .features-grid { grid-template-columns: repeat(2,1fr); }
     }
-    footer .f-logo { display: flex; align-items: center; gap: .6rem; justify-content: center; margin-bottom: 1rem; }
-    footer .f-logo .fm {
-        width: 32px; height: 32px; border-radius: 8px;
-        background: rgba(255,255,255,.1); display: flex; align-items: center;
-        justify-content: center; font-size: .85rem; color: #fff;
+    @media(max-width:768px) {
+        .stats-inner { grid-template-columns: repeat(2,1fr); gap: 2rem; }
+        .stat-cell { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
+        .stat-cell:nth-child(2n) { border-bottom: 1px solid var(--border); }
+        .stat-cell:last-child, .stat-cell:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+        .roles-grid { grid-template-columns: 1fr; }
+        .features-grid { grid-template-columns: 1fr; }
     }
-    footer .f-logo span { color: rgba(255,255,255,.7); font-size: .85rem; font-weight: 600; }
-    footer p { font-size: .76rem; line-height: 1.6; }
-    footer .f-links { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; justify-content: center; margin-bottom: 1rem; }
-    footer .f-links a { color: rgba(255,255,255,.35); text-decoration: none; font-size: .76rem; transition: color .14s; }
-    footer .f-links a:hover { color: rgba(255,255,255,.65); }
-
-    @media(max-width:576px) {
-        .hero { padding: 4rem 1.25rem 3.5rem; }
-        .hstat { min-width: 110px; }
-        .hero-stats { gap: .4rem; }
+    @media(max-width:560px) {
+        .hero { padding: 4rem 0 3rem; }
+        .hero-h1 { font-size: 2.4rem; }
+        .nav-links .btn-ghost { display: none; }
     }
     </style>
 </head>
 <body>
 
-{{-- Navbar --}}
-<nav class="nav-bar">
-    <a class="nav-logo" href="{{ route('home') }}">
-        <div class="logo-mark"><i class="bi bi-building-check"></i></div>
-        <div>
-            <div class="logo-text">E-Services</div>
-            <span class="logo-sub">Lebanon Gov Portal</span>
+@php
+    $municipalityCount = \App\Models\Municipality::where('is_active', true)->count();
+    $officeCount       = \App\Models\Office::where('is_active', true)->count();
+    $serviceCount      = \App\Models\Service::where('is_active', true)->count();
+    $requestCount      = \App\Models\ServiceRequest::count();
+@endphp
+
+{{-- NAV --}}
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="{{ route('home') }}" class="brand">
+            <div class="brand-icon"><i class="bi bi-building-check"></i></div>
+            <div>
+                <span class="brand-name">E-Services</span>
+                <span class="brand-sub">Lebanon Gov Portal</span>
+            </div>
+        </a>
+        <div class="nav-links">
+            <a href="{{ route('login') }}" class="btn-ghost">Sign in</a>
+            <a href="{{ route('register') }}" class="btn-dark">Get started</a>
         </div>
-    </a>
-    <div class="nav-actions">
-        <a href="{{ route('login') }}"    class="btn-nav btn-outline"><i class="bi bi-box-arrow-in-right"></i> Sign In</a>
-        <a href="{{ route('register') }}" class="btn-nav btn-solid"><i class="bi bi-person-plus"></i><span class="d-none d-sm-inline"> Get Started</span></a>
     </div>
 </nav>
 
-{{-- Hero --}}
+{{-- HERO --}}
 <section class="hero">
-    <div class="hero-orb-1"></div>
-    <div class="hero-orb-2"></div>
-    <div class="hero-orb-3"></div>
+    <div class="hero-glow"></div>
     <div class="hero-inner">
-        <div class="hero-eyebrow">
-            <i class="bi bi-shield-check"></i> Official Government Digital Platform
+        <div>
+            <span class="hero-eyebrow">Municipal E-Services &mdash; Lebanon</span>
+            <h1 class="hero-h1">Government services, made simple.</h1>
+            <p class="hero-desc">Submit requests, upload documents, pay fees, and track progress through a single platform built for Lebanese municipalities. No queues, no paperwork.</p>
+            <div class="hero-actions">
+                <a href="{{ route('register') }}" class="btn-primary-hero">
+                    Create free account <i class="bi bi-arrow-right"></i>
+                </a>
+                <a href="{{ route('login') }}" class="btn-outline-hero">Sign in</a>
+            </div>
+            <div class="hero-trust">
+                <div class="trust-item"><i class="bi bi-shield-fill-check"></i> 2FA secured</div>
+                <div class="trust-item"><i class="bi bi-qr-code"></i> QR tracking</div>
+                <div class="trust-item"><i class="bi bi-credit-card"></i> Online payments</div>
+                <div class="trust-item"><i class="bi bi-file-earmark-pdf"></i> Digital certificates</div>
+            </div>
         </div>
-        <h1>
-            Government Services,<br>
-            <span class="highlight">Reimagined</span> for You
-        </h1>
-        <p class="hero-sub">
-            Submit requests, pay fees, track progress, and download official documents —
-            all from your phone, without a single queue.
-        </p>
-        <div class="hero-cta">
-            <a href="{{ route('register') }}" class="btn-hero-primary">
-                <i class="bi bi-person-plus"></i> Create Free Account
-            </a>
-            <a href="{{ route('login') }}" class="btn-hero-ghost">
-                <i class="bi bi-box-arrow-in-right"></i> Sign In
-            </a>
-        </div>
-        <div class="hero-stats">
-            <div class="hstat"><div class="hstat-num">3+</div><div class="hstat-lbl">Municipalities</div></div>
-            <div class="hstat"><div class="hstat-num">20+</div><div class="hstat-lbl">Services Online</div></div>
-            <div class="hstat"><div class="hstat-num">100%</div><div class="hstat-lbl">Paperless</div></div>
-            <div class="hstat"><div class="hstat-num">24/7</div><div class="hstat-lbl">Live Tracking</div></div>
+
+        {{-- Platform card --}}
+        <div class="hero-panel">
+            <div class="hp-top">
+                <span class="hp-eyebrow">Platform overview</span>
+                <span class="hp-live"><span class="hp-live-dot"></span>Live</span>
+            </div>
+            <div class="hp-stats">
+                <div class="hp-stat">
+                    <div class="hp-stat-label">Municipalities</div>
+                    <div class="hp-stat-val teal">{{ $municipalityCount }}</div>
+                </div>
+                <div class="hp-stat">
+                    <div class="hp-stat-label">Active offices</div>
+                    <div class="hp-stat-val">{{ $officeCount }}</div>
+                </div>
+                <div class="hp-stat" style="border-bottom:none;">
+                    <div class="hp-stat-label">Services</div>
+                    <div class="hp-stat-val">{{ $serviceCount }}</div>
+                </div>
+                <div class="hp-stat" style="border-bottom:none;">
+                    <div class="hp-stat-label">Requests</div>
+                    <div class="hp-stat-val">{{ $requestCount }}</div>
+                </div>
+            </div>
+            <div class="hp-requests">
+                <div class="hp-req-label">Recent activity</div>
+                <div class="hp-req">
+                    <div><div class="hp-req-ref">SRQ-2024-00041</div><div class="hp-req-svc">Birth Certificate</div></div>
+                    <span class="hp-pill approved">Approved</span>
+                </div>
+                <div class="hp-req">
+                    <div><div class="hp-req-ref">SRQ-2024-00038</div><div class="hp-req-svc">Building Permit</div></div>
+                    <span class="hp-pill review">In Review</span>
+                </div>
+                <div class="hp-req">
+                    <div><div class="hp-req-ref">SRQ-2024-00031</div><div class="hp-req-svc">Land Registration</div></div>
+                    <span class="hp-pill pending">Pending</span>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-{{-- Trust bar --}}
-<div class="trust-bar">
-    <div class="trust-chip"><i class="bi bi-shield-lock-fill"></i> SSL Encrypted</div>
-    <div class="trust-chip"><i class="bi bi-phone"></i> Works on All Devices</div>
-    <div class="trust-chip"><i class="bi bi-credit-card-2-front"></i> Secure Online Payments</div>
-    <div class="trust-chip"><i class="bi bi-qr-code"></i> QR Code Tracking</div>
-    <div class="trust-chip"><i class="bi bi-bell"></i> Instant Notifications</div>
+{{-- STATS STRIP --}}
+<div class="stats-strip">
+    <div class="stats-inner">
+        <div class="stat-cell reveal">
+            <span class="stat-eyebrow">Municipalities</span>
+            <span class="stat-number"><span class="counter" data-target="{{ $municipalityCount }}">0</span></span>
+        </div>
+        <div class="stat-cell reveal d1">
+            <span class="stat-eyebrow">Active offices</span>
+            <span class="stat-number"><span class="counter" data-target="{{ $officeCount }}">0</span></span>
+        </div>
+        <div class="stat-cell reveal d2">
+            <span class="stat-eyebrow">Services available</span>
+            <span class="stat-number"><span class="counter" data-target="{{ $serviceCount }}">0</span></span>
+        </div>
+        <div class="stat-cell reveal d3">
+            <span class="stat-eyebrow">Requests processed</span>
+            <span class="stat-number"><span class="counter" data-target="{{ $requestCount }}">0</span></span>
+        </div>
+    </div>
 </div>
 
-{{-- Features --}}
+{{-- FEATURES --}}
 <section class="section">
-    <div class="section-inner">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-4">
-                <div class="section-label">Platform Features</div>
-                <h2 class="section-title">Everything You Need, in One Place</h2>
-                <p class="section-sub">From birth certificates to building permits — handle everything digitally without leaving your home.</p>
+    <div class="wrap">
+        <span class="sec-eyebrow reveal">Platform capabilities</span>
+        <h2 class="sec-h2 reveal">Everything in one place.</h2>
+        <p class="sec-lead reveal">A complete digital workflow for residents and municipal teams — replacing in-person visits with transparent, trackable online processes.</p>
+
+        <div class="features-grid reveal">
+            <div class="feat">
+                <div class="feat-icon"><i class="bi bi-credit-card-2-front"></i></div>
+                <span class="feat-eyebrow">Payments</span>
+                <h3>Pay fees online</h3>
+                <p>Card or cryptocurrency — pay service fees without visiting the office. Full payment history and receipts included.</p>
             </div>
-            <div class="col-lg-8">
-                <div class="feat-grid">
-                    <div class="feat-card">
-                        <div class="feat-icon" style="background:#EFF6FF;color:#1E4080"><i class="bi bi-file-earmark-text"></i></div>
-                        <h4>Online Service Requests</h4>
-                        <p>Submit applications and upload required documents from any device, anytime.</p>
+            <div class="feat">
+                <div class="feat-icon"><i class="bi bi-qr-code-scan"></i></div>
+                <span class="feat-eyebrow">Tracking</span>
+                <h3>QR code status tracking</h3>
+                <p>Every request gets a unique reference number and QR code with a live status timeline, updated by the processing office.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-icon"><i class="bi bi-calendar-check"></i></div>
+                <span class="feat-eyebrow">Scheduling</span>
+                <h3>Appointment booking</h3>
+                <p>Schedule office visits tied directly to your service request, with confirmation and calendar reminders.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-icon"><i class="bi bi-file-earmark-arrow-up"></i></div>
+                <span class="feat-eyebrow">Documents</span>
+                <h3>Upload &amp; receive files</h3>
+                <p>Attach supporting documents when submitting. Receive official certificates, approvals, and receipts digitally.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-icon"><i class="bi bi-chat-left-text"></i></div>
+                <span class="feat-eyebrow">Communication</span>
+                <h3>Direct messaging</h3>
+                <p>Communicate directly with the processing office through secure, request-linked in-platform messaging.</p>
+            </div>
+            <div class="feat">
+                <div class="feat-icon"><i class="bi bi-bell"></i></div>
+                <span class="feat-eyebrow">Notifications</span>
+                <h3>Real-time alerts</h3>
+                <p>Automatic notifications keep citizens and offices aligned on every status change, deadline, and required action.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- HOW IT WORKS --}}
+<section class="section process-section">
+    <div class="wrap">
+        <div class="process-layout">
+            <div class="process-sticky">
+                <span class="sec-eyebrow reveal">How it works</span>
+                <h2 class="sec-h2 reveal">Four steps, start to finish.</h2>
+                <p class="sec-lead reveal" style="margin-bottom:0;">Every step is predictable, trackable, and designed to keep you informed throughout.</p>
+            </div>
+            <div>
+                <div class="process-step reveal">
+                    <div class="process-num">01</div>
+                    <div>
+                        <h3>Create your account</h3>
+                        <p>Register with email or social login. Verify your national ID and optionally enable two-factor authentication for full platform access.</p>
                     </div>
-                    <div class="feat-card">
-                        <div class="feat-icon" style="background:#ECFDF5;color:#0D7A4E"><i class="bi bi-qr-code-scan"></i></div>
-                        <h4>QR Code Tracking</h4>
-                        <p>Every request gets a unique QR code. Scan to instantly check your status.</p>
+                </div>
+                <div class="process-step reveal d1">
+                    <div class="process-num">02</div>
+                    <div>
+                        <h3>Find a service and submit</h3>
+                        <p>Browse offices by municipality, select the service you need, and submit your request with the required supporting documents.</p>
                     </div>
-                    <div class="feat-card">
-                        <div class="feat-icon" style="background:#FDF7DC;color:#9A6F00"><i class="bi bi-credit-card-2-front"></i></div>
-                        <h4>Secure Online Payments</h4>
-                        <p>Pay service fees with credit/debit cards or cryptocurrency — fast and safe.</p>
+                </div>
+                <div class="process-step reveal d2">
+                    <div class="process-num">03</div>
+                    <div>
+                        <h3>Track progress and pay</h3>
+                        <p>Follow your request status in real time via dashboard or QR code. When a fee is set, pay online to keep the process moving.</p>
                     </div>
-                    <div class="feat-card">
-                        <div class="feat-icon" style="background:#ECFEFF;color:#0E7490"><i class="bi bi-bell-fill"></i></div>
-                        <h4>Real-Time Notifications</h4>
-                        <p>Receive instant email and in-app alerts whenever your request status changes.</p>
-                    </div>
-                    <div class="feat-card">
-                        <div class="feat-icon" style="background:#F5F3FF;color:#6D28D9"><i class="bi bi-calendar-check"></i></div>
-                        <h4>Appointment Booking</h4>
-                        <p>Schedule in-person visits at your preferred time — no waiting in line.</p>
-                    </div>
-                    <div class="feat-card">
-                        <div class="feat-icon" style="background:#FFF1F2;color:#BE123C"><i class="bi bi-chat-dots-fill"></i></div>
-                        <h4>Direct Messaging</h4>
-                        <p>Communicate securely with office staff directly on each service request.</p>
+                </div>
+                <div class="process-step reveal d3">
+                    <div class="process-num">04</div>
+                    <div>
+                        <h3>Receive your outcome</h3>
+                        <p>Download your certificate, receipt, or approval letter digitally — or attend a scheduled appointment at the office.</p>
                     </div>
                 </div>
             </div>
@@ -368,117 +589,97 @@
     </div>
 </section>
 
-{{-- How it works --}}
-<div class="how-section">
-    <div class="section-inner">
-        <div class="text-center mb-2">
-            <div class="section-label">How It Works</div>
-            <h2 class="section-title">Four Simple Steps</h2>
-            <p class="section-sub" style="margin:0 auto">Getting your government service has never been simpler.</p>
-        </div>
-        <div class="steps">
-            <div class="step">
-                <div class="step-num">1</div>
-                <h4>Create Account</h4>
-                <p>Register with your email or social login. Upload your National ID for verification.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <h4>Find Your Service</h4>
-                <p>Browse offices by municipality and select the service you need.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <h4>Submit & Pay</h4>
-                <p>Upload documents, submit your request, and pay the fee online — all in minutes.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">4</div>
-                <h4>Track & Download</h4>
-                <p>Follow your request in real-time and download your official certificate when ready.</p>
-            </div>
-        </div>
-    </div>
-</div>
+{{-- ROLES --}}
+<section class="section">
+    <div class="wrap">
+        <span class="sec-eyebrow reveal">Who it's for</span>
+        <h2 class="sec-h2 reveal">Built for every role.</h2>
+        <p class="sec-lead reveal">Each user gets a tailored dashboard — only the tools that matter for their specific responsibilities.</p>
 
-{{-- Roles --}}
-<section class="section" style="background:var(--white)">
-    <div class="section-inner">
-        <div class="text-center mb-2">
-            <div class="section-label">Built for Everyone</div>
-            <h2 class="section-title">Three Tailored Portals</h2>
-            <p class="section-sub" style="margin:0 auto">One platform, three purpose-built experiences.</p>
-        </div>
         <div class="roles-grid">
-            <div class="role-card">
-                <div class="role-card-top">
-                    <div class="role-icon" style="background:#EFF6FF;color:#1E4080"><i class="bi bi-person-fill"></i></div>
-                    <h3>Citizens</h3>
-                    <p>Browse and submit service requests, pay online, track progress in real-time, chat with office staff, and download official documents — all from your phone.</p>
-                </div>
-                <div class="role-card-foot">
-                    <a href="{{ route('register') }}" style="color:var(--primary)">
-                        <i class="bi bi-person-plus-fill"></i> Create Account <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
+            <div class="role-card reveal">
+                <span class="role-eyebrow">Citizen</span>
+                <h3>For residents</h3>
+                <div class="role-feature"><i class="bi bi-check2"></i>Submit and track service requests</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Pay fees and download receipts</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Book appointments with offices</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Message the processing office</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Get real-time notifications</div>
             </div>
-            <div class="role-card">
-                <div class="role-card-top">
-                    <div class="role-icon" style="background:#ECFDF5;color:#0D7A4E"><i class="bi bi-building"></i></div>
-                    <h3>Government Offices</h3>
-                    <p>Manage incoming requests, update statuses, communicate with citizens, issue certificates and approval letters, and monitor office performance analytics.</p>
-                </div>
-                <div class="role-card-foot">
-                    <a href="{{ route('login') }}" style="color:#0D7A4E">
-                        <i class="bi bi-box-arrow-in-right"></i> Office Portal <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
+            <div class="role-card reveal d1">
+                <span class="role-eyebrow">Office staff</span>
+                <h3>For municipal teams</h3>
+                <div class="role-feature"><i class="bi bi-check2"></i>Review and process requests</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Manage services and fees</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Generate and send official PDFs</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Handle appointments and feedback</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Communicate directly with citizens</div>
             </div>
-            <div class="role-card">
-                <div class="role-card-top">
-                    <div class="role-icon" style="background:#FDF7DC;color:#9A6F00"><i class="bi bi-shield-lock-fill"></i></div>
-                    <h3>Administrators</h3>
-                    <p>Full platform control — manage municipalities, register government offices, create staff accounts, and view comprehensive system-wide analytics and reports.</p>
-                </div>
-                <div class="role-card-foot">
-                    <a href="{{ route('login') }}" style="color:#9A6F00">
-                        <i class="bi bi-gear-fill"></i> Admin Portal <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
+            <div class="role-card reveal d2">
+                <span class="role-eyebrow">Administrator</span>
+                <h3>For platform admins</h3>
+                <div class="role-feature"><i class="bi bi-check2"></i>Manage municipalities and offices</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Create and oversee office users</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Monitor all requests and revenue</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>View analytics and reports</div>
+                <div class="role-feature"><i class="bi bi-check2"></i>Toggle office and user status</div>
             </div>
         </div>
     </div>
 </section>
 
-{{-- CTA Banner --}}
-<section style="background:var(--navy);padding:4.5rem 1.5rem;text-align:center;position:relative;overflow:hidden">
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(30,64,128,.5),transparent);pointer-events:none"></div>
-    <div style="position:relative;z-index:1;max-width:580px;margin:0 auto">
-        <div style="font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem">Get Started Today</div>
-        <h2 style="font-family:var(--font-disp);font-style:italic;color:#fff;font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:700;letter-spacing:-.03em;margin-bottom:1rem">Join Thousands of Citizens<br>Already Using E-Services</h2>
-        <p style="color:rgba(255,255,255,.5);font-size:.88rem;line-height:1.7;margin-bottom:2rem">Free to register. No paperwork. No queues. Your time matters.</p>
-        <a href="{{ route('register') }}" class="btn-hero-primary" style="display:inline-flex">
-            <i class="bi bi-person-plus"></i> Create Your Free Account
-        </a>
+{{-- CTA --}}
+<section class="cta-section">
+    <div class="cta-glow"></div>
+    <div class="cta-inner">
+        <span class="cta-eyebrow reveal">Get started today</span>
+        <h2 class="cta-h2 reveal">Skip the queue.<br>Start online.</h2>
+        <p class="cta-sub reveal">Create your free account in under two minutes and access all municipal services from wherever you are.</p>
+        <div class="cta-actions reveal">
+            <a href="{{ route('register') }}" class="btn-primary-hero">Create free account <i class="bi bi-arrow-right"></i></a>
+            <a href="{{ route('login') }}" class="btn-outline-hero">Sign in</a>
+        </div>
     </div>
 </section>
 
-{{-- Footer --}}
-<footer>
-    <div class="f-logo">
-        <div class="fm"><i class="bi bi-building-check"></i></div>
-        <span>E-Services Government Portal</span>
+{{-- FOOTER --}}
+<footer class="footer">
+    <div class="footer-inner">
+        <span class="footer-brand"><strong>E-Services Lebanon</strong> &mdash; Municipal Digital Portal &copy; {{ now()->year }}</span>
+        <div class="footer-links">
+            <a href="{{ route('login') }}">Login</a>
+            <a href="{{ route('register') }}">Register</a>
+        </div>
     </div>
-    <div class="f-links">
-        <a href="{{ route('home') }}">Home</a>
-        <a href="{{ route('login') }}">Sign In</a>
-        <a href="{{ route('register') }}">Register</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Use</a>
-    </div>
-    <p>&copy; {{ date('Y') }} E-Services Lebanon. All rights reserved.<br>
-    <span style="font-size:.7rem">PROG322-EC20 · Lebanese-American University · Built with Laravel 11</span></p>
 </footer>
 
+<script>
+// Scroll reveal
+const ro = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+// Counter animation
+function animateCounter(el, target) {
+    const t0 = performance.now();
+    const dur = Math.min(1200 + target * 2, 1800);
+    (function tick(now) {
+        const p = Math.min((now - t0) / dur, 1);
+        el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+        if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+}
+let fired = false;
+const co = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && !fired) {
+        fired = true;
+        document.querySelectorAll('.counter').forEach(el => animateCounter(el, +el.dataset.target || 0));
+        co.disconnect();
+    }
+}, { threshold: 0.3 });
+const strip = document.querySelector('.stats-strip');
+if (strip) co.observe(strip);
+</script>
 </body>
 </html>

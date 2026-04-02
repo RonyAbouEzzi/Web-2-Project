@@ -1,297 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In — E-Services Lebanon</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-    :root {
-        --navy: #060D1F; --navy-2: #0B1630; --navy-3: #1A3360;
-        --primary: #1E4080; --primary-lt: #EFF6FF; --primary-dk: #162F60;
-        --gold: #D4A017; --gold-lt: #FDF7DC;
-        --red: #BE123C; --red-lt: #FFF1F2;
-        --ink-900:#111318; --ink-700:#2D3748; --ink-500:#718096;
-        --ink-300:#CBD5E0; --ink-200:#E2E8F0; --ink-100:#F7FAFC;
-        --white:#fff;
-        --font: 'Instrument Sans', system-ui, sans-serif;
-        --font-disp: 'Fraunces', Georgia, serif;
-        --r: 12px; --r-sm: 8px;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
-    html { font-size: 14px; }
-    body {
-        font-family: var(--font); min-height: 100vh; margin: 0;
-        background: #F0F4FA; display: flex; align-items: stretch;
-        -webkit-font-smoothing: antialiased;
-    }
+        :root {
+            --bg:      #F9F6F1;
+            --surface: #FFFFFF;
+            --border:  #E5E0D8;
+            --text:    #1C1917;
+            --muted:   #78716C;
+            --label:   #A8A29E;
+            --teal:    #0D9488;
+            --teal-dk: #0b7f75;
+            --font:    'Inter', system-ui, sans-serif;
+            --serif:   'Inter', system-ui, sans-serif;
+        }
 
-    /* ── Left panel ── */
-    .auth-left {
-        flex: 1; background: var(--navy);
-        display: none; flex-direction: column;
-        justify-content: space-between; padding: 2.5rem;
-        position: relative; overflow: hidden;
-    }
-    @media(min-width:900px) { .auth-left { display: flex; } }
-    .al-orb-1 {
-        position: absolute; top: -100px; right: -100px;
-        width: 400px; height: 400px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(30,64,128,.55), transparent 70%);
-        pointer-events: none;
-    }
-    .al-orb-2 {
-        position: absolute; bottom: -120px; left: -60px;
-        width: 350px; height: 350px; border-radius: 50%;
-        background: radial-gradient(circle, rgba(212,160,23,.18), transparent 70%);
-        pointer-events: none;
-    }
-    .al-grid {
-        position: absolute; inset: 0;
-        background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-        background-size: 36px 36px;
-    }
-    .al-top { position: relative; z-index: 2; }
-    .al-logo { display: flex; align-items: center; gap: .65rem; }
-    .al-logo-mark {
-        width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
-        background: linear-gradient(135deg, var(--primary), #4B7CD0);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.05rem; color: #fff;
-        box-shadow: 0 2px 14px rgba(30,64,128,.5), 0 0 0 1px rgba(255,255,255,.08);
-    }
-    .al-logo-text .t1 { color: #fff; font-family: var(--font-disp); font-style: italic; font-size: .95rem; font-weight: 600; line-height: 1.2; }
-    .al-logo-text .t2 { color: rgba(255,255,255,.3); font-size: .65rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
-    .al-mid { position: relative; z-index: 2; }
-    .al-mid h2 {
-        font-family: var(--font-disp); font-style: italic;
-        color: #fff; font-size: 2.2rem; font-weight: 700;
-        line-height: 1.15; letter-spacing: -.03em; margin-bottom: .85rem;
-    }
-    .al-mid h2 em { color: var(--gold); font-style: italic; }
-    .al-mid p { color: rgba(255,255,255,.5); font-size: .88rem; line-height: 1.75; }
-    .al-features { margin-top: 2rem; display: flex; flex-direction: column; gap: .65rem; }
-    .al-feat {
-        display: flex; align-items: flex-start; gap: .7rem;
-    }
-    .al-feat-icon {
-        width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
-        background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
-        display: flex; align-items: center; justify-content: center;
-        font-size: .88rem; color: rgba(255,255,255,.8); margin-top: 1px;
-    }
-    .al-feat-text strong { color: rgba(255,255,255,.82); font-size: .82rem; display: block; margin-bottom: 1px; }
-    .al-feat-text span   { color: rgba(255,255,255,.38); font-size: .75rem; }
-    .al-bottom { position: relative; z-index: 2; }
-    .al-note {
-        background: rgba(212,160,23,.12); border: 1px solid rgba(212,160,23,.2);
-        border-radius: var(--r-sm); padding: .75rem 1rem;
-        display: flex; align-items: flex-start; gap: .6rem;
-    }
-    .al-note i { color: var(--gold); font-size: .88rem; margin-top: 1px; flex-shrink: 0; }
-    .al-note p { color: rgba(255,255,255,.55); font-size: .76rem; line-height: 1.6; margin: 0; }
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
 
-    /* ── Right form ── */
-    .auth-right {
-        width: 480px; flex-shrink: 0; background: var(--white);
-        display: flex; align-items: center; justify-content: center;
-        padding: 2.5rem 2.25rem;
-        position: relative;
-    }
-    @media(max-width:899px) { .auth-right { width: 100%; padding: 2rem 1.5rem; } }
-    @media(max-width:400px)  { .auth-right { padding: 1.5rem 1.25rem; } }
-    .auth-form { width: 100%; max-width: 360px; }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
 
-    .form-top { margin-bottom: 2rem; }
-    .form-top .mobile-brand {
-        display: flex; align-items: center; gap: .6rem; margin-bottom: 1.5rem;
-    }
-    .form-top .mobile-brand .logo-m {
-        width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
-        background: linear-gradient(135deg, var(--primary), #4B7CD0);
-        display: flex; align-items: center; justify-content: center;
-        color: #fff; font-size: .88rem;
-    }
-    .form-top .mobile-brand span { font-family: var(--font-disp); font-style: italic; font-size: .9rem; color: var(--ink-900); font-weight: 600; }
-    .form-top h2 { font-family: var(--font-disp); font-style: italic; font-size: 1.55rem; font-weight: 700; color: var(--ink-900); letter-spacing: -.03em; margin-bottom: .28rem; }
-    .form-top p  { color: var(--ink-500); font-size: .84rem; }
+        /* Amber glow — top right */
+        .auth-glow {
+            position: fixed; pointer-events: none;
+            top: -160px; right: -160px;
+            width: 600px; height: 520px; border-radius: 50%;
+            background: radial-gradient(circle at 50% 40%,
+                rgba(253,224,130,.52) 0%,
+                rgba(254,243,199,.32) 35%,
+                transparent 68%);
+            z-index: 0;
+        }
+        /* Secondary glow — bottom left */
+        .auth-glow-2 {
+            position: fixed; pointer-events: none;
+            bottom: -180px; left: -160px;
+            width: 480px; height: 420px; border-radius: 50%;
+            background: radial-gradient(circle at 50% 60%,
+                rgba(20,184,166,.12) 0%,
+                transparent 65%);
+            z-index: 0;
+        }
 
-    .form-label { font-size: .77rem; font-weight: 600; color: var(--ink-700); margin-bottom: .38rem; display: block; }
-    .input-group-row { display: flex; flex-direction: column; gap: .95rem; margin-bottom: 1rem; }
-    .field { position: relative; }
-    .field-icon { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: var(--ink-300); font-size: .9rem; pointer-events: none; z-index: 2; }
-    input.form-inp {
-        width: 100%; border: 1.5px solid var(--ink-200); border-radius: var(--r-sm);
-        padding: .62rem .9rem .62rem 2.5rem; font-family: var(--font); font-size: .84rem;
-        transition: border-color .14s, box-shadow .14s; outline: none;
-        background: var(--white); color: var(--ink-900); min-height: 42px;
-    }
-    input.form-inp:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,64,128,.1); }
-    input.form-inp::placeholder { color: var(--ink-300); }
-    input.form-inp.has-right { padding-right: 2.5rem; }
-    .field-toggle {
-        position: absolute; right: .85rem; top: 50%; transform: translateY(-50%);
-        background: none; border: none; color: var(--ink-400); cursor: pointer;
-        font-size: .9rem; z-index: 2; padding: 0;
-        transition: color .14s;
-    }
-    .field-toggle:hover { color: var(--primary); }
+        .auth-wrap {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 440px;
+            padding: 1.5rem;
+        }
 
-    .form-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
-    .check-row { display: flex; align-items: center; gap: .4rem; font-size: .79rem; color: var(--ink-500); cursor: pointer; }
-    .check-row input { accent-color: var(--primary); width: 14px; height: 14px; }
-    .forgot-link { font-size: .79rem; color: var(--primary); font-weight: 600; text-decoration: none; }
-    .forgot-link:hover { text-decoration: underline; }
+        /* Card */
+        .auth-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2.25rem 2.5rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,.06), 0 1px 4px rgba(0,0,0,.04);
+        }
 
-    .btn-submit {
-        width: 100%; padding: .68rem; border-radius: var(--r-sm);
-        background: var(--primary); border: none; color: #fff;
-        font-family: var(--font); font-size: .88rem; font-weight: 700;
-        cursor: pointer; transition: all .18s;
-        display: flex; align-items: center; justify-content: center; gap: .45rem;
-        min-height: 44px;
-    }
-    .btn-submit:hover { background: var(--primary-dk); box-shadow: 0 4px 14px rgba(30,64,128,.4); transform: translateY(-1px); }
-    .btn-submit:active { transform: translateY(0); }
+        /* Brand */
+        .auth-brand {
+            display: flex; align-items: center; justify-content: center; gap: .65rem;
+            text-decoration: none; color: var(--text);
+            margin-bottom: 1.75rem;
+        }
+        .auth-brand-icon {
+            width: 36px; height: 36px; border-radius: 9px;
+            background: var(--text);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--bg); font-size: .9rem; flex-shrink: 0;
+        }
+        .auth-brand-name {
+            font-family: var(--serif); font-weight: 700; font-size: 1rem;
+            color: var(--text);
+        }
+        .auth-brand-sub {
+            font-size: .62rem; color: var(--label); display: block;
+            margin-top: 1px; letter-spacing: .04em;
+        }
 
-    .divider { display: flex; align-items: center; gap: .75rem; margin: 1.25rem 0; }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--ink-200); }
-    .divider span { color: var(--ink-400); font-size: .73rem; white-space: nowrap; }
+        /* Heading */
+        .auth-heading {
+            font-family: var(--serif);
+                       font-weight: 600;
+            font-size: 1.55rem;
+            color: var(--text);
+            margin-bottom: .3rem;
+            line-height: 1.25;
+        }
+        .auth-sub {
+            font-size: .83rem; color: var(--muted); margin-bottom: 1.5rem;
+        }
 
-    .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-    .btn-social {
-        display: flex; align-items: center; justify-content: center; gap: .5rem;
-        padding: .56rem; border-radius: var(--r-sm); border: 1.5px solid var(--ink-200);
-        background: var(--white); font-family: var(--font); font-size: .82rem;
-        font-weight: 600; color: var(--ink-700); text-decoration: none;
-        transition: all .14s; cursor: pointer;
-    }
-    .btn-social:hover { border-color: var(--ink-400); background: var(--ink-100); color: var(--ink-900); }
+        /* Divider */
+        .auth-divider {
+            display: flex; align-items: center; gap: .7rem;
+            font-size: .7rem; font-weight: 600; letter-spacing: .1em;
+            text-transform: uppercase; color: var(--label);
+            margin: 1.1rem 0;
+        }
+        .auth-divider::before, .auth-divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
 
-    .sign-up { text-align: center; margin-top: 1.35rem; font-size: .82rem; color: var(--ink-500); }
-    .sign-up a { color: var(--primary); font-weight: 700; text-decoration: none; }
-    .sign-up a:hover { text-decoration: underline; }
+        /* Social buttons */
+        .btn-social {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: .5rem;
+            padding: .55rem; border: 1px solid var(--border); border-radius: .5rem;
+            background: var(--surface); color: var(--muted);
+            font-family: var(--font); font-size: .82rem; font-weight: 600;
+            text-decoration: none; transition: border-color .15s, box-shadow .15s, color .15s;
+        }
+        .btn-social:hover {
+            border-color: #c7c0b7; color: var(--text);
+            box-shadow: 0 2px 8px rgba(0,0,0,.06);
+        }
 
-    .err-box {
-        background: var(--red-lt); border: 1px solid rgba(190,18,60,.2);
-        border-radius: var(--r-sm); padding: .65rem .9rem;
-        color: #9F1239; font-size: .8rem; margin-bottom: 1.1rem;
-    }
+        /* Form */
+        .form-label {
+            font-size: .78rem; font-weight: 600;
+            letter-spacing: .02em; color: var(--muted);
+            margin-bottom: .3rem; display: block;
+        }
+        .form-control {
+            font-family: var(--font); font-size: .87rem; color: var(--text);
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: .45rem; padding: .55rem .8rem;
+            width: 100%; transition: border-color .15s, box-shadow .15s;
+            outline: none;
+        }
+        .form-control::placeholder { color: var(--label); }
+        .form-control:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(13,148,136,.15);
+            background: var(--surface);
+        }
+
+        /* Input group */
+        .input-group { position: relative; }
+        .input-group .input-icon {
+            position: absolute; left: .75rem; top: 50%; transform: translateY(-50%);
+            color: var(--label); font-size: .9rem; pointer-events: none;
+            transition: color .15s;
+        }
+        .input-group .form-control { padding-left: 2.2rem; }
+        .input-group:focus-within .input-icon { color: var(--teal); }
+
+        /* Password toggle */
+        .pw-btn {
+            position: absolute; right: .65rem; top: 50%; transform: translateY(-50%);
+            background: none; border: none; padding: .2rem .3rem;
+            color: var(--label); cursor: pointer; font-size: .9rem;
+            transition: color .15s; line-height: 1;
+        }
+        .pw-btn:hover { color: var(--teal); }
+
+        /* Submit */
+        .btn-submit {
+            width: 100%; padding: .65rem;
+            background: var(--teal); border: none; border-radius: .5rem;
+            color: #fff; font-family: var(--font); font-size: .88rem; font-weight: 700;
+            cursor: pointer; transition: background .15s, box-shadow .15s, transform .1s;
+            letter-spacing: .01em;
+        }
+        .btn-submit:hover {
+            background: var(--teal-dk);
+            box-shadow: 0 4px 14px rgba(13,148,136,.38);
+            transform: translateY(-1px);
+        }
+        .btn-submit:active { transform: translateY(0); }
+
+        /* Checkbox */
+        .form-check { display: flex; align-items: center; gap: .5rem; }
+        .form-check-input {
+            width: 15px; height: 15px; border: 1px solid var(--border);
+            border-radius: 4px; background: var(--bg); cursor: pointer;
+            flex-shrink: 0; accent-color: var(--teal);
+        }
+        .form-check-label { font-size: .8rem; color: var(--muted); cursor: pointer; }
+
+        /* Links */
+        .auth-link { color: var(--teal); font-weight: 600; text-decoration: none; }
+        .auth-link:hover { text-decoration: underline; color: var(--teal-dk); }
+
+        /* Error box */
+        .auth-error {
+            background: #fff1f0; border: 1px solid #fecaca;
+            border-radius: .45rem; padding: .6rem .85rem;
+            color: #b91c1c; font-size: .8rem; margin-bottom: 1rem;
+        }
+
+        /* Remember / forgot row */
+        .auth-meta-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin: .9rem 0 1.15rem;
+        }
+
+        /* Footer text */
+        .auth-footer-text {
+            text-align: center; font-size: .8rem; color: var(--muted); margin-top: 1.25rem;
+        }
+
+        /* Back to home */
+        .auth-back {
+            display: block; text-align: center;
+            font-size: .75rem; color: var(--label); margin-top: 1rem;
+            text-decoration: none; transition: color .15s;
+        }
+        .auth-back:hover { color: var(--muted); }
     </style>
 </head>
 <body>
 
-{{-- Left panel --}}
-<div class="auth-left">
-    <div class="al-grid"></div>
-    <div class="al-orb-1"></div>
-    <div class="al-orb-2"></div>
-    <div class="al-top">
-        <div class="al-logo">
-            <div class="al-logo-mark"><i class="bi bi-building-check"></i></div>
-            <div class="al-logo-text">
-                <div class="t1">E-Services</div>
-                <div class="t2">Lebanon Gov Portal</div>
-            </div>
-        </div>
-    </div>
-    <div class="al-mid">
-        <h2>Government<br>Services, <em>Digitized</em></h2>
-        <p>Submit requests, track progress, pay fees, and receive official documents — all from your device.</p>
-        <div class="al-features">
-            <div class="al-feat">
-                <div class="al-feat-icon"><i class="bi bi-shield-check"></i></div>
-                <div class="al-feat-text">
-                    <strong>Bank-grade security</strong>
-                    <span>Encrypted connections & secure data storage</span>
-                </div>
-            </div>
-            <div class="al-feat">
-                <div class="al-feat-icon"><i class="bi bi-qr-code"></i></div>
-                <div class="al-feat-text">
-                    <strong>QR Code tracking</strong>
-                    <span>Follow every request in real-time with a scannable code</span>
-                </div>
-            </div>
-            <div class="al-feat">
-                <div class="al-feat-icon"><i class="bi bi-credit-card"></i></div>
-                <div class="al-feat-text">
-                    <strong>Online payments</strong>
-                    <span>Card, cryptocurrency — pay from anywhere</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="al-bottom">
-        <div class="al-note">
-            <i class="bi bi-info-circle"></i>
-            <p>This is an official government digital services platform. Use only your real personal information when registering.</p>
-        </div>
-    </div>
-</div>
+<div class="auth-glow"></div>
+<div class="auth-glow-2"></div>
 
-{{-- Right form --}}
-<div class="auth-right">
-    <div class="auth-form">
-        <div class="form-top">
-            {{-- Mobile logo --}}
-            <div class="mobile-brand d-block" style="display: none !important">
-                <div class="logo-m"><i class="bi bi-building-check"></i></div>
-                <span>E-Services</span>
-            </div>
-            <style>@media(max-width:899px){.mobile-brand{display:flex !important}}</style>
-            <h2>Welcome back</h2>
-            <p>Sign in to your account to continue</p>
-        </div>
+<div class="auth-wrap">
+    <div class="auth-card">
 
-        @if($errors->any())
-        <div class="err-box">
-            @foreach($errors->all() as $e)<div>{{ $e }}</div>@endforeach
-        </div>
-        @endif
+        {{-- Brand --}}
+        <a href="{{ route('home') }}" class="auth-brand">
+            <span class="auth-brand-icon"><i class="bi bi-building-check"></i></span>
+            <span>
+                <span class="auth-brand-name">E-Services</span>
+                <span class="auth-brand-sub">MUNICIPAL PORTAL · LEBANON</span>
+            </span>
+        </a>
 
-        <form action="{{ route('login') }}" method="POST" novalidate>
-            @csrf
-            <div class="input-group-row">
-                <div>
-                    <label class="form-label" for="email">Email address</label>
-                    <div class="field">
-                        <i class="bi bi-envelope field-icon"></i>
-                        <input class="form-inp" id="email" type="email" name="email"
-                               value="{{ old('email') }}" placeholder="you@example.com"
-                               autocomplete="email" required autofocus>
-                    </div>
-                </div>
-                <div>
-                    <label class="form-label" for="password">Password</label>
-                    <div class="field">
-                        <i class="bi bi-lock field-icon"></i>
-                        <input class="form-inp has-right" id="password" type="password" name="password"
-                               placeholder="Enter your password" autocomplete="current-password" required>
-                        <button type="button" class="field-toggle" id="togglePw" aria-label="Toggle visibility">
-                            <i class="bi bi-eye" id="pwIcon"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="form-row">
-                <label class="check-row">
-                    <input type="checkbox" name="remember"> Remember me
-                </label>
-                <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a>
-            </div>
-            <button type="submit" class="btn-submit">
-                <i class="bi bi-box-arrow-in-right"></i> Sign In to Your Account
-            </button>
-        </form>
+        <h1 class="auth-heading">Welcome back</h1>
+        <p class="auth-sub">Sign in to access your municipal e-services dashboard</p>
 
-        <div class="divider"><span>or sign in with</span></div>
-
-        <div class="social-grid">
+        {{-- Social --}}
+        <div class="d-flex gap-2 mb-1">
             <a href="{{ route('social.redirect', 'google') }}" class="btn-social">
                 <svg width="16" height="16" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -302,24 +261,78 @@
                 Google
             </a>
             <a href="{{ route('social.redirect', 'github') }}" class="btn-social">
-                <i class="bi bi-github" style="font-size:1rem"></i>
+                <i class="bi bi-github" style="font-size:.95rem;"></i>
                 GitHub
             </a>
         </div>
 
-        <p class="sign-up">
-            Don't have an account? <a href="{{ route('register') }}">Create one free</a>
+        <div class="auth-divider">or sign in with email</div>
+
+        {{-- Errors --}}
+        @if($errors->any())
+            <div class="auth-error">
+                @foreach($errors->all() as $e)<div>{{ $e }}</div>@endforeach
+            </div>
+        @endif
+
+        {{-- Form --}}
+        <form action="{{ route('login') }}" method="POST" novalidate>
+            @csrf
+
+            <div class="mb-3">
+                <label class="form-label" for="email">Email address</label>
+                <div class="input-group">
+                    <i class="bi bi-envelope input-icon"></i>
+                    <input type="email" id="email" name="email" class="form-control"
+                           value="{{ old('email') }}" placeholder="you@example.com"
+                           autocomplete="email" required autofocus>
+                </div>
+            </div>
+
+            <div class="mb-1">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-group" style="position:relative;">
+                    <i class="bi bi-lock input-icon"></i>
+                    <input type="password" id="password" name="password" class="form-control"
+                           placeholder="············" autocomplete="current-password" required
+                           style="padding-right:2.4rem;">
+                    <button type="button" class="pw-btn" id="pw-toggle" aria-label="Toggle password">
+                        <i class="bi bi-eye-slash" id="pw-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="auth-meta-row">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                    <label class="form-check-label" for="remember">Remember me</label>
+                </div>
+                <a href="{{ route('password.request') }}" class="auth-link" style="font-size:.78rem;">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-submit">Sign In</button>
+        </form>
+
+        <p class="auth-footer-text">
+            No account yet? <a href="{{ route('register') }}" class="auth-link">Create one free</a>
         </p>
+
     </div>
+
+    <a href="{{ route('home') }}" class="auth-back">
+        <i class="bi bi-arrow-left me-1"></i> Back to home
+    </a>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.getElementById('togglePw')?.addEventListener('click', function() {
-    const pw = document.getElementById('password');
-    const ic = document.getElementById('pwIcon');
-    if(pw.type==='password') { pw.type='text';     ic.className='bi bi-eye-slash'; }
-    else                     { pw.type='password'; ic.className='bi bi-eye'; }
-});
+    document.getElementById('pw-toggle')?.addEventListener('click', function () {
+        const pw = document.getElementById('password');
+        const ic = document.getElementById('pw-icon');
+        const hidden = pw.type === 'password';
+        pw.type  = hidden ? 'text' : 'password';
+        ic.className = hidden ? 'bi bi-eye' : 'bi bi-eye-slash';
+    });
 </script>
 </body>
 </html>
