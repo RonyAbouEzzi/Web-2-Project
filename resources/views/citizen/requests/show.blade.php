@@ -691,4 +691,3 @@ body.es-role-citizen .citizen-apt-modal {
     chatBox.scrollTop = chatBox.scrollHeight;
 </script>
 @endpush
-@endsection

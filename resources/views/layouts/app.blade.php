@@ -1625,6 +1625,7 @@ function closeSidebar() {
             }
         });
     }
+    @endauth
 
     const parseCellValue = (text, type) => {
         const raw = String(text ?? '').trim();

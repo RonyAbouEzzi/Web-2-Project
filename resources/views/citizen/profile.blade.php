@@ -755,4 +755,5 @@ zone?.addEventListener('drop', (event) => {
 });
 </script>
 @endpush
+
 @endsection

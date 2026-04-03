@@ -483,4 +483,3 @@ function initOfficeMap() {
     src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initOfficeMap">
 </script>
 @endpush
-@endsection
