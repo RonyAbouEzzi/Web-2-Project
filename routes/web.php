@@ -50,6 +50,10 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::post('/notifications/read-all', function () {
+        auth()->user()->unreadNotifications->markAsRead();
+        return response()->json(['success' => true]);
+    })->name('notifications.readAll');
     Route::get('/security/2fa', [AuthController::class, 'show2FASettings'])->name('security.2fa');
     Route::post('/security/2fa/enable', [AuthController::class, 'enable2FA'])->name('security.2fa.enable');
     Route::post('/security/2fa/disable', [AuthController::class, 'disable2FA'])->name('security.2fa.disable');
@@ -109,6 +113,7 @@ Route::middleware(['auth', 'role:office_user'])->prefix('office')->name('office.
 
     Route::get('/appointments',                 [OfficeController::class, 'appointments'])->name('appointments');
     Route::patch('/appointments/{appointment}', [OfficeController::class, 'updateAppointment'])->name('appointments.update');
+    Route::post('/requests/{serviceRequest}/messages/read', [OfficeController::class, 'markMessagesRead'])->name('messages.read');
 });
 
 // ── Citizen ───────────────────────────────────────────────────────────────────
@@ -141,6 +146,7 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
 
         // Feedback
         Route::post('/feedback', [CitizenController::class, 'submitFeedback'])->name('feedback.submit');
+        Route::post('/requests/{serviceRequest}/messages/read', [CitizenController::class, 'markMessagesRead'])->name('messages.read');
     });
 
     // My requests

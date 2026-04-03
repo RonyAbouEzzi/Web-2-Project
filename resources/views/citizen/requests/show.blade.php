@@ -82,13 +82,13 @@
             <div class="card-header"><span class="card-title"><i class="bi bi-chat-dots me-2" style="color:var(--primary)"></i>Messages</span></div>
             <div class="chat-box" id="chatBox">
                 @if($serviceRequest->messages->isEmpty())
-                    <div style="padding:1rem;text-align:center;color:#9ca3af;font-size:.82rem">
+                    <div data-empty-chat style="padding:1rem;text-align:center;color:#9ca3af;font-size:.82rem">
                         No messages yet. Start the conversation.
                     </div>
                 @else
                     @foreach($serviceRequest->messages as $msg)
                     @php $mine = $msg->sender_id === auth()->id(); @endphp
-                    <div class="msg {{ $mine ? 'mine' : 'theirs' }}">
+                    <div class="msg {{ $mine ? 'mine' : 'theirs' }}" data-message-id="{{ $msg->id }}" data-read-at="{{ $msg->read_at }}">
                         <div class="msg-av {{ $mine ? 'av-me' : 'av-other' }}">
                             {{ strtoupper(substr($msg->sender->name,0,1)) }}
                         </div>
@@ -97,7 +97,12 @@
                                 {{ $mine ? 'You' : $msg->sender->name }}
                             </div>
                             <p>{{ $msg->body }}</p>
-                            <div class="msg-time">{{ $msg->created_at->format('H:i') }}</div>
+                            <div class="msg-time">
+                                {{ $msg->created_at->format('H:i') }}
+                                @if($msg->sender_id === auth()->id())
+                                    · {{ $msg->read_at ? 'Seen' : 'Sent' }}
+                                @endif
+                            </div>
                         </div>
                     </div>
                     @endforeach
@@ -166,25 +171,26 @@
                 @endif
             </div>
         </div>
-        @if($serviceRequest->status === 'completed')
-<div class="card">
-    <div class="card-header">
-        <span class="card-title">
-            <i class="bi bi-star me-2" style="color:var(--primary)"></i>Feedback
-        </span>
-    </div>
-    <div class="card-body">
-        @if($errors->any())
-            <div class="alert alert-danger" style="font-size:.8rem">
-                <ul style="margin:0;padding-left:1rem">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
-        <form action="{{ route('citizen.feedback.submit') }}" method="POST">
+        @if($serviceRequest->status === 'completed')
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i class="bi bi-star me-2" style="color:var(--primary)"></i>Feedback
+                </span>
+            </div>
+            <div class="card-body">
+                @if($errors->any())
+                    <div class="alert alert-danger" style="font-size:.8rem">
+                        <ul style="margin:0;padding-left:1rem">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form action="{{ route('citizen.feedback.submit') }}" method="POST">
                     @csrf
                     <input type="hidden" name="office_id" value="{{ $serviceRequest->office_id }}">
                     <input type="hidden" name="service_request_id" value="{{ $serviceRequest->id }}">
@@ -261,9 +267,62 @@
 
 @push('scripts')
 <script>
-    const chatBox   = document.getElementById('chatBox');
+    const chatBox = document.getElementById('chatBox');
     const chatInput = document.getElementById('chatInput');
-    const sendBtn   = document.getElementById('sendBtn');
+    const sendBtn = document.getElementById('sendBtn');
+
+    const renderedMessageIds = new Set(
+        Array.from(chatBox.querySelectorAll('[data-message-id]'))
+            .map(el => String(el.dataset.messageId))
+    );
+
+    function appendMessage(msg) {
+        if (msg.id && renderedMessageIds.has(String(msg.id))) {
+            return;
+        }
+
+        const mine = msg.sender_id === {{ auth()->id() }};
+
+        const emptyState = chatBox.querySelector('[data-empty-chat]');
+        if (emptyState) {
+            emptyState.remove();
+        }
+
+        const div = document.createElement('div');
+        div.className = 'msg ' + (mine ? 'mine' : 'theirs');
+
+        div.innerHTML = `
+            <div class="msg-av ${mine ? 'av-me' : 'av-other'}">
+                ${(msg.sender?.name || '?').charAt(0).toUpperCase()}
+            </div>
+            <div class="msg-bubble">
+                <div style="font-size:.7rem;font-weight:700;margin-bottom:.2rem;color:#6b7280">
+                    ${mine ? 'You' : (msg.sender?.name || 'Unknown')}
+                </div>
+                <p></p>
+                <div class="msg-time">
+                    ${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    ${msg.sender_id === {{ auth()->id() }}
+                        ? (msg.read_at ? ' · Seen' : ' · Sent')
+                        : ''}
+                </div>
+            </div>
+        `;
+
+        div.querySelector('p').textContent = msg.body;
+
+        if (msg.id) {
+            div.dataset.messageId = String(msg.id);
+            renderedMessageIds.add(String(msg.id));
+        }
+
+        if (msg.read_at) {
+            div.dataset.readAt = msg.read_at;
+        }
+
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
     async function sendMsg() {
         const body = chatInput.value.trim();
@@ -291,8 +350,7 @@
             }
 
             chatInput.value = '';
-            await loadMessages();
-
+            appendMessage(data.message);
         } catch (error) {
             alert('Something went wrong while sending the message.');
         } finally {
@@ -302,56 +360,17 @@
         }
     }
 
-    async function loadMessages() {
+    async function markIncomingMessagesAsRead() {
         try {
-            const res = await fetch('{{ route('citizen.messages.get', $serviceRequest) }}', {
+            await fetch('{{ route('citizen.messages.read', $serviceRequest) }}', {
+                method: 'POST',
                 headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
                     'Accept': 'application/json'
                 }
             });
-
-            const data = await res.json();
-
-            chatBox.innerHTML = '';
-
-            if (!data.messages.length) {
-                chatBox.innerHTML = `
-                    <div style="padding:1rem;text-align:center;color:#9ca3af;font-size:.82rem">
-                        No messages yet. Start the conversation.
-                    </div>
-                `;
-                return;
-            }
-
-            data.messages.forEach(msg => {
-                const mine = msg.sender_id === {{ auth()->id() }};
-
-                const div = document.createElement('div');
-                div.className = 'msg ' + (mine ? 'mine' : 'theirs');
-
-                div.innerHTML = `
-                    <div class="msg-av ${mine ? 'av-me' : 'av-other'}">
-                        ${msg.sender.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div class="msg-bubble">
-                        <div style="font-size:.7rem;font-weight:700;margin-bottom:.2rem;color:#6b7280">
-                            ${mine ? 'You' : msg.sender.name}
-                        </div>
-                        <p></p>
-                        <div class="msg-time">
-                            ${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                    </div>
-                `;
-
-                div.querySelector('p').textContent = msg.body;
-                chatBox.appendChild(div);
-            });
-
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-        } catch (e) {
-            console.error('Error loading messages', e);
+        } catch (error) {
+            console.error('Failed to mark messages as read');
         }
     }
 
@@ -364,8 +383,37 @@
         }
     });
 
-    loadMessages();
-    setInterval(loadMessages, 2000);
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!window.Echo) {
+            console.error('Echo is not loaded');
+            return;
+        }
+
+        window.Echo.private('request.{{ $serviceRequest->id }}')
+            .listen('.message.sent', async (e) => {
+                appendMessage(e);
+
+                if (e.sender_id !== {{ auth()->id() }}) {
+                    await markIncomingMessagesAsRead();
+                }
+            })
+            .listen('.messages.read', (e) => {
+                e.message_ids.forEach((id) => {
+                    const msgEl = chatBox.querySelector(`[data-message-id="${id}"]`);
+                    if (!msgEl) return;
+
+                    msgEl.dataset.readAt = '1';
+
+                    const timeEl = msgEl.querySelector('.msg-time');
+                    if (!timeEl) return;
+
+                    if (msgEl.classList.contains('mine') && !timeEl.textContent.includes('Seen')) {
+                        timeEl.textContent = timeEl.textContent.replace(' · Sent', '') + ' · Seen';
+                    }
+                });
+            });
+    });
+
     chatBox.scrollTop = chatBox.scrollHeight;
 </script>
 @endpush

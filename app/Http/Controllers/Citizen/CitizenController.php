@@ -9,6 +9,8 @@ use App\Notifications\AppointmentReminder;
 use App\Services\{QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, Hash, Storage};
+use App\Events\MessageSent;
+use App\Events\MessagesRead;
 
 class CitizenController extends Controller
 {
@@ -147,7 +149,7 @@ class CitizenController extends Controller
         event(new NewRequestSubmitted($serviceRequest));
 
         return redirect()->route('citizen.payment', $serviceRequest)
-                         ->with('success', 'Request submitted. Please complete payment.');
+                        ->with('success', 'Request submitted. Please complete payment.');
     }
 
     // ── Payment ───────────────────────────────────────────────────
@@ -194,7 +196,23 @@ class CitizenController extends Controller
     public function showRequest(ServiceRequest $serviceRequest)
     {
         abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
+
+        $readMessageIds = $serviceRequest->messages()
+            ->whereNull('read_at')
+            ->where('sender_id', '!=', Auth::id())
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($readMessageIds)) {
+            $serviceRequest->messages()
+                ->whereIn('id', $readMessageIds)
+                ->update(['read_at' => now()]);
+
+            event(new MessagesRead($serviceRequest->id, $readMessageIds, Auth::id()));
+        }
+
         $serviceRequest->load(['service', 'office', 'documents', 'statusLogs.changedBy', 'messages.sender', 'appointment']);
+
         return view('citizen.requests.show', compact('serviceRequest'));
     }
 
@@ -271,6 +289,8 @@ class CitizenController extends Controller
             'body'      => $data['body'],
         ]);
 
+        event(new MessageSent($msg));
+
         return response()->json(['message' => $msg->load('sender'), 'success' => true]);
     }
 
@@ -291,6 +311,30 @@ class CitizenController extends Controller
 
         return response()->json([
             'messages' => $serviceRequest->messages()->with('sender')->get()
+        ]);
+    }
+
+    public function markMessagesRead(ServiceRequest $serviceRequest)
+    {
+        abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
+
+        $readMessageIds = $serviceRequest->messages()
+            ->whereNull('read_at')
+            ->where('sender_id', '!=', Auth::id())
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($readMessageIds)) {
+            $serviceRequest->messages()
+                ->whereIn('id', $readMessageIds)
+                ->update(['read_at' => now()]);
+
+            event(new MessagesRead($serviceRequest->id, $readMessageIds, Auth::id()));
+        }
+
+        return response()->json([
+            'success' => true,
+            'message_ids' => $readMessageIds,
         ]);
     }
 }

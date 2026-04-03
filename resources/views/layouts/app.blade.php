@@ -288,6 +288,7 @@
         .topbar{padding:0 .85rem}
     }
     </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 <body>
@@ -361,7 +362,7 @@
     <div class="top-right">
         @php $unread = auth()->user()->unreadNotifications->count(); @endphp
         <div class="dropdown">
-            <button class="top-btn" data-bs-toggle="dropdown" aria-label="Notifications">
+            <button id="notificationBell" class="top-btn" data-bs-toggle="dropdown" aria-label="Notifications">
                 <i class="bi bi-bell"></i>
                 @if($unread > 0)<span class="top-dot">{{ min($unread,9) }}</span>@endif
             </button>
@@ -371,7 +372,13 @@
                     @if($unread)<span style="background:var(--rose-lt);color:var(--rose);font-size:.6rem;font-weight:700;padding:.1rem .4rem;border-radius:99px">{{ $unread }} new</span>@endif
                 </div>
                 @forelse(auth()->user()->unreadNotifications->take(6) as $n)
-                <a class="dropdown-item" href="#" style="white-space:normal">
+                <a
+                    class="dropdown-item"
+                    href="{{ isset($n->data['request_id'])
+                        ? route(auth()->user()->isOfficeUser() ? 'office.requests.show' : 'citizen.requests.show', $n->data['request_id'])
+                        : '#' }}"
+                    style="white-space:normal"
+                >
                     <div style="display:flex;gap:.45rem">
                         <span style="width:7px;height:7px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:5px"></span>
                         <div>
@@ -444,10 +451,10 @@
 
         @if(session('success') || session('error') || session('info'))
         <div id="__flash"
-             data-success="{{ session('success') }}"
-             data-error="{{ session('error') }}"
-             data-info="{{ session('info') }}"
-             style="display:none"></div>
+            data-success="{{ session('success') }}"
+            data-error="{{ session('error') }}"
+            data-info="{{ session('info') }}"
+            style="display:none"></div>
         @endif
 
         @if($errors->any())
@@ -522,6 +529,126 @@
         if(fd.dataset.error)  setTimeout(()=>showToast(fd.dataset.error,  'error'),  200);
         if(fd.dataset.info)   setTimeout(()=>showToast(fd.dataset.info,   'info'),   200);
     }
+
+    @auth
+        function addRealtimeNotification(message, url = '#') {
+            const bellBtn = document.getElementById('notificationBell');
+            const dropdownMenu = bellBtn?.nextElementSibling;
+            const unreadBadge = bellBtn?.querySelector('.top-dot');
+            const headerCount = dropdownMenu?.querySelector('.dropdown-header span');
+
+            if (!unreadBadge && bellBtn) {
+                const badge = document.createElement('span');
+                badge.className = 'top-dot';
+                badge.textContent = '1';
+                bellBtn.appendChild(badge);
+            } else if (unreadBadge) {
+                const current = parseInt(unreadBadge.textContent || '0', 10);
+                unreadBadge.textContent = String(Math.min(current + 1, 9));
+            }
+
+            if (headerCount) {
+                const currentHeader = parseInt(headerCount.textContent || '0', 10) || 0;
+                headerCount.textContent = `${currentHeader + 1} new`;
+            }
+
+            const emptyState = dropdownMenu?.querySelector('.bi-bell-slash')?.closest('div');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const newItem = document.createElement('a');
+            newItem.className = 'dropdown-item';
+            newItem.href = url;
+            newItem.style.whiteSpace = 'normal';
+            newItem.innerHTML = `
+                <div style="display:flex;gap:.45rem">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:5px"></span>
+                    <div>
+                        <div style="font-size:.78rem;line-height:1.45;color:var(--ink-600)">${message}</div>
+                        <div style="font-size:.65rem;color:var(--ink-400);margin-top:1px">Just now</div>
+                    </div>
+                </div>
+            `;
+
+            const header = dropdownMenu?.querySelector('.dropdown-header');
+            if (header && header.nextSibling) {
+                dropdownMenu.insertBefore(newItem, header.nextSibling);
+            } else if (dropdownMenu) {
+                dropdownMenu.appendChild(newItem);
+            }
+
+            showToast(message, 'info');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Echo) {
+                console.error('Echo is not loaded');
+                return;
+            }
+
+            window.Echo.private('user.{{ auth()->id() }}')
+                .listen('.request.status.updated', (e) => {
+                    const statusText = String(e.new_status || '').replaceAll('_', ' ');
+                    const message = `Your request #${e.reference_number} status changed to ${statusText}.`;
+                    const url = `{{ auth()->user()->isOfficeUser() ? url('/office/requests') : url('/citizen/requests') }}/${e.request_id}`;
+                    addRealtimeNotification(message, url);
+                })
+                .listen('.appointment.reminder', (e) => {
+                    const url = e.service_request_id
+                        ? `{{ auth()->user()->isOfficeUser() ? url('/office/requests') : url('/citizen/requests') }}/${e.service_request_id}`
+                        : `{{ auth()->user()->isOfficeUser() ? url('/office/dashboard') : url('/citizen/offices') }}/${e.office_id}`;
+
+                    addRealtimeNotification(e.message || 'Appointment reminder', url);
+                })
+                .listen('.message.sent', (e) => {
+                    if (e.sender_id === {{ auth()->id() }}) {
+                        return;
+                    }
+
+                    const url = `{{ auth()->user()->isOfficeUser() ? url('/office/requests') : url('/citizen/requests') }}/${e.service_request_id}`;
+                    const senderName = e.sender?.name || 'Someone';
+                    addRealtimeNotification(`New message from ${senderName}.`, url);
+                });
+
+            @if(auth()->user()->isOfficeUser() && auth()->user()->offices()->first())
+            window.Echo.private('office.{{ auth()->user()->offices()->first()->id }}')
+                .listen('.message.sent', (e) => {
+                    if (e.sender_id === {{ auth()->id() }}) {
+                        return;
+                    }
+
+                    const url = `{{ url('/office/requests') }}/${e.service_request_id}`;
+                    const senderName = e.sender?.name || 'Citizen';
+                    addRealtimeNotification(`New message from ${senderName}.`, url);
+                });
+            @endif
+
+            const bellBtn = document.getElementById('notificationBell');
+
+            bellBtn?.addEventListener('shown.bs.dropdown', async () => {
+                try {
+                    await fetch('{{ route('notifications.readAll') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            'Accept': 'application/json',
+                        }
+                    });
+
+                    bellBtn.querySelector('.top-dot')?.remove();
+
+                    const dropdownMenu = bellBtn.nextElementSibling;
+                    const headerCount = dropdownMenu?.querySelector('.dropdown-header span');
+                    if (headerCount) {
+                        headerCount.remove();
+                    }
+                } catch (error) {
+                    console.error('Failed to mark notifications as read');
+                }
+            });
+        });
+    @endauth
 
     /* Session expiry countdown + history lock for authenticated pages */
     @auth

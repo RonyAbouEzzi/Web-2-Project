@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 
 class RequestStatusUpdated extends Notification implements ShouldQueue
 {
@@ -16,7 +17,7 @@ class RequestStatusUpdated extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['mail', 'database' , 'broadcast'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -42,5 +43,10 @@ class RequestStatusUpdated extends Notification implements ShouldQueue
             'status'           => $this->serviceRequest->status,
             'message'          => "Your request #{$this->serviceRequest->reference_number} status changed to {$this->serviceRequest->status}.",
         ];
+    }
+
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage($this->toArray($notifiable));
     }
 }
