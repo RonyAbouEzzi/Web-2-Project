@@ -25,8 +25,10 @@
         "bootstrap": "~5.3.3",
         "highlight.js": "~11.10.0",
         "jquery": "~3.7.1",
+        "laravel-echo": "^2.3.3",
         "masonry-layout": "~4.2.2",
-        "perfect-scrollbar": "~1.5.6"
+        "perfect-scrollbar": "~1.5.6",
+        "pusher-js": "^8.5.0"
     },
     "overrides": {
         "sass": "1.76.0"

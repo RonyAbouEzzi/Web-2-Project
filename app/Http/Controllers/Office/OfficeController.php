@@ -9,6 +9,8 @@ use App\Notifications\AppointmentReminder;
 use App\Notifications\RequestStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Events\MessageSent;
+use App\Events\MessagesRead;
 
 class OfficeController extends Controller
 {
@@ -144,7 +146,23 @@ class OfficeController extends Controller
     public function showRequest(ServiceRequest $serviceRequest)
     {
         $this->authorizeOfficeOwnership($serviceRequest->office_id);
-        $serviceRequest->load(['citizen', 'service', 'documents', 'statusLogs.changedBy', 'messages.sender' , 'appointment']);
+
+        $readMessageIds = $serviceRequest->messages()
+            ->whereNull('read_at')
+            ->where('sender_id', '!=', Auth::id())
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($readMessageIds)) {
+            $serviceRequest->messages()
+                ->whereIn('id', $readMessageIds)
+                ->update(['read_at' => now()]);
+
+            event(new MessagesRead($serviceRequest->id, $readMessageIds, Auth::id()));
+        }
+
+        $serviceRequest->load(['citizen', 'service', 'documents', 'statusLogs.changedBy', 'messages.sender', 'appointment']);
+
         return view('office.requests.show', compact('serviceRequest'));
     }
 
@@ -234,6 +252,8 @@ class OfficeController extends Controller
             'body'      => $data['body'],
         ]);
 
+        event(new MessageSent($msg));
+
         return response()->json(['message' => $msg->load('sender'), 'success' => true]);
     }
 
@@ -268,5 +288,29 @@ class OfficeController extends Controller
             'messages' => $serviceRequest->messages()->with('sender')->get()
         ]);
     }
-    
+
+    public function markMessagesRead(ServiceRequest $serviceRequest)
+    {
+        $this->authorizeOfficeOwnership($serviceRequest->office_id);
+
+        $readMessageIds = $serviceRequest->messages()
+            ->whereNull('read_at')
+            ->where('sender_id', '!=', Auth::id())
+            ->pluck('id')
+            ->toArray();
+
+        if (!empty($readMessageIds)) {
+            $serviceRequest->messages()
+                ->whereIn('id', $readMessageIds)
+                ->update(['read_at' => now()]);
+
+            event(new MessagesRead($serviceRequest->id, $readMessageIds, Auth::id()));
+        }
+
+        return response()->json([
+            'success' => true,
+            'message_ids' => $readMessageIds,
+        ]);
+    }
+
 }

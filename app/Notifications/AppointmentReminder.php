@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 
 class AppointmentReminder extends Notification implements ShouldQueue
 {
@@ -21,7 +22,7 @@ class AppointmentReminder extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        $channels = ['mail', 'database'];
+        $channels = ['mail', 'database', 'broadcast'];
 
         $smsSources = ['appointment_confirmed', 'daily_scheduler'];
         if (in_array($this->source, $smsSources, true) && filled($notifiable->phone ?? null)) {
@@ -65,6 +66,11 @@ class AppointmentReminder extends Notification implements ShouldQueue
             'source' => $this->source,
             'message' => 'Appointment reminder for ' . $this->appointment->appointment_date . ' at ' . substr((string) $this->appointment->appointment_time, 0, 5) . '.',
         ];
+    }
+
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage($this->toArray($notifiable));
     }
 
     public function toSms(object $notifiable): string

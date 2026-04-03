@@ -12,8 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class SecurityHeadersMiddleware
 {
-    private const CONTENT_SECURITY_POLICY = "default-src 'self' data: blob: https: http: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'";
-
+    private const CONTENT_SECURITY_POLICY = "default-src 'self' data: blob: https: http: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: http: ws: wss:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'";
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);

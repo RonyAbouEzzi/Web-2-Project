@@ -1025,9 +1025,9 @@
             }
         }
     </style>
-
     @yield('vendor-style')
     @yield('page-style')
+    @vite(['resources/js/app.js'])
     @stack('styles')
 </head>
 @php
@@ -1073,6 +1073,14 @@
 
         {{-- Navigation --}}
         <nav class="es-nav">
+
+        @if(session('success') || session('error') || session('info'))
+        <div id="__flash"
+            data-success="{{ session('success') }}"
+            data-error="{{ session('error') }}"
+            data-info="{{ session('info') }}"
+            style="display:none"></div>
+        @endif
 
             @if($user->isAdmin())
                 <span class="es-nav-section">Administration</span>
@@ -1230,7 +1238,7 @@
 
                 {{-- Notifications --}}
                 <div class="dropdown">
-                    <button class="es-topbar-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                    <button id="notificationBell" class="es-topbar-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
                         <i class="bi bi-bell"></i>
                         @if($unreadCount > 0)
                             <span class="es-notif-dot"></span>
@@ -1443,6 +1451,178 @@ function closeSidebar() {
         const revealItems = Array.from(content.children);
         revealItems.forEach((el, index) => {
             el.style.animationDelay = `${Math.min(index * 45, 220)}ms`;
+        });
+    }
+
+    /* Swipe */
+    let tx=0,ty=0,drag=false;
+    document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;drag=false},{passive:true});
+    document.addEventListener('touchmove',e=>{if(Math.abs(e.touches[0].clientX-tx)>Math.abs(e.touches[0].clientY-ty))drag=true},{passive:true});
+    document.addEventListener('touchend',e=>{
+        if(!drag)return;
+        const dx=e.changedTouches[0].clientX-tx;
+        if(tx<28&&dx>65)openSb();
+        if(dx<-55&&sb?.classList.contains('open'))closeSb();
+    },{passive:true});
+
+    /* Toasts */
+    const ts=document.getElementById('toastStack');
+    const icons={success:'bi-check-circle-fill',error:'bi-x-circle-fill',info:'bi-info-circle-fill',warning:'bi-exclamation-triangle-fill'};
+    window.showToast=function(msg,type,dur){
+        if(!msg||!ts)return;
+        type=type||'info';dur=dur||4500;
+        const t=document.createElement('div');
+        t.className=`toast-item ${type}`;
+        t.innerHTML=`<i class="bi ${icons[type]||icons.info}" style="font-size:.9rem;flex-shrink:0"></i><span style="flex:1">${msg}</span><button onclick="window.closeToast(this.parentElement)" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:1.1rem;padding:0;line-height:1">&times;</button>`;
+        ts.appendChild(t);
+        setTimeout(()=>window.closeToast(t),dur);
+    };
+    window.closeToast=function(el){
+        if(!el||!el.parentElement)return;
+        el.classList.add('out');
+        el.addEventListener('animationend',()=>el.remove(),{once:true});
+    };
+
+    /* Flash messages */
+    const fd=document.getElementById('__flash');
+    if(fd){
+        if(fd.dataset.success)setTimeout(()=>showToast(fd.dataset.success,'success'),200);
+        if(fd.dataset.error)  setTimeout(()=>showToast(fd.dataset.error,  'error'),  200);
+        if(fd.dataset.info)   setTimeout(()=>showToast(fd.dataset.info,   'info'),   200);
+    }
+
+    @auth
+        function addRealtimeNotification(message, url = '#') {
+            const bellBtn = document.getElementById('notificationBell');
+            const dropdownMenu = bellBtn?.nextElementSibling;
+            const unreadBadge = bellBtn?.querySelector('.top-dot');
+            const headerCount = dropdownMenu?.querySelector('.dropdown-header span');
+
+            if (!unreadBadge && bellBtn) {
+                const badge = document.createElement('span');
+                badge.className = 'top-dot';
+                badge.textContent = '1';
+                bellBtn.appendChild(badge);
+            } else if (unreadBadge) {
+                const current = parseInt(unreadBadge.textContent || '0', 10);
+                unreadBadge.textContent = String(Math.min(current + 1, 9));
+            }
+
+            if (headerCount) {
+                const currentHeader = parseInt(headerCount.textContent || '0', 10) || 0;
+                headerCount.textContent = `${currentHeader + 1} new`;
+            }
+
+            const emptyState = dropdownMenu?.querySelector('.bi-bell-slash')?.closest('div');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const newItem = document.createElement('a');
+            newItem.className = 'dropdown-item';
+            newItem.href = url;
+            newItem.style.whiteSpace = 'normal';
+            newItem.innerHTML = `
+                <div style="display:flex;gap:.45rem">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:5px"></span>
+                    <div>
+                        <div style="font-size:.78rem;line-height:1.45;color:var(--ink-600)">${message}</div>
+                        <div style="font-size:.65rem;color:var(--ink-400);margin-top:1px">Just now</div>
+                    </div>
+                </div>
+            `;
+
+            const header = dropdownMenu?.querySelector('.dropdown-header');
+            if (header && header.nextSibling) {
+                dropdownMenu.insertBefore(newItem, header.nextSibling);
+            } else if (dropdownMenu) {
+                dropdownMenu.appendChild(newItem);
+            }
+
+            showToast(message, 'info');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Echo) {
+                console.error('Echo is not loaded');
+                return;
+            }
+
+            window.Echo.private('user.{{ auth()->id() }}')
+                .listen('.request.status.updated', (e) => {
+                    const statusText = String(e.new_status || '').replaceAll('_', ' ');
+                    const message = `Your request #${e.reference_number} status changed to ${statusText}.`;
+                    const url = `{{ auth()->user()->isOfficeUser() ? url('/office/requests') : url('/citizen/requests') }}/${e.request_id}`;
+                    addRealtimeNotification(message, url);
+                })
+                .listen('.appointment.reminder', (e) => {
+                    const url = e.service_request_id
+                        ? `{{ auth()->user()->isOfficeUser() ? url('/office/requests') : url('/citizen/requests') }}/${e.service_request_id}`
+                        : `{{ auth()->user()->isOfficeUser() ? url('/office/dashboard') : url('/citizen/offices') }}/${e.office_id}`;
+
+                    addRealtimeNotification(e.message || 'Appointment reminder', url);
+                })
+                .listen('.message.sent', (e) => {
+                    if (e.sender_id === {{ auth()->id() }}) {
+                        return;
+                    }
+
+                    const url = `{{ auth()->user()->isOfficeUser() ? url('/office/requests') : url('/citizen/requests') }}/${e.service_request_id}`;
+                    const senderName = e.sender?.name || 'Someone';
+                    addRealtimeNotification(`New message from ${senderName}.`, url);
+                });
+
+            @if(auth()->user()->isOfficeUser() && auth()->user()->offices()->first())
+            window.Echo.private('office.{{ auth()->user()->offices()->first()->id }}')
+                .listen('.message.sent', (e) => {
+                    if (e.sender_id === {{ auth()->id() }}) {
+                        return;
+                    }
+
+                    const url = `{{ url('/office/requests') }}/${e.service_request_id}`;
+                    const senderName = e.sender?.name || 'Citizen';
+                    addRealtimeNotification(`New message from ${senderName}.`, url);
+                });
+            @endif
+
+            const bellBtn = document.getElementById('notificationBell');
+
+            bellBtn?.addEventListener('shown.bs.dropdown', async () => {
+                try {
+                    await fetch('{{ route('notifications.readAll') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            'Accept': 'application/json',
+                        }
+                    });
+
+                    bellBtn.querySelector('.top-dot')?.remove();
+
+                    const dropdownMenu = bellBtn.nextElementSibling;
+                    const headerCount = dropdownMenu?.querySelector('.dropdown-header span');
+                    if (headerCount) {
+                        headerCount.remove();
+                    }
+                } catch (error) {
+                    console.error('Failed to mark notifications as read');
+                }
+            });
+        });
+    @endauth
+
+    /* Session expiry countdown + history lock for authenticated pages */
+    @auth
+    const ROLE_HOME_URL='{{ match(auth()->user()->role){ "admin" => route("admin.dashboard"), "office_user" => route("office.dashboard"), default => route("citizen.dashboard") } }}';
+
+    // Prevent browser back/forward from traversing authenticated history.
+    if(window.history && window.history.pushState){
+        window.history.pushState({locked:true},'',window.location.href);
+        window.addEventListener('popstate',()=>{
+            window.history.pushState({locked:true},'',window.location.href);
+            if(window.location.href!==ROLE_HOME_URL){
+                window.location.replace(ROLE_HOME_URL);
+            }
         });
     }
 
