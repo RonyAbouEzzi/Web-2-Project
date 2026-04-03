@@ -72,8 +72,8 @@ class AuthController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
-        return redirect()->route('citizen.dashboard')
-                        ->with('success', 'Welcome to E-Services!');
+        return $this->redirectByRole($user)
+                    ->with('success', 'Welcome to E-Services!');
     }
 
     public function extractNationalIdDocument(Request $request): JsonResponse
@@ -161,6 +161,10 @@ class AuthController extends Controller
         $nationalId = $this->extractAzureFieldString($fields, [
             'DocumentNumber', 'NationalId', 'NationalID', 'IdNumber', 'IDNumber',
         ]);
+
+        if ($nationalId) {
+            $nationalId = preg_replace('/\D/u', '', $this->normalizeUnicodeDigits($nationalId));
+        }
 
         $content = (string) data_get($analyzeResult, 'content', '');
         if (!$nationalId && $content !== '') {

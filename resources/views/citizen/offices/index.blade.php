@@ -1,61 +1,80 @@
 @extends('layouts.app')
-@section('title','Browse Services')
-@section('page-title','Browse Offices')
+@section('title', 'Browse Services')
+@section('page-title', 'Browse Offices')
 
 @section('content')
-
-{{-- Search --}}
-<div class="card mb-3">
+<div class="card mb-3 citizen-reveal" data-citizen-reveal>
     <div class="card-body">
-        <form method="GET" class="d-flex flex-wrap gap-2">
-            <div class="flex-grow-1 position-relative" style="min-width:180px;">
-                <i class="bi bi-search position-absolute text-muted" style="left:.8rem;top:50%;transform:translateY(-50%);pointer-events:none;"></i>
-                <input type="text" name="search" class="form-control ps-5" placeholder="Search offices by name..." value="{{ request('search') }}">
+        <form method="GET" class="citizen-office-filter-grid">
+            <div class="citizen-office-search-wrap">
+                <i class="bi bi-search citizen-office-search-icon"></i>
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control citizen-office-search-input"
+                    placeholder="Search offices by name..."
+                    value="{{ request('search') }}"
+                >
             </div>
-            <select name="municipality_id" class="form-select" style="min-width:160px;">
+            <select name="municipality_id" class="form-select citizen-office-filter-select">
                 <option value="">All Municipalities</option>
-                @foreach(\App\Models\Municipality::where('is_active',true)->get() as $m)
-                    <option value="{{ $m->id }}" {{ request('municipality_id')==$m->id ? 'selected' : '' }}>{{ $m->name }}</option>
+                @foreach($municipalities as $municipality)
+                    <option value="{{ $municipality->id }}" {{ (string) request('municipality_id') === (string) $municipality->id ? 'selected' : '' }}>
+                        {{ $municipality->name }}
+                    </option>
                 @endforeach
             </select>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Filter</button>
+            <button type="submit" class="btn btn-primary citizen-office-filter-btn">
+                <i class="bi bi-funnel me-1"></i> Filter
+            </button>
+            @if(request()->hasAny(['search', 'municipality_id']))
+                <a href="{{ route('citizen.offices') }}" class="btn btn-outline-secondary citizen-office-filter-btn">Clear</a>
+            @endif
         </form>
     </div>
 </div>
 
-{{-- Map Section --}}
-<div class="card mb-3">
-    <div class="card-header">
-        <span class="card-title">
-            <i class="bi bi-geo-alt me-2" style="color:var(--primary)"></i>Office Locations
-        </span>
+<div class="card mb-3 citizen-reveal" data-citizen-reveal>
+    <div class="card-header d-flex justify-content-between align-items-center gap-2 flex-wrap">
+        <span class="card-title"><i class="bi bi-geo-alt me-2 text-primary"></i>Office Locations</span>
+        <div class="citizen-office-map-meta">
+            <span><strong>{{ $offices->total() }}</strong> offices found</span>
+            <span class="mx-2">&middot;</span>
+            <span><strong>{{ $mapOffices->count() }}</strong> with map pin</span>
+        </div>
     </div>
     <div class="card-body">
         @if($mapOffices->isEmpty())
-            <div style="text-align:center;padding:2rem 1rem;color:#9ca3af">
-                No office locations available to display on the map.
-            </div>
+            <x-empty-state
+                icon="bi-geo-alt"
+                title="No map locations yet"
+                message="No office locations are available to display on the map."
+                class="citizen-office-map-empty"
+            />
         @else
-            <div id="officesMap" style="width:100%;height:430px;border-radius:12px;overflow:hidden;border:1px solid #e5eaf0"></div>
+            <div id="officesMap" class="citizen-office-map"></div>
         @endif
     </div>
 </div>
 
-{{-- Office Cards Grid --}}
 @if($offices->isEmpty())
-    <div class="card text-center py-5">
+    <div class="card citizen-reveal" data-citizen-reveal>
         <div class="card-body">
-            <i class="bi bi-building-x text-muted d-block mb-3" style="font-size:2.5rem;"></i>
-            <div class="fw-semibold text-sm mb-1">No offices found</div>
-            <a href="{{ route('citizen.offices') }}" class="text-sm">Clear filters</a>
+            <x-empty-state
+                icon="bi-building-x"
+                title="No offices found"
+                message="Try another municipality or clear your filters."
+                :action-url="route('citizen.offices')"
+                action-label="Clear Filters"
+            />
         </div>
     </div>
 @else
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+    <div class="citizen-office-grid citizen-reveal" data-citizen-reveal>
         @foreach($offices as $office)
             <a href="{{ route('citizen.offices.show', $office) }}" class="text-decoration-none text-reset d-block">
-                <div class="office-card-wrap">
-                    {{-- Header --}}
+                <article class="office-card-wrap">
+                    <div class="office-card-glow"></div>
                     <div class="office-card-header">
                         @if($office->logo)
                             <img src="{{ Storage::url($office->logo) }}" alt="{{ $office->name }}" class="office-card-logo">
@@ -64,12 +83,12 @@
                                 <i class="bi bi-building"></i>
                             </div>
                         @endif
-                        <div class="flex-grow-1" style="min-width:0;">
-                            <div class="office-card-name">{{ $office->name }}</div>
+                        <div class="flex-grow-1 citizen-min-w-0">
+                            <h3 class="office-card-name">{{ $office->name }}</h3>
                             <div class="office-card-municipality">{{ $office->municipality->name }}</div>
                         </div>
                     </div>
-                    {{-- Body --}}
+
                     <div class="office-card-body">
                         @if($office->address)
                             <div class="office-card-meta">
@@ -79,26 +98,241 @@
                         @endif
                         @if($office->phone)
                             <div class="office-card-meta">
-                                <i class="bi bi-telephone office-card-meta-icon" style="font-size:.82rem;"></i>
+                                <i class="bi bi-telephone office-card-meta-icon"></i>
                                 <span class="office-card-meta-text">{{ $office->phone }}</span>
                             </div>
                         @endif
-                        <div class="office-card-footer">
-                            <span class="text-xs text-muted"><i class="bi bi-grid-3x3-gap me-1"></i>{{ $office->services->count() }} services</span>
-                            @php $rating = $office->averageRating(); @endphp
-                            @if($rating)
-                                <span class="d-flex align-items-center gap-1 text-xs fw-semibold">
-                                    <i class="bi bi-star-fill text-warning" style="font-size:.7rem;"></i>{{ number_format($rating,1) }}
-                                </span>
-                            @endif
-                        </div>
                     </div>
-                </div>
+
+                    <footer class="office-card-footer">
+                        <span class="office-card-chip">
+                            <i class="bi bi-grid-3x3-gap me-1"></i>{{ $office->services->count() }} services
+                        </span>
+                        @php $rating = $office->averageRating(); @endphp
+                        @if($rating)
+                            <span class="office-card-chip is-rating">
+                                <i class="bi bi-star-fill"></i>{{ number_format($rating, 1) }}
+                            </span>
+                        @endif
+                    </footer>
+                </article>
             </a>
         @endforeach
     </div>
-    <div class="mt-3">{{ $offices->links() }}</div>
+    <div class="mt-3 citizen-reveal" data-citizen-reveal>{{ $offices->links() }}</div>
 @endif
+@endsection
+
+@push('styles')
+<style>
+body.es-role-citizen .citizen-office-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 14rem auto auto;
+    gap: .64rem;
+    align-items: center;
+}
+
+body.es-role-citizen .citizen-office-search-wrap {
+    position: relative;
+}
+
+body.es-role-citizen .citizen-office-search-icon {
+    position: absolute;
+    left: .8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94A3B8;
+    font-size: .85rem;
+    pointer-events: none;
+}
+
+body.es-role-citizen .citizen-office-search-input {
+    padding-left: 2.25rem;
+}
+
+body.es-role-citizen .citizen-office-filter-select,
+body.es-role-citizen .citizen-office-filter-btn {
+    height: 2.45rem;
+}
+
+body.es-role-citizen .citizen-office-map-meta {
+    color: #64748B;
+    font-size: .76rem;
+}
+
+body.es-role-citizen .citizen-office-map {
+    width: 100%;
+    height: 26rem;
+    border-radius: .95rem;
+    overflow: hidden;
+    border: 1px solid #CBD5E1;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34), 0 10px 22px rgba(15, 23, 42, 0.08);
+}
+
+body.es-role-citizen .citizen-office-map-empty {
+    padding-top: 1.2rem;
+    padding-bottom: 1.2rem;
+}
+
+body.es-role-citizen .citizen-office-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+body.es-role-citizen .office-card-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: .95rem;
+    border: 1px solid color-mix(in srgb, var(--es-border) 72%, #BFDBFE 28%);
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+body.es-role-citizen .office-card-wrap:hover {
+    transform: translateY(-3px);
+    border-color: #93C5FD;
+    box-shadow: 0 16px 30px rgba(37, 99, 235, 0.14);
+}
+
+body.es-role-citizen .office-card-glow {
+    position: absolute;
+    top: -46%;
+    right: -24%;
+    width: 9rem;
+    height: 9rem;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.22) 0%, rgba(14, 165, 233, 0) 72%);
+    pointer-events: none;
+}
+
+body.es-role-citizen .office-card-header {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: 1rem 1rem .72rem;
+}
+
+body.es-role-citizen .office-card-logo,
+body.es-role-citizen .office-card-logo-placeholder {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: .72rem;
+    flex-shrink: 0;
+}
+
+body.es-role-citizen .office-card-logo {
+    object-fit: cover;
+    border: 1px solid #DBEAFE;
+}
+
+body.es-role-citizen .office-card-logo-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #0369A1;
+    background: #E0F2FE;
+    border: 1px solid #BAE6FD;
+    font-size: 1rem;
+}
+
+body.es-role-citizen .citizen-min-w-0 {
+    min-width: 0;
+}
+
+body.es-role-citizen .office-card-name {
+    margin: 0;
+    font-size: .88rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #0F172A;
+}
+
+body.es-role-citizen .office-card-municipality {
+    margin-top: .2rem;
+    font-size: .74rem;
+    color: #64748B;
+}
+
+body.es-role-citizen .office-card-body {
+    padding: 0 1rem .82rem;
+}
+
+body.es-role-citizen .office-card-meta {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    margin-top: .46rem;
+}
+
+body.es-role-citizen .office-card-meta-icon {
+    color: #0369A1;
+    font-size: .82rem;
+    margin-top: .12rem;
+}
+
+body.es-role-citizen .office-card-meta-text {
+    color: #475569;
+    font-size: .76rem;
+    line-height: 1.45;
+}
+
+body.es-role-citizen .office-card-footer {
+    border-top: 1px solid #E2E8F0;
+    padding: .72rem 1rem .84rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+body.es-role-citizen .office-card-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    font-size: .7rem;
+    font-weight: 700;
+    color: #0F766E;
+    background: #ECFEFF;
+    border: 1px solid #A5F3FC;
+    border-radius: 999px;
+    padding: .18rem .5rem;
+}
+
+body.es-role-citizen .office-card-chip.is-rating {
+    color: #92400E;
+    background: #FEF3C7;
+    border-color: #FDE68A;
+}
+
+body.es-role-citizen .office-card-chip.is-rating i {
+    color: #B45309;
+}
+
+@media (max-width: 991.98px) {
+    body.es-role-citizen .citizen-office-filter-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 767.98px) {
+    body.es-role-citizen .citizen-office-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body.es-role-citizen .citizen-office-filter-btn {
+        width: 100%;
+    }
+
+    body.es-role-citizen .citizen-office-map {
+        height: 22rem;
+    }
+}
+</style>
+@endpush
+
 @push('scripts')
 @if($mapOffices->isNotEmpty())
 <script>
@@ -111,7 +345,6 @@
         if (!offices.length) return;
 
         const firstOffice = offices[0];
-
         const map = new google.maps.Map(document.getElementById('officesMap'), {
             center: { lat: firstOffice.latitude, lng: firstOffice.longitude },
             zoom: 11,
@@ -132,19 +365,19 @@
             marker.addListener('click', () => {
                 infoWindow.setContent(`
                     <div style="min-width:220px;max-width:260px;padding:4px 2px;">
-                        <div style="font-weight:800;font-size:14px;color:#111827;margin-bottom:4px;">
+                        <div style="font-weight:800;font-size:14px;color:#0f172a;margin-bottom:4px;">
                             ${office.name}
                         </div>
-                        <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">
+                        <div style="font-size:12px;color:#64748b;margin-bottom:6px;">
                             ${office.municipality ?? ''}
                         </div>
-                        <div style="font-size:12px;color:#374151;line-height:1.4;margin-bottom:8px;">
+                        <div style="font-size:12px;color:#334155;line-height:1.4;margin-bottom:8px;">
                             ${office.address ?? ''}
                         </div>
-                        <div style="font-size:12px;color:#374151;margin-bottom:8px;">
+                        <div style="font-size:12px;color:#334155;margin-bottom:8px;">
                             ${office.services_count} services
                         </div>
-                        <a href="${office.show_url}" style="display:inline-block;padding:6px 10px;background:#0038a8;color:#fff;text-decoration:none;border-radius:8px;font-size:12px;">
+                        <a href="${office.show_url}" style="display:inline-block;padding:6px 10px;background:#0ea5e9;color:#fff;text-decoration:none;border-radius:8px;font-size:12px;">
                             View Office
                         </a>
                     </div>
@@ -165,4 +398,3 @@
 </script>
 @endif
 @endpush
-@endsection

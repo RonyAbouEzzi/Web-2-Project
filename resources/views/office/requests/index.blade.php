@@ -3,49 +3,52 @@
 @section('page-title', 'Incoming Requests')
 
 @section('content')
-
-{{-- Filters --}}
-<div class="card mb-3">
+<div class="card mb-3 office-reveal" data-office-reveal>
     <div class="card-body">
-        <form method="GET" style="display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end">
-            <div style="flex:1;min-width:180px">
+        <form method="GET" class="office-request-filter-grid">
+            <div class="office-filter-field">
                 <label class="form-label">Search</label>
-                <div style="position:relative">
-                    <i class="bi bi-search" style="position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:.85rem;pointer-events:none"></i>
-                    <input type="text" name="search" class="form-control" style="padding-left:2.3rem"
-                           placeholder="Reference or citizen name..." value="{{ request('search') }}">
+                <div class="office-filter-input-wrap">
+                    <i class="bi bi-search office-filter-input-icon"></i>
+                    <input
+                        type="text"
+                        name="search"
+                        class="form-control office-filter-input"
+                        placeholder="Reference or citizen name..."
+                        value="{{ request('search') }}"
+                    >
                 </div>
             </div>
-            <div style="min-width:160px">
+            <div class="office-filter-field office-filter-status">
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     <option value="">All Statuses</option>
-                    @foreach(['pending','in_review','missing_documents','approved','rejected','completed'] as $s)
-                        <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>
-                            {{ ucfirst(str_replace('_',' ',$s)) }}
+                    @foreach(['pending','in_review','missing_documents','approved','rejected','completed'] as $status)
+                        <option value="{{ $status }}" {{ request('status') === $status ? 'selected' : '' }}>
+                            {{ ucfirst(str_replace('_', ' ', $status)) }}
                         </option>
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:auto"><i class="bi bi-funnel"></i> Filter</button>
-            @if(request()->hasAny(['search','status']))
-                <a href="{{ route('office.requests') }}" class="btn" style="background:#f3f4f6;border:none;color:#374151;margin-top:auto">Clear</a>
+            <button type="submit" class="btn btn-primary office-filter-btn">
+                <i class="bi bi-funnel me-1"></i> Filter
+            </button>
+            @if(request()->hasAny(['search', 'status']))
+                <a href="{{ route('office.requests') }}" class="btn btn-outline-secondary office-filter-btn">Clear</a>
             @endif
         </form>
     </div>
 </div>
 
-{{-- Requests --}}
-<div class="card">
-    <div class="card-header">
+<div class="card office-reveal" data-office-reveal>
+    <div class="card-header d-flex align-items-center justify-content-between gap-2 flex-wrap">
         <span class="card-title">Requests</span>
-        <span style="font-size:.75rem;color:#9ca3af">{{ $requests->total() }} total</span>
+        <span class="office-request-total">{{ $requests->total() }} total</span>
     </div>
 
-    {{-- Desktop table --}}
     <div class="d-none d-md-block">
-        <div class="table-wrap">
-            <table class="table table-hover">
+        <div class="table-responsive office-request-table-wrap">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
                         <th>Reference</th>
@@ -54,59 +57,206 @@
                         <th>Status</th>
                         <th>Payment</th>
                         <th>Date</th>
-                        <th>Action</th>
+                        <th class="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($requests as $req)
-                    <tr>
-                        <td><code>{{ $req->reference_number }}</code></td>
-                        <td>
-                            <div style="font-weight:600">{{ $req->citizen->name }}</div>
-                            <div style="font-size:.72rem;color:#9ca3af">{{ $req->citizen->email }}</div>
-                        </td>
-                        <td style="color:#6b7280">{{ $req->service->name }}</td>
-                        <td><span class="sbadge s-{{ $req->status }}">{{ ucfirst(str_replace('_',' ',$req->status)) }}</span></td>
-                        <td><span class="sbadge s-{{ $req->payment_status }}">{{ ucfirst($req->payment_status) }}</span></td>
-                        <td style="color:#9ca3af;font-size:.78rem">{{ $req->created_at->format('M d, Y') }}</td>
-                        <td>
-                            <a href="{{ route('office.requests.show', $req) }}" class="btn btn-sm" style="background:var(--primary-light);color:var(--primary);border:none">
-                                <i class="bi bi-eye"></i> View
-                            </a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td><code>{{ $req->reference_number }}</code></td>
+                            <td>
+                                <div class="office-request-citizen">{{ $req->citizen->name }}</div>
+                                <div class="office-request-citizen-email">{{ $req->citizen->email }}</div>
+                            </td>
+                            <td class="office-request-service">{{ $req->service->name }}</td>
+                            <td><x-status-pill :status="$req->status" /></td>
+                            <td><x-status-pill :status="$req->payment_status === 'paid' ? 'paid' : 'unpaid'" /></td>
+                            <td class="office-request-date">{{ $req->created_at->format('M d, Y') }}</td>
+                            <td class="text-end">
+                                <a href="{{ route('office.requests.show', $req) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye me-1"></i> View
+                                </a>
+                            </td>
+                        </tr>
                     @empty
-                    <tr><td colspan="7" style="text-align:center;padding:2.5rem;color:#9ca3af">No requests found.</td></tr>
+                        <tr>
+                            <td colspan="7" class="office-request-empty-cell">
+                                <x-empty-state
+                                    icon="bi-inbox"
+                                    title="No requests found"
+                                    message="Try adjusting filters or check back later."
+                                    class="py-2"
+                                />
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-    {{-- Mobile card list --}}
     <div class="d-md-none">
         @forelse($requests as $req)
-        <a href="{{ route('office.requests.show', $req) }}" style="display:block;padding:.9rem 1rem;border-bottom:1px solid #f3f4f6;text-decoration:none;color:inherit;transition:background .1s" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.35rem">
-                <div style="font-size:.83rem;font-weight:700;color:#111827">{{ $req->citizen->name }}</div>
-                <span class="sbadge s-{{ $req->status }}">{{ ucfirst(str_replace('_',' ',$req->status)) }}</span>
-            </div>
-            <div style="font-size:.75rem;color:#6b7280;margin-bottom:.25rem">{{ $req->service->name }}</div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-                <code style="font-size:.68rem">{{ $req->reference_number }}</code>
-                <span class="sbadge s-{{ $req->payment_status }}" style="font-size:.65rem">{{ ucfirst($req->payment_status) }}</span>
-            </div>
-        </a>
+            <a href="{{ route('office.requests.show', $req) }}" class="office-request-mobile-item">
+                <div class="office-request-mobile-head">
+                    <div class="office-request-mobile-name">{{ $req->citizen->name }}</div>
+                    <x-status-pill :status="$req->status" />
+                </div>
+                <div class="office-request-mobile-service">{{ $req->service->name }}</div>
+                <div class="office-request-mobile-foot">
+                    <code>{{ $req->reference_number }}</code>
+                    <x-status-pill :status="$req->payment_status === 'paid' ? 'paid' : 'unpaid'" />
+                </div>
+            </a>
         @empty
-        <div style="text-align:center;padding:3rem 1rem;color:#9ca3af">
-            <i class="bi bi-inbox" style="font-size:2.5rem;display:block;margin-bottom:.75rem;color:#d1d5db"></i>
-            No requests found.
-        </div>
+            <div class="office-request-empty-mobile">
+                <x-empty-state
+                    icon="bi-inbox"
+                    title="No requests found"
+                    message="Incoming requests will appear here."
+                />
+            </div>
         @endforelse
     </div>
 
     @if($requests->hasPages())
-    <div style="padding:.75rem 1rem;border-top:1px solid #f3f4f6">{{ $requests->links() }}</div>
+        <div class="office-request-pagination">{{ $requests->links() }}</div>
     @endif
 </div>
 @endsection
+
+@push('styles')
+<style>
+body.es-role-office_user .office-request-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 11rem auto auto;
+    gap: .62rem;
+    align-items: end;
+}
+
+body.es-role-office_user .office-filter-field {
+    min-width: 0;
+}
+
+body.es-role-office_user .office-filter-status {
+    min-width: 10rem;
+}
+
+body.es-role-office_user .office-filter-input-wrap {
+    position: relative;
+}
+
+body.es-role-office_user .office-filter-input-icon {
+    position: absolute;
+    left: .78rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94A3B8;
+    font-size: .83rem;
+    pointer-events: none;
+}
+
+body.es-role-office_user .office-filter-input {
+    padding-left: 2.2rem;
+}
+
+body.es-role-office_user .office-filter-btn {
+    height: 2.45rem;
+}
+
+body.es-role-office_user .office-request-total {
+    font-size: .75rem;
+    color: #64748B;
+}
+
+body.es-role-office_user .office-request-citizen {
+    font-weight: 600;
+    font-size: .83rem;
+}
+
+body.es-role-office_user .office-request-citizen-email {
+    font-size: .72rem;
+    color: #94A3B8;
+}
+
+body.es-role-office_user .office-request-service {
+    color: #64748B;
+    font-size: .8rem;
+}
+
+body.es-role-office_user .office-request-date {
+    color: #94A3B8;
+    font-size: .78rem;
+}
+
+body.es-role-office_user .office-request-empty-cell {
+    padding: 1.8rem .8rem !important;
+}
+
+body.es-role-office_user .office-request-mobile-item {
+    display: block;
+    padding: .9rem 1rem;
+    border-bottom: 1px solid #E2E8F0;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color .12s ease;
+}
+
+body.es-role-office_user .office-request-mobile-item:hover {
+    background: #F8FAFF;
+    color: inherit;
+}
+
+body.es-role-office_user .office-request-mobile-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: .35rem;
+    gap: .6rem;
+}
+
+body.es-role-office_user .office-request-mobile-name {
+    font-size: .84rem;
+    font-weight: 700;
+    color: #0F172A;
+}
+
+body.es-role-office_user .office-request-mobile-service {
+    font-size: .75rem;
+    color: #64748B;
+    margin-bottom: .24rem;
+}
+
+body.es-role-office_user .office-request-mobile-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .45rem;
+}
+
+body.es-role-office_user .office-request-empty-mobile {
+    padding: 1.25rem .55rem 1.4rem;
+}
+
+body.es-role-office_user .office-request-pagination {
+    padding: .75rem 1rem;
+    border-top: 1px solid #E2E8F0;
+}
+
+@media (max-width: 991.98px) {
+    body.es-role-office_user .office-request-filter-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 767.98px) {
+    body.es-role-office_user .office-request-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body.es-role-office_user .office-filter-btn {
+        width: 100%;
+    }
+}
+</style>
+@endpush

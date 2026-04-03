@@ -17,9 +17,17 @@ class CitizenController extends Controller
     // ── Dashboard ─────────────────────────────────────────────────
     public function dashboard()
     {
-        $user     = Auth::user();
+        $user = Auth::user();
         $requests = $user->serviceRequests()->with(['service', 'office'])->latest()->paginate(10);
-        return view('citizen.dashboard', compact('requests'));
+        $upcomingAppointments = $user->appointments()
+            ->with('office')
+            ->whereDate('appointment_date', '>=', now()->toDateString())
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time')
+            ->take(5)
+            ->get();
+
+        return view('citizen.dashboard', compact('requests', 'upcomingAppointments'));
     }
 
     // ── Profile ───────────────────────────────────────────────────
@@ -27,7 +35,14 @@ class CitizenController extends Controller
     {
         $user = Auth::user();
         $requests = $user->serviceRequests()->with(['service', 'office'])->latest()->take(5)->get();
-        return view('citizen.profile', compact('user', 'requests'));
+        $paidRequests = $user->serviceRequests()
+            ->with(['service', 'office'])
+            ->where('payment_status', 'paid')
+            ->latest('updated_at')
+            ->take(5)
+            ->get();
+
+        return view('citizen.profile', compact('user', 'requests', 'paidRequests'));
     }
 
     public function updateProfile(Request $request)
@@ -189,7 +204,24 @@ class CitizenController extends Controller
             $query->where('status', $status);
         }
 
+        if ($paymentStatus = $request->payment_status) {
+            if ($paymentStatus === 'unpaid') {
+                $query->where('payment_status', '!=', 'paid');
+            } else {
+                $query->where('payment_status', $paymentStatus);
+            }
+        }
+
+        if ($search = trim((string) $request->search)) {
+            $query->where(function ($builder) use ($search) {
+                $builder->where('reference_number', 'like', "%{$search}%")
+                    ->orWhereHas('service', fn ($serviceQuery) => $serviceQuery->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('office', fn ($officeQuery) => $officeQuery->where('name', 'like', "%{$search}%"));
+            });
+        }
+
         $requests = $query->paginate(15);
+        $requests->appends($request->query());
         return view('citizen.requests.index', compact('requests'));
     }
 

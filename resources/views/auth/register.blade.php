@@ -125,6 +125,7 @@
         .auth-footer-link a:hover { text-decoration:underline; }
 
         .alert-error { background:#FFF1F2; border:1px solid #FECDD3; border-radius:8px; padding:.75rem 1rem; font-size:.84rem; color:#9F1239; margin-bottom:1.25rem; }
+        .extract-status { display:none; margin-top:.55rem; border:1px solid transparent; border-radius:8px; padding:.58rem .72rem; font-size:.78rem; font-weight:500; line-height:1.45; }
 
         @media (max-width:560px) {
             .form-row { grid-template-columns:1fr; }
@@ -205,8 +206,8 @@
             </div>
 
             <div class="field">
-                <label for="national_id_number">National ID Number</label>
-                <input type="text" id="national_id_number" name="national_id_number" value="{{ old('national_id_number') }}" placeholder="LB-XXXXXXXXX" required>
+                <label for="national_id">National ID Number</label>
+                <input type="text" id="national_id" name="national_id" value="{{ old('national_id') }}" placeholder="LB-XXXXXXXXX" required>
                 <p class="form-hint"><i class="bi bi-shield-lock"></i> Encrypted and stored securely for identity verification</p>
             </div>
 
@@ -214,6 +215,7 @@
                 <label for="national_id_document">National ID Document <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
                 <input type="file" id="national_id_document" name="national_id_document" accept=".jpg,.jpeg,.png,.pdf">
                 <p class="form-hint">JPG, PNG or PDF &mdash; max 5 MB</p>
+                <div id="registerOcrStatus" class="extract-status" role="status" aria-live="polite"></div>
             </div>
 
             <div class="form-row" style="margin-bottom:1.5rem;">
@@ -254,6 +256,85 @@ function togglePwd(id, iconId) {
     i.type = i.type === 'password' ? 'text' : 'password';
     ic.className = i.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
 }
+
+const idDocumentInput = document.getElementById('national_id_document');
+const nationalIdInput = document.getElementById('national_id');
+const firstNameInput = document.getElementById('first_name');
+const lastNameInput = document.getElementById('last_name');
+const ocrStatus = document.getElementById('registerOcrStatus');
+const extractEndpoint = '{{ route('register.id-extract') }}';
+const csrfToken = '{{ csrf_token() }}';
+
+let extractionRunId = 0;
+
+function setExtractionStatus(message, type = 'info') {
+    if (!ocrStatus) return;
+
+    const palette = {
+        info: ['#EFF6FF', '#1E4080', '#BFDBFE'],
+        success: ['#ECFDF5', '#0D7A4E', '#A7F3D0'],
+        warn: ['#FFF7ED', '#9A3412', '#FED7AA'],
+        error: ['#FFF1F2', '#9F1239', '#FECDD3'],
+    };
+
+    const [bg, color, border] = palette[type] || palette.info;
+    ocrStatus.style.display = 'block';
+    ocrStatus.style.background = bg;
+    ocrStatus.style.color = color;
+    ocrStatus.style.borderColor = border;
+    ocrStatus.textContent = message;
+}
+
+async function extractIdData(file) {
+    if (!file) return;
+
+    const myRunId = ++extractionRunId;
+    setExtractionStatus('Reading ID document...', 'info');
+
+    const formData = new FormData();
+    formData.append('national_id_document', file);
+
+    try {
+        const response = await fetch(extractEndpoint, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: formData,
+            credentials: 'same-origin',
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (myRunId !== extractionRunId) return;
+
+        if (!response.ok) {
+            setExtractionStatus(payload.message || 'Could not extract fields from this file. Please fill manually.', 'warn');
+            return;
+        }
+
+        if (payload?.data?.national_id && nationalIdInput && !nationalIdInput.value.trim()) {
+            nationalIdInput.value = payload.data.national_id;
+        }
+        if (payload?.data?.first_name && firstNameInput && !firstNameInput.value.trim()) {
+            firstNameInput.value = payload.data.first_name;
+        }
+        if (payload?.data?.last_name && lastNameInput && !lastNameInput.value.trim()) {
+            lastNameInput.value = payload.data.last_name;
+        }
+
+        setExtractionStatus(payload.message || 'ID fields extracted successfully.', 'success');
+    } catch (error) {
+        setExtractionStatus('Extraction request failed. Please check your connection and try again.', 'error');
+    }
+}
+
+idDocumentInput?.addEventListener('change', () => {
+    const file = idDocumentInput.files?.[0];
+    if (file) {
+        extractIdData(file);
+    }
+});
 </script>
 </body>
 </html>
