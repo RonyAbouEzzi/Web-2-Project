@@ -232,35 +232,13 @@
 
             const data = await response.json();
 
-            // ❌ if error
             if (!response.ok || !data.success) {
                 alert(data.message || 'Failed to send message');
                 return;
             }
 
-            // ✅ success
-            const msg = data.message;
             chatInput.value = '';
-
-            const div = document.createElement('div');
-            div.className = 'msg mine';
-
-            div.innerHTML = `
-                <div class="msg-av av-me">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div>
-                <div class="msg-bubble">
-                    <div style="font-size:.7rem;font-weight:700;margin-bottom:.2rem;color:#6b7280">
-                        You
-                    </div>
-                    <p></p>
-                    <div class="msg-time">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                </div>
-            `;
-
-            // 🔐 SAFE TEXT (IMPORTANT)
-            div.querySelector('p').textContent = msg.body;
-
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            await loadMessages();
 
         } catch (error) {
             alert('Something went wrong while sending the message.');
@@ -268,6 +246,59 @@
             chatInput.disabled = false;
             sendBtn.disabled = false;
             chatInput.focus();
+        }
+    }
+
+    async function loadMessages() {
+        try {
+            const res = await fetch('{{ route('office.messages.get', $serviceRequest) }}', {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await res.json();
+
+            chatBox.innerHTML = '';
+
+            if (!data.messages.length) {
+                chatBox.innerHTML = `
+                    <div style="padding:1rem;text-align:center;color:#9ca3af;font-size:.82rem">
+                        No messages yet. Start the conversation.
+                    </div>
+                `;
+                return;
+            }
+
+            data.messages.forEach(msg => {
+                const mine = msg.sender_id === {{ auth()->id() }};
+
+                const div = document.createElement('div');
+                div.className = 'msg ' + (mine ? 'mine' : 'theirs');
+
+                div.innerHTML = `
+                    <div class="msg-av ${mine ? 'av-me' : 'av-other'}">
+                        ${msg.sender.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="msg-bubble">
+                        <div style="font-size:.7rem;font-weight:700;margin-bottom:.2rem;color:#6b7280">
+                            ${mine ? 'You' : msg.sender.name}
+                        </div>
+                        <p></p>
+                        <div class="msg-time">
+                            ${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                    </div>
+                `;
+
+                div.querySelector('p').textContent = msg.body;
+                chatBox.appendChild(div);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (e) {
+            console.error('Error loading messages', e);
         }
     }
 
@@ -280,6 +311,8 @@
         }
     });
 
+    loadMessages();
+    setInterval(loadMessages, 2000);
     chatBox.scrollTop = chatBox.scrollHeight;
 </script>
 @endpush

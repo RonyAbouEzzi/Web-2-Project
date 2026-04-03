@@ -73,7 +73,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
         return redirect()->route('citizen.dashboard')
-                         ->with('success', 'Welcome to E-Services!');
+                        ->with('success', 'Welcome to E-Services!');
     }
 
     public function extractNationalIdDocument(Request $request): JsonResponse
