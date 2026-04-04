@@ -128,7 +128,19 @@ class CitizenController extends Controller
     public function showService(Service $service)
     {
         $service->load('office');
-        return view('citizen.services.show', compact('service'));
+
+        $convertedPrices = [];
+        $baseCurrency = $service->currency ?? 'USD';
+        $targets = array_diff(['USD', 'LBP', 'EUR'], [$baseCurrency]);
+        $paymentService = app(PaymentService::class);
+
+        foreach ($targets as $currency) {
+            $convertedPrices[$currency] = $paymentService->convertCurrency(
+                $service->price, $baseCurrency, $currency
+            );
+        }
+
+        return view('citizen.services.show', compact('service', 'convertedPrices'));
     }
 
     public function submitRequest(Request $request, Service $service)
