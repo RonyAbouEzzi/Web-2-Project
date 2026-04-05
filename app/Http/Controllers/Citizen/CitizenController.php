@@ -49,30 +49,16 @@ class CitizenController extends Controller
     {
         $user = Auth::user();
         $data = $request->validate([
-            'name'         => 'required|string|max:100',
-            'phone'        => 'nullable|string|max:20',
-            'national_id'  => 'required|string|max:20',
-            'national_id_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'password'     => 'nullable|min:8|confirmed',
+            'phone'    => 'nullable|string|max:20',
+            'password' => 'nullable|min:8|confirmed',
         ]);
 
-        $user->name = $data['name'];
         $user->phone = $data['phone'] ?? $user->phone;
-        $user->national_id = $data['national_id'];
-
-        if ($request->hasFile('national_id_document')) {
-            $path = $request->file('national_id_document')->store('id_documents', 'private');
-
-            if (filled($user->id_document)) {
-                Storage::disk('private')->delete($user->id_document);
-            }
-
-            $user->id_document = $path;
-        }
 
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
+
         $user->save();
 
         return back()->with('success', 'Profile updated successfully.');

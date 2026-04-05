@@ -86,8 +86,9 @@
                             <label class="form-label">Full Name</label>
                             <div class="citizen-input-wrap">
                                 <i class="bi bi-person citizen-input-icon"></i>
-                                <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                                <input type="text" class="form-control citizen-disabled-input" value="{{ $user->name }}" disabled>
                             </div>
+                            <div class="form-text">Name cannot be changed. Contact support if needed.</div>
                         </div>
                         <div>
                             <label class="form-label">Email Address</label>
@@ -98,33 +99,33 @@
                             <div class="form-text">Email cannot be changed. Contact support if needed.</div>
                         </div>
                         <div>
+                            <label class="form-label">National ID Number</label>
+                            <div class="citizen-input-wrap">
+                                <i class="bi bi-credit-card-2-front citizen-input-icon"></i>
+                                <input type="text" class="form-control citizen-disabled-input citizen-mono" value="{{ $user->national_id ?? 'Not set' }}" disabled>
+                            </div>
+                            <div class="form-text">National ID cannot be changed. Contact support if needed.</div>
+                        </div>
+                        <div>
+                            <label class="form-label">National ID Document</label>
+                            @if($user->id_document)
+                                <div class="citizen-id-verified">
+                                    <i class="bi bi-patch-check-fill"></i>
+                                    <span>ID document on file — verified at registration</span>
+                                </div>
+                            @else
+                                <div class="citizen-id-missing">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    <span>No ID document uploaded. Contact support.</span>
+                                </div>
+                            @endif
+                        </div>
+                        <div>
                             <label class="form-label">Phone Number</label>
                             <div class="citizen-input-wrap">
                                 <i class="bi bi-phone citizen-input-icon"></i>
                                 <input type="tel" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="+961 xx xxx xxx">
                             </div>
-                        </div>
-                        <div>
-                            <label class="form-label">National ID Number</label>
-                            <div class="citizen-input-wrap">
-                                <i class="bi bi-credit-card-2-front citizen-input-icon"></i>
-                                <input type="text" id="national_id" name="national_id" class="form-control" value="{{ old('national_id', $user->national_id) }}" placeholder="LB-XXXXXXXXX" required>
-                            </div>
-                            <div class="form-text">Required to complete your account verification.</div>
-                        </div>
-                        <div>
-                            <label class="form-label">National ID Document <span class="text-muted fw-normal">(photo or scan)</span></label>
-                            <div class="citizen-upload-zone" id="idUploadZone" onclick="document.getElementById('national_id_doc').click()">
-                                <div class="citizen-upload-icon"><i class="bi bi-cloud-upload"></i></div>
-                                <div class="citizen-upload-title">Click to upload your ID document</div>
-                                <div class="citizen-upload-sub">JPG, PNG or PDF - Max 5MB</div>
-                                <input type="file" id="national_id_doc" name="national_id_document" accept=".jpg,.jpeg,.png,.pdf">
-                            </div>
-                            <div class="citizen-upload-preview" id="uploadPreview">
-                                <i class="bi bi-file-earmark-check"></i>
-                                <span id="uploadName">File selected</span>
-                            </div>
-                            <div id="ocrStatus" class="citizen-ocr-status" style="display:none;"></div>
                         </div>
                         <div class="citizen-password-zone">
                             <label class="form-label citizen-password-label">Change Password <span class="fw-normal">(leave blank to keep current)</span></label>
@@ -506,11 +507,27 @@ body.es-role-citizen .citizen-password-grid {
     gap: .7rem;
 }
 
-body.es-role-citizen .citizen-ocr-status {
-    margin-top: .55rem;
-    font-size: .75rem;
-    border-radius: .55rem;
-    padding: .45rem .6rem;
+body.es-role-citizen .citizen-id-verified,
+body.es-role-citizen .citizen-id-missing {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .65rem .9rem;
+    border-radius: .65rem;
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+body.es-role-citizen .citizen-id-verified {
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    color: #047857;
+}
+
+body.es-role-citizen .citizen-id-missing {
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    color: #9A3412;
 }
 
 body.es-role-citizen .citizen-info-row {
