@@ -120,12 +120,50 @@
                                 </div>
                             @endif
                         </div>
+                        {{-- Phone Verification --}}
                         <div>
-                            <label class="form-label">Phone Number</label>
-                            <div class="citizen-input-wrap">
-                                <i class="bi bi-phone citizen-input-icon"></i>
-                                <input type="tel" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="+961 xx xxx xxx">
-                            </div>
+                            <label class="form-label d-flex align-items-center gap-2">
+                                Phone Number
+                                @if($user->phone_verified_at)
+                                    <span class="citizen-badge is-success" style="font-size:.65rem"><i class="bi bi-patch-check-fill me-1"></i>Verified</span>
+                                @elseif($user->phone)
+                                    <span class="citizen-badge" style="font-size:.65rem;color:#B45309;background:#FFFBEB;border-color:#FDE68A"><i class="bi bi-exclamation-circle me-1"></i>Not verified</span>
+                                @endif
+                            </label>
+
+                            @if(!session('otp_sent'))
+                                {{-- Step 1: enter phone + send code --}}
+                                <form action="{{ route('citizen.profile.phone.otp.send') }}" method="POST" class="d-flex gap-2">
+                                    @csrf
+                                    <div class="citizen-input-wrap flex-grow-1">
+                                        <i class="bi bi-phone citizen-input-icon"></i>
+                                        <input type="tel" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="+961 xx xxx xxx" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm text-nowrap">
+                                        <i class="bi bi-send me-1"></i>Send Code
+                                    </button>
+                                </form>
+                            @else
+                                {{-- Step 2: enter OTP --}}
+                                <div class="citizen-otp-box">
+                                    <div class="citizen-otp-info">
+                                        <i class="bi bi-phone-vibrate"></i>
+                                        <span>Code sent! Check your phone (or the Laravel log if SMS is in log mode).</span>
+                                    </div>
+                                    <form action="{{ route('citizen.profile.phone.otp.verify') }}" method="POST" class="d-flex gap-2 mt-2">
+                                        @csrf
+                                        <input type="text" name="otp" class="form-control text-center citizen-otp-input @error('otp') is-invalid @enderror"
+                                               maxlength="6" placeholder="_ _ _ _ _ _" autocomplete="one-time-code" required>
+                                        <button type="submit" class="btn btn-success btn-sm text-nowrap">
+                                            <i class="bi bi-check2 me-1"></i>Verify
+                                        </button>
+                                    </form>
+                                    @error('otp')
+                                        <div class="text-danger mt-1" style="font-size:.75rem">{{ $message }}</div>
+                                    @enderror
+                                    <a href="{{ route('citizen.profile') }}" class="d-block mt-1" style="font-size:.73rem;color:#64748B">Wrong number? Start over</a>
+                                </div>
+                            @endif
                         </div>
                         <div class="citizen-password-zone">
                             <label class="form-label citizen-password-label">Change Password <span class="fw-normal">(leave blank to keep current)</span></label>
@@ -505,6 +543,30 @@ body.es-role-citizen .citizen-password-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: .7rem;
+}
+
+body.es-role-citizen .citizen-otp-box {
+    background: #F0FDF4;
+    border: 1px solid #A7F3D0;
+    border-radius: .65rem;
+    padding: .75rem;
+}
+
+body.es-role-citizen .citizen-otp-info {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .78rem;
+    color: #047857;
+    font-weight: 600;
+}
+
+body.es-role-citizen .citizen-otp-input {
+    font-size: 1.2rem;
+    letter-spacing: .3em;
+    font-weight: 700;
+    text-align: center;
+    max-width: 160px;
 }
 
 body.es-role-citizen .citizen-id-verified,

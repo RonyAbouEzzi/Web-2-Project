@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Events\{AppointmentReminderBroadcast, NewRequestSubmitted, RequestDocumentUploaded};
 use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceRequest};
 use App\Notifications\AppointmentReminder;
+use App\Notifications\PhoneVerificationNotification;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
 use App\Services\{QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, Hash, Storage};
@@ -49,19 +52,52 @@ class CitizenController extends Controller
     {
         $user = Auth::user();
         $data = $request->validate([
-            'phone'    => 'nullable|string|max:20',
             'password' => 'nullable|min:8|confirmed',
         ]);
 
-        $user->phone = $data['phone'] ?? $user->phone;
-
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
+            $user->save();
         }
 
+        return back()->with('success', 'Password updated successfully.');
+    }
+
+    public function sendPhoneOtp(Request $request)
+    {
+        $data = $request->validate(['phone' => 'required|string|max:20']);
+        $phone = $data['phone'];
+
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        Cache::put('phone_otp_' . Auth::id(), [
+            'otp'   => $otp,
+            'phone' => $phone,
+        ], now()->addMinutes(5));
+
+        Notification::route('sms', $phone)
+            ->notify(new PhoneVerificationNotification($otp));
+
+        return back()->with('otp_sent', true);
+    }
+
+    public function verifyPhoneOtp(Request $request)
+    {
+        $data   = $request->validate(['otp' => 'required|string|size:6']);
+        $cached = Cache::get('phone_otp_' . Auth::id());
+
+        if (!$cached || $cached['otp'] !== $data['otp']) {
+            return back()->withErrors(['otp' => 'Invalid or expired code. Please try again.'])->with('otp_sent', true);
+        }
+
+        $user = Auth::user();
+        $user->phone            = $cached['phone'];
+        $user->phone_verified_at = now();
         $user->save();
 
-        return back()->with('success', 'Profile updated successfully.');
+        Cache::forget('phone_otp_' . Auth::id());
+
+        return back()->with('success', 'Phone number verified successfully!');
     }
 
     // ── Browse Services ───────────────────────────────────────────
