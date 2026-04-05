@@ -226,6 +226,8 @@
 
         .lp-headline em {
             font-style: italic;
+        }
+        .lp-headline em .word {
             background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 45%, #2DD4BF 65%, var(--gold) 100%);
             background-size: 250% 100%;
             -webkit-background-clip: text;

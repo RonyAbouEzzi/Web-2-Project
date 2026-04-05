@@ -9,12 +9,16 @@ use Illuminate\Support\Str;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
 use Stripe\Exception\ApiErrorException;
+use Stripe\HttpClient\CurlClient;
 
 class PaymentService
 {
     public function __construct()
     {
         Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setMaxNetworkRetries(0);
+        CurlClient::instance()->setTimeout(30);
+        CurlClient::instance()->setConnectTimeout(10);
     }
 
     public function process(ServiceRequest $serviceRequest, string $method, array $payload): array
@@ -58,7 +62,9 @@ class PaymentService
                 'session_id'   => $session->id,
             ];
         } catch (ApiErrorException $e) {
-            return ['success' => false, 'message' => $e->getMessage()];
+            return ['success' => false, 'message' => 'Stripe error: ' . $e->getMessage()];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Could not connect to payment processor. Please try again.'];
         }
     }
 

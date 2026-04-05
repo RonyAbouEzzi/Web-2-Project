@@ -140,9 +140,10 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
         // Payment
         Route::get('/requests/{serviceRequest}/payment',  [CitizenController::class, 'showPayment'])->name('payment');
         Route::post('/requests/{serviceRequest}/payment', [CitizenController::class, 'processPayment'])->name('payment.process');
-        Route::get('/requests/{serviceRequest}/payment/success', [CitizenController::class, 'paymentSuccess'])->name('payment.success');
-        Route::get('/requests/{serviceRequest}/payment/cancel',  [CitizenController::class, 'paymentCancel'])->name('payment.cancel');
-        Route::post('/requests/{serviceRequest}/payment/crypto', [CitizenController::class, 'confirmCryptoPayment'])->name('payment.crypto.confirm');
+        Route::get('/requests/{serviceRequest}/payment/success',  [CitizenController::class, 'paymentSuccess'])->name('payment.success');
+        Route::get('/requests/{serviceRequest}/payment/cancel',   [CitizenController::class, 'paymentCancel'])->name('payment.cancel');
+        Route::get('/requests/{serviceRequest}/payment/simulate', [CitizenController::class, 'paymentSimulate'])->name('payment.simulate');
+        Route::post('/requests/{serviceRequest}/payment/crypto',  [CitizenController::class, 'confirmCryptoPayment'])->name('payment.crypto.confirm');
 
         // Appointments
         Route::post('/appointments', [CitizenController::class, 'bookAppointment'])->name('appointments.book');
