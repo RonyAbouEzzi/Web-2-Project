@@ -126,8 +126,8 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
     // Profile
     Route::get('/profile',  [CitizenController::class, 'profile'])->name('profile');
     Route::put('/profile',  [CitizenController::class, 'updateProfile'])->name('profile.update');
-    Route::post('/profile/phone/send-otp', [CitizenController::class, 'sendPhoneOtp'])->name('profile.phone.otp.send');
-    Route::post('/profile/phone/verify',   [CitizenController::class, 'verifyPhoneOtp'])->name('profile.phone.otp.verify');
+    Route::post('/profile/avatar', [CitizenController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::post('/profile/phone/firebase-verify', [CitizenController::class, 'firebaseVerifyPhone'])->name('profile.phone.firebase');
     Route::post('/profile/id-extract', [AuthController::class, 'extractNationalIdDocument'])->name('profile.id-extract');
 
     // Browse
@@ -158,6 +158,10 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
     // My requests
     Route::get('/requests',                   [CitizenController::class, 'myRequests'])->name('requests');
     Route::get('/requests/{serviceRequest}',  [CitizenController::class, 'showRequest'])->name('requests.show');
+
+    // Appointments & Payments (dedicated pages)
+    Route::get('/appointments', [CitizenController::class, 'myAppointments'])->name('appointments');
+    Route::get('/payments',     [CitizenController::class, 'myPayments'])->name('payments');
 
     // Messages
     Route::post('/requests/{serviceRequest}/messages', [CitizenController::class, 'sendMessage'])->name('messages.send');

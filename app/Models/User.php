@@ -13,7 +13,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'phone', 'national_id',
+        'name', 'email', 'password', 'role', 'phone', 'phone_verified_at', 'national_id',
         'id_document',          // column in migration
         'is_active',
         'two_factor_secret',    // column in migration

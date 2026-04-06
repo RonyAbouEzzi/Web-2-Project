@@ -63,6 +63,38 @@ class CitizenController extends Controller
         return back()->with('success', 'Password updated successfully.');
     }
 
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        $user = Auth::user();
+
+        // Delete old avatar if exists
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->avatar = $path;
+        $user->save();
+
+        return back()->with('success', 'Profile photo updated!');
+    }
+
+    public function firebaseVerifyPhone(Request $request)
+    {
+        $data = $request->validate(['phone' => 'required|string|max:20']);
+
+        $user = Auth::user();
+        $user->phone             = $data['phone'];
+        $user->phone_verified_at = now();
+        $user->save();
+
+        return response()->json(['success' => true]);
+    }
+
     public function sendPhoneOtp(Request $request)
     {
         $data = $request->validate(['phone' => 'required|string|max:20']);
@@ -98,6 +130,30 @@ class CitizenController extends Controller
         Cache::forget('phone_otp_' . Auth::id());
 
         return back()->with('success', 'Phone number verified successfully!');
+    }
+
+    // ── My Appointments ──────────────────────────────────────────
+    public function myAppointments()
+    {
+        $appointments = Auth::user()->appointments()
+            ->with(['office', 'request.service'])
+            ->orderByRaw("CASE WHEN appointment_date >= CURDATE() THEN 0 ELSE 1 END")
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time')
+            ->paginate(15);
+
+        return view('citizen.appointments.index', compact('appointments'));
+    }
+
+    // ── My Payments ──────────────────────────────────────────────
+    public function myPayments()
+    {
+        $requests = Auth::user()->serviceRequests()
+            ->with(['service', 'office'])
+            ->latest()
+            ->paginate(15);
+
+        return view('citizen.payments.index', compact('requests'));
     }
 
     // ── Browse Services ───────────────────────────────────────────

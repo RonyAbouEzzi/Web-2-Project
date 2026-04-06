@@ -16,6 +16,6 @@ class PhoneVerificationNotification extends Notification
 
     public function toSms(object $notifiable): string
     {
-        return "Your CedarGov verification code is: {$this->otp}. Valid for 5 minutes. Do not share this code.";
+        return "CedarGov: Your verification code is {$this->otp}. Valid for 5 minutes. Do not share this code.";
     }
 }

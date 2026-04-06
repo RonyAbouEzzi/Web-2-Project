@@ -30,8 +30,21 @@
 
     <div class="card citizen-profile-head citizen-reveal" data-citizen-reveal>
         <div class="card-body">
-            <div class="citizen-profile-avatar">
-                {{ strtoupper(substr($user->name, 0, 1)) }}
+            <div class="citizen-profile-avatar-wrap">
+                @if($user->avatar)
+                    <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" class="citizen-profile-avatar-img">
+                @else
+                    <div class="citizen-profile-avatar">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </div>
+                @endif
+                <label class="citizen-avatar-edit" for="avatar-input" title="Change photo">
+                    <i class="bi bi-camera-fill"></i>
+                </label>
+                <form id="avatar-form" action="{{ route('citizen.profile.avatar') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="file" id="avatar-input" name="avatar" accept="image/jpeg,image/png,image/webp" hidden>
+                </form>
             </div>
             <div class="citizen-profile-main">
                 <h2 class="citizen-profile-name">{{ $user->name }}</h2>
@@ -120,7 +133,7 @@
                                 </div>
                             @endif
                         </div>
-                        {{-- Phone Verification --}}
+                        {{-- Phone Verification (Firebase) --}}
                         <div>
                             <label class="form-label d-flex align-items-center gap-2">
                                 Phone Number
@@ -131,39 +144,47 @@
                                 @endif
                             </label>
 
-                            @if(!session('otp_sent'))
-                                {{-- Step 1: enter phone + send code --}}
-                                <form action="{{ route('citizen.profile.phone.otp.send') }}" method="POST" class="d-flex gap-2">
-                                    @csrf
+                            {{-- Step 1: Enter phone + Send Code --}}
+                            <div id="fb-step-1">
+                                <div class="d-flex gap-2">
                                     <div class="citizen-input-wrap flex-grow-1">
                                         <i class="bi bi-phone citizen-input-icon"></i>
-                                        <input type="tel" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="+961 xx xxx xxx" required>
+                                        <input type="tel" id="fb-phone-input" class="form-control"
+                                               value="{{ $user->phone }}" placeholder="+96170551180">
                                     </div>
-                                    <button type="submit" class="btn btn-outline-primary btn-sm text-nowrap">
+                                    <button type="button" id="fb-send-btn" class="btn btn-outline-primary btn-sm text-nowrap">
                                         <i class="bi bi-send me-1"></i>Send Code
                                     </button>
-                                </form>
-                            @else
-                                {{-- Step 2: enter OTP --}}
-                                <div class="citizen-otp-box">
-                                    <div class="citizen-otp-info">
-                                        <i class="bi bi-phone-vibrate"></i>
-                                        <span>Code sent! Check your phone (or the Laravel log if SMS is in log mode).</span>
-                                    </div>
-                                    <form action="{{ route('citizen.profile.phone.otp.verify') }}" method="POST" class="d-flex gap-2 mt-2">
-                                        @csrf
-                                        <input type="text" name="otp" class="form-control text-center citizen-otp-input @error('otp') is-invalid @enderror"
-                                               maxlength="6" placeholder="_ _ _ _ _ _" autocomplete="one-time-code" required>
-                                        <button type="submit" class="btn btn-success btn-sm text-nowrap">
-                                            <i class="bi bi-check2 me-1"></i>Verify
-                                        </button>
-                                    </form>
-                                    @error('otp')
-                                        <div class="text-danger mt-1" style="font-size:.75rem">{{ $message }}</div>
-                                    @enderror
-                                    <a href="{{ route('citizen.profile') }}" class="d-block mt-1" style="font-size:.73rem;color:#64748B">Wrong number? Start over</a>
                                 </div>
-                            @endif
+                                <div class="form-text">No spaces — e.g. +96170551180</div>
+                                <div id="recaptcha-container"></div>
+                                <div id="fb-send-error" class="text-danger mt-1" style="font-size:.75rem;display:none"></div>
+                            </div>
+
+                            {{-- Step 2: Enter OTP --}}
+                            <div id="fb-step-2" class="citizen-otp-box d-none">
+                                <div class="citizen-otp-info">
+                                    <i class="bi bi-phone-vibrate"></i>
+                                    <span>Code sent! Enter the 6-digit code from your SMS.</span>
+                                </div>
+                                <div class="d-flex gap-2 mt-2">
+                                    <input type="text" id="fb-otp-input" class="form-control citizen-otp-input"
+                                           maxlength="6" placeholder="_ _ _ _ _ _" autocomplete="one-time-code" inputmode="numeric">
+                                    <button type="button" id="fb-verify-btn" class="btn btn-success btn-sm text-nowrap">
+                                        <i class="bi bi-check2 me-1"></i>Verify
+                                    </button>
+                                </div>
+                                <div id="fb-otp-error" class="text-danger mt-1" style="font-size:.75rem;display:none"></div>
+                                <button type="button" id="fb-restart-btn" style="font-size:.73rem;color:#64748B;background:none;border:none;padding:0;margin-top:.3rem;cursor:pointer">
+                                    Wrong number? Start over
+                                </button>
+                            </div>
+
+                            {{-- Step 3: Success flash --}}
+                            <div id="fb-step-3" class="citizen-id-verified d-none">
+                                <i class="bi bi-patch-check-fill"></i>
+                                <span>Phone verified! Refreshing...</span>
+                            </div>
                         </div>
                         <div class="citizen-password-zone">
                             <label class="form-label citizen-password-label">Change Password <span class="fw-normal">(leave blank to keep current)</span></label>
@@ -316,6 +337,11 @@ body.es-role-citizen .citizen-profile-head .card-body {
     flex-wrap: wrap;
 }
 
+body.es-role-citizen .citizen-profile-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
 body.es-role-citizen .citizen-profile-avatar {
     width: 4.5rem;
     height: 4.5rem;
@@ -331,6 +357,39 @@ body.es-role-citizen .citizen-profile-avatar {
     background: linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%);
     border: 3px solid #fff;
     box-shadow: 0 10px 22px rgba(37, 99, 235, 0.2);
+}
+
+body.es-role-citizen .citizen-profile-avatar-img {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.2);
+}
+
+body.es-role-citizen .citizen-avatar-edit {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #2563EB;
+    color: #fff;
+    font-size: .68rem;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+    transition: background .18s ease, transform .18s ease;
+}
+
+body.es-role-citizen .citizen-avatar-edit:hover {
+    background: #1D4ED8;
+    transform: scale(1.1);
 }
 
 body.es-role-citizen .citizen-profile-main {
@@ -733,6 +792,16 @@ body.es-role-citizen .citizen-panel-empty p {
 
 @push('scripts')
 <script>
+// Avatar auto-upload
+const avatarInput = document.getElementById('avatar-input');
+if (avatarInput) {
+    avatarInput.addEventListener('change', () => {
+        if (avatarInput.files.length) {
+            document.getElementById('avatar-form').submit();
+        }
+    });
+}
+
 const zone = document.getElementById('idUploadZone');
 const input = document.getElementById('national_id_doc');
 const preview = document.getElementById('uploadPreview');
@@ -831,6 +900,139 @@ zone?.addEventListener('drop', (event) => {
         input.files = event.dataTransfer.files;
         handleSelectedFile(event.dataTransfer.files[0]);
     }
+});
+</script>
+@endpush
+
+@push('scripts')
+{{-- Firebase Phone Auth --}}
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+if (!firebase.apps.length) {
+firebase.initializeApp({
+    apiKey:            "AIzaSyAWvJLrqHqRwIN84xDEePsNf9u329foFZ0",
+    authDomain:        "cedargov-f6962.firebaseapp.com",
+    projectId:         "cedargov-f6962",
+    storageBucket:     "cedargov-f6962.firebasestorage.app",
+    messagingSenderId: "777539421796",
+    appId:             "1:777539421796:web:e19b77c25439d338314171",
+});
+}
+
+const fbAuth       = firebase.auth();
+fbAuth.useDeviceLanguage();
+const fbStep1      = document.getElementById('fb-step-1');
+const fbStep2      = document.getElementById('fb-step-2');
+const fbStep3      = document.getElementById('fb-step-3');
+const fbSendBtn    = document.getElementById('fb-send-btn');
+const fbVerifyBtn  = document.getElementById('fb-verify-btn');
+const fbRestartBtn = document.getElementById('fb-restart-btn');
+const fbPhoneInput = document.getElementById('fb-phone-input');
+const fbOtpInput   = document.getElementById('fb-otp-input');
+const fbSendErr    = document.getElementById('fb-send-error');
+const fbOtpErr     = document.getElementById('fb-otp-error');
+
+let recaptchaVerifier = null;
+let recaptchaWidgetId = null;
+let confirmationResult = null;
+
+function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+function hideErr(el)       { el.style.display = 'none'; }
+function resetRecaptchaToken() {
+    if (window.grecaptcha && recaptchaWidgetId !== null) {
+        window.grecaptcha.reset(recaptchaWidgetId);
+    }
+}
+
+async function ensureRecaptchaVerifier() {
+    if (recaptchaVerifier) {
+        resetRecaptchaToken();
+        return recaptchaVerifier;
+    }
+
+    const container = document.getElementById('recaptcha-container');
+    if (!container) {
+        throw new Error('reCAPTCHA container not found on page.');
+    }
+
+    recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+        callback: () => {},
+        'expired-callback': () => resetRecaptchaToken(),
+    });
+
+    recaptchaWidgetId = await recaptchaVerifier.render();
+    return recaptchaVerifier;
+}
+
+fbSendBtn?.addEventListener('click', async () => {
+    hideErr(fbSendErr);
+    const phone = (fbPhoneInput?.value ?? '').trim().replace(/\s+/g, '');
+    if (!phone) { showErr(fbSendErr, 'Please enter your phone number.'); return; }
+
+    fbSendBtn.disabled = true;
+    fbSendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending...';
+
+    try {
+        const appVerifier = await ensureRecaptchaVerifier();
+        confirmationResult = await fbAuth.signInWithPhoneNumber(phone, appVerifier);
+        fbStep1.classList.add('d-none');
+        fbStep2.classList.remove('d-none');
+    } catch (err) {
+        fbSendBtn.disabled = false;
+        fbSendBtn.innerHTML = '<i class="bi bi-send me-1"></i>Send Code';
+        resetRecaptchaToken();
+
+        if (err?.code === 'auth/invalid-app-credential') {
+            showErr(fbSendErr, 'Firebase rejected reCAPTCHA token. Open the app with the exact authorized host (localhost or 127.0.0.1), then retry.');
+            return;
+        }
+
+        showErr(fbSendErr, err?.message ?? 'Failed. Use format: +96170551180');
+    }
+});
+
+fbVerifyBtn?.addEventListener('click', async () => {
+    hideErr(fbOtpErr);
+    const code = (fbOtpInput?.value ?? '').trim();
+    if (code.length !== 6) { showErr(fbOtpErr, 'Enter the 6-digit code.'); return; }
+
+    fbVerifyBtn.disabled = true;
+    fbVerifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Verifying...';
+
+    try {
+        const result = await confirmationResult.confirm(code);
+        const phone  = result.user.phoneNumber;
+
+        const resp = await fetch('{{ route("citizen.profile.phone.firebase") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN':  '{{ csrf_token() }}',
+                'Accept':        'application/json',
+            },
+            body: JSON.stringify({ phone }),
+        });
+
+        if (resp.ok) {
+            fbStep2.classList.add('d-none');
+            fbStep3.classList.remove('d-none');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            throw new Error('Server error saving phone.');
+        }
+    } catch (err) {
+        fbVerifyBtn.disabled = false;
+        fbVerifyBtn.innerHTML = '<i class="bi bi-check2 me-1"></i>Verify';
+        showErr(fbOtpErr, 'Invalid code. Please try again.');
+    }
+});
+
+fbRestartBtn?.addEventListener('click', () => {
+    fbStep2.classList.add('d-none');
+    fbStep1.classList.remove('d-none');
+    if (fbOtpInput) fbOtpInput.value = '';
 });
 </script>
 @endpush

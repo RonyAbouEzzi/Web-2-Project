@@ -1174,13 +1174,13 @@
                         <span class="es-nav-badge">{{ $activeCitizenRequests }}</span>
                     @endif
                 </a>
-                <a href="{{ route('citizen.requests') }}?appointments=1"
-                   class="es-nav-link">
+                <a href="{{ route('citizen.appointments') }}"
+                   class="es-nav-link {{ request()->routeIs('citizen.appointments') ? 'active' : '' }}">
                     <i class="bi bi-calendar-event"></i>
                     <span class="es-nav-label">Appointments</span>
                 </a>
-                <a href="{{ route('citizen.requests') }}?payment_status=unpaid"
-                   class="es-nav-link">
+                <a href="{{ route('citizen.payments') }}"
+                   class="es-nav-link {{ request()->routeIs('citizen.payments') ? 'active' : '' }}">
                     <i class="bi bi-credit-card"></i>
                     <span class="es-nav-label">Payments</span>
                 </a>
@@ -1277,9 +1277,13 @@
 
                 {{-- User menu --}}
                 <div class="dropdown ms-1">
-                    <div class="es-avatar" data-bs-toggle="dropdown" role="button" aria-expanded="false">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                    </div>
+                    @if($user->avatar)
+                        <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" class="es-avatar" data-bs-toggle="dropdown" role="button" aria-expanded="false" style="object-fit:cover;">
+                    @else
+                        <div class="es-avatar" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                        </div>
+                    @endif
                     <ul class="dropdown-menu dropdown-menu-end" style="min-width:210px;">
                         <li>
                             <div class="px-3 py-2 border-bottom" style="border-color:var(--es-border)!important;">
