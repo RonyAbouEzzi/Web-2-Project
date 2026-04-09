@@ -298,69 +298,129 @@
 
 @push('styles')
 <style>
+/* ═══════════════════════════════════════════════════════
+   CITIZEN DASHBOARD — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Hero card: animated gradient mesh + glassmorphism ── */
 body.es-role-citizen .citizen-hero-card {
     position: relative;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--es-primary) 18%, var(--es-border) 82%);
-    background: radial-gradient(circle at 16% -10%, rgba(56, 189, 248, 0.2) 0, rgba(56, 189, 248, 0) 52%),
-                radial-gradient(circle at 92% 116%, rgba(16, 185, 129, 0.17) 0, rgba(16, 185, 129, 0) 58%),
-                linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 248, 255, 0.9) 100%);
+    border: 1px solid rgba(255,255,255,0.5);
+    background:
+        radial-gradient(ellipse at 20% -20%, rgba(56,189,248,0.25) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 120%, rgba(99,102,241,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%, rgba(16,185,129,0.08) 0%, transparent 60%),
+        rgba(255,255,255,0.65);
+    backdrop-filter: blur(16px) saturate(1.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    box-shadow: 0 8px 32px rgba(14,165,233,0.08), 0 1px 2px rgba(15,23,42,0.04);
+}
+
+body.es-role-citizen .citizen-hero-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 60%;
+    height: 200%;
+    background: linear-gradient(135deg, transparent 30%, rgba(56,189,248,0.06) 50%, transparent 70%);
+    animation: citizenHeroSweep 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes citizenHeroSweep {
+    0%, 100% { transform: translateX(-30%) rotate(25deg); opacity: 0; }
+    50% { transform: translateX(30%) rotate(25deg); opacity: 1; }
 }
 
 body.es-role-citizen .citizen-hero-eyebrow {
     display: inline-flex;
     align-items: center;
     gap: .35rem;
-    padding: .22rem .58rem;
+    padding: .25rem .65rem;
     border-radius: 999px;
-    font-size: .67rem;
+    font-size: .65rem;
     font-weight: 700;
-    letter-spacing: .05em;
+    letter-spacing: .06em;
     text-transform: uppercase;
-    color: #0F766E;
-    background: rgba(153, 246, 228, 0.55);
+    color: #fff;
+    background: linear-gradient(135deg, #0EA5E9, #6366F1);
+    box-shadow: 0 2px 10px rgba(14,165,233,0.3);
 }
 
 body.es-role-citizen .citizen-hero-title {
-    margin: .9rem 0 .45rem;
-    font-size: clamp(1.38rem, 2.4vw, 1.85rem);
+    margin: 1rem 0 .5rem;
+    font-size: clamp(1.5rem, 2.8vw, 2rem);
     font-weight: 800;
-    letter-spacing: -0.02em;
-    color: #0F172A;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #0F172A 0%, #0EA5E9 60%, #6366F1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 body.es-role-citizen .citizen-hero-copy {
     margin: 0;
     color: #475569;
-    font-size: .9rem;
+    font-size: .88rem;
     max-width: 42rem;
+    line-height: 1.6;
 }
 
 body.es-role-citizen .citizen-progress-wrap {
-    margin-top: 1rem;
+    margin-top: 1.2rem;
 }
 
 body.es-role-citizen .citizen-progress-label {
-    font-size: .74rem;
+    font-size: .72rem;
     color: #475569;
     font-weight: 600;
 }
 
 body.es-role-citizen .citizen-progress-value {
     font-size: .77rem;
-    color: #0F766E;
-    font-weight: 700;
+    background: linear-gradient(135deg, #0EA5E9, #6366F1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
 }
 
 body.es-role-citizen .citizen-progress-bar {
-    height: .5rem;
+    height: .55rem;
     border-radius: 999px;
-    background: #DBEAFE;
+    background: rgba(219,234,254,0.6);
+    overflow: hidden;
 }
 
 body.es-role-citizen .citizen-progress-bar .progress-bar {
     border-radius: 999px;
-    background: linear-gradient(90deg, #06B6D4 0%, #0EA5E9 55%, #2563EB 100%);
+    background: linear-gradient(90deg, #06B6D4 0%, #0EA5E9 40%, #6366F1 100%);
+    position: relative;
+    overflow: hidden;
+    animation: citizenProgressGrow .8s cubic-bezier(.4,0,.2,1) forwards;
+}
+
+body.es-role-citizen .citizen-progress-bar .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    animation: citizenBarShimmer 2s ease-in-out infinite 1s;
+}
+
+@keyframes citizenProgressGrow {
+    from { width: 0 !important; }
+}
+
+@keyframes citizenBarShimmer {
+    0% { left: -100%; }
+    100% { left: 200%; }
 }
 
 body.es-role-citizen .citizen-inline-alert {
@@ -368,61 +428,61 @@ body.es-role-citizen .citizen-inline-alert {
     align-items: center;
     gap: .42rem;
     border-radius: 999px;
-    padding: .32rem .68rem;
+    padding: .34rem .72rem;
     font-size: .74rem;
     font-weight: 600;
-    background: #FFF7ED;
+    background: rgba(255,247,237,0.8);
     color: #9A3412;
     border: 1px solid #FED7AA;
+    backdrop-filter: blur(4px);
 }
 
 body.es-role-citizen .citizen-inline-alert.is-success {
-    background: #ECFDF5;
+    background: rgba(236,253,245,0.8);
     border-color: #A7F3D0;
     color: #047857;
 }
 
+/* ── Hero panel (profile readiness) ── */
 body.es-role-citizen .citizen-hero-panel {
     position: relative;
-    border: 1px solid rgba(37, 99, 235, 0.18);
-    border-radius: 1rem;
-    padding: 1rem;
-    background: linear-gradient(150deg, rgba(219, 234, 254, 0.76) 0%, rgba(240, 249, 255, 0.92) 100%);
-    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 1.2rem;
+    padding: 1.2rem;
+    background: linear-gradient(150deg, rgba(224,242,254,0.5) 0%, rgba(238,242,255,0.6) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 12px 32px rgba(14,165,233,0.12), inset 0 1px 0 rgba(255,255,255,0.5);
     overflow: hidden;
 }
 
 body.es-role-citizen .citizen-hero-orb {
     position: absolute;
     border-radius: 999px;
-    filter: blur(1px);
+    filter: blur(2px);
     animation: citizenFloat 6s ease-in-out infinite;
 }
 
 body.es-role-citizen .citizen-hero-orb-one {
-    width: 6rem;
-    height: 6rem;
-    top: -2.6rem;
-    right: -2.1rem;
-    background: rgba(14, 165, 233, 0.32);
+    width: 7rem;
+    height: 7rem;
+    top: -3rem;
+    right: -2.5rem;
+    background: radial-gradient(circle, rgba(14,165,233,0.35) 0%, rgba(99,102,241,0.15) 100%);
 }
 
 body.es-role-citizen .citizen-hero-orb-two {
-    width: 4.8rem;
-    height: 4.8rem;
-    bottom: -2rem;
-    left: -1.4rem;
-    background: rgba(16, 185, 129, 0.28);
+    width: 5.5rem;
+    height: 5.5rem;
+    bottom: -2.5rem;
+    left: -1.8rem;
+    background: radial-gradient(circle, rgba(16,185,129,0.3) 0%, rgba(14,165,233,0.1) 100%);
     animation-delay: .8s;
 }
 
 @keyframes citizenFloat {
-    0%, 100% {
-        transform: translateY(0) scale(1);
-    }
-    50% {
-        transform: translateY(-8px) scale(1.03);
-    }
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.06); }
 }
 
 body.es-role-citizen .citizen-hero-meta {
@@ -431,115 +491,190 @@ body.es-role-citizen .citizen-hero-meta {
 }
 
 body.es-role-citizen .citizen-hero-meta-label {
-    font-size: .72rem;
-    color: #475569;
-    font-weight: 600;
-}
-
-body.es-role-citizen .citizen-hero-meta-value {
-    margin-top: .25rem;
-    line-height: 1;
-    font-size: 2rem;
-    letter-spacing: -0.03em;
-    font-weight: 800;
-    color: #0F172A;
-}
-
-body.es-role-citizen .citizen-hero-meta-suffix {
-    margin-top: .2rem;
-    font-size: .77rem;
-    color: #475569;
-}
-
-body.es-role-citizen .citizen-kpi-card {
-    border-radius: .9rem;
-    border-color: color-mix(in srgb, var(--es-border) 72%, #BFDBFE 28%);
-}
-
-body.es-role-citizen .citizen-kpi-label {
-    display: block;
-    margin-bottom: .18rem;
+    font-size: .7rem;
     color: #64748B;
-    font-size: .72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .05em;
 }
 
+body.es-role-citizen .citizen-hero-meta-value {
+    margin-top: .3rem;
+    line-height: 1;
+    font-size: 2.4rem;
+    letter-spacing: -0.04em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0F172A 0%, #0EA5E9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.es-role-citizen .citizen-hero-meta-suffix {
+    margin-top: .25rem;
+    font-size: .77rem;
+    color: #64748B;
+    font-weight: 500;
+}
+
+/* ── KPI cards: each with unique gradient accent ── */
+body.es-role-citizen .citizen-kpi-card {
+    border-radius: 1rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+body.es-role-citizen .citizen-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 1rem 1rem 0 0;
+}
+
+body.es-role-citizen .col-6:nth-child(1) .citizen-kpi-card::before {
+    background: linear-gradient(90deg, #06B6D4, #0EA5E9);
+}
+body.es-role-citizen .col-6:nth-child(2) .citizen-kpi-card::before {
+    background: linear-gradient(90deg, #F59E0B, #F97316);
+}
+body.es-role-citizen .col-6:nth-child(3) .citizen-kpi-card::before {
+    background: linear-gradient(90deg, #10B981, #059669);
+}
+body.es-role-citizen .col-6:nth-child(4) .citizen-kpi-card::before {
+    background: linear-gradient(90deg, #F43F5E, #E11D48);
+}
+
+body.es-role-citizen .citizen-kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(14,165,233,0.1);
+}
+
+body.es-role-citizen .citizen-kpi-label {
+    display: block;
+    margin-bottom: .2rem;
+    color: #64748B;
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
 body.es-role-citizen .citizen-kpi-value {
     margin: 0;
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     color: #0F172A;
 }
 
 body.es-role-citizen .citizen-kpi-sub {
-    margin-top: .2rem;
-    font-size: .75rem;
-    color: #64748B;
+    margin-top: .25rem;
+    font-size: .72rem;
+    color: #94A3B8;
 }
 
+body.es-role-citizen .stat-card-icon {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: .75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ── Quick actions: glass cards with gradient hover ── */
 body.es-role-citizen .citizen-actions-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: .65rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem;
 }
 
 body.es-role-citizen .citizen-action-link {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: .68rem;
-    border-radius: .8rem;
-    padding: .72rem .8rem;
-    border: 1px solid color-mix(in srgb, var(--es-border) 74%, #BFDBFE 26%);
-    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%);
+    text-align: center;
+    gap: .55rem;
+    border-radius: 1rem;
+    padding: 1rem .8rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(8px);
     color: #0F172A;
     text-decoration: none;
-    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    position: relative;
+    overflow: hidden;
+    transition: all .3s cubic-bezier(.4,0,.2,1);
+}
+
+body.es-role-citizen .citizen-action-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    opacity: 0;
+    background: linear-gradient(135deg, rgba(14,165,233,0.08) 0%, rgba(99,102,241,0.08) 100%);
+    transition: opacity .3s ease;
 }
 
 body.es-role-citizen .citizen-action-link:hover {
-    transform: translateY(-2px);
-    border-color: #93C5FD;
-    box-shadow: 0 12px 22px rgba(37, 99, 235, 0.12);
+    transform: translateY(-4px);
+    border-color: rgba(14,165,233,0.3);
+    box-shadow: 0 16px 32px rgba(14,165,233,0.12), 0 0 0 1px rgba(14,165,233,0.1);
     color: #0F172A;
 }
 
+body.es-role-citizen .citizen-action-link:hover::before {
+    opacity: 1;
+}
+
 body.es-role-citizen .citizen-action-icon {
-    width: 2rem;
-    height: 2rem;
-    border-radius: .62rem;
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: .85rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: .94rem;
-    color: #0369A1;
-    background: #E0F2FE;
-    border: 1px solid #BAE6FD;
+    font-size: 1.1rem;
+    color: #fff;
+    background: linear-gradient(135deg, #0EA5E9, #6366F1);
+    box-shadow: 0 6px 16px rgba(14,165,233,0.3);
     flex-shrink: 0;
+    transition: all .3s ease;
+}
+
+body.es-role-citizen .citizen-action-link:hover .citizen-action-icon {
+    transform: scale(1.1);
+    box-shadow: 0 8px 24px rgba(14,165,233,0.4);
 }
 
 body.es-role-citizen .citizen-action-title {
     display: block;
     font-size: .8rem;
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 1.2;
 }
 
 body.es-role-citizen .citizen-action-sub {
     display: block;
-    margin-top: .16rem;
-    font-size: .72rem;
-    color: #64748B;
+    margin-top: .1rem;
+    font-size: .68rem;
+    color: #94A3B8;
 }
 
+/* ── Active requests table ── */
 body.es-role-citizen .citizen-table-wrap thead th {
-    font-size: .68rem;
+    font-size: .66rem;
 }
 
 body.es-role-citizen .citizen-empty i {
-    font-size: 2rem;
+    font-size: 2.2rem;
     color: #94A3B8;
 }
 
@@ -551,17 +686,20 @@ body.es-role-citizen .citizen-empty .text-muted {
     font-size: .78rem;
 }
 
+/* ── Appointment cards ── */
 body.es-role-citizen .citizen-appointment-card {
-    border-radius: .8rem;
-    border: 1px solid color-mix(in srgb, var(--es-border) 76%, #BFDBFE 24%);
-    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%);
-    padding: .7rem .78rem;
-    transition: transform .18s ease, box-shadow .18s ease;
+    border-radius: .85rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(6px);
+    padding: .72rem .82rem;
+    transition: all .25s cubic-bezier(.4,0,.2,1);
 }
 
 body.es-role-citizen .citizen-appointment-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(14,165,233,0.1);
+    border-color: rgba(14,165,233,0.2);
 }
 
 body.es-role-citizen .citizen-appointment-card .fw-semibold {
@@ -569,20 +707,27 @@ body.es-role-citizen .citizen-appointment-card .fw-semibold {
 }
 
 body.es-role-citizen .citizen-appointment-time {
-    font-size: .74rem;
+    font-size: .72rem;
+    color: #64748B;
 }
 
 body.es-role-citizen .citizen-appointment-empty,
 body.es-role-citizen .citizen-note-empty {
     font-size: .84rem;
+    color: #94A3B8;
 }
 
+/* ── Notification items ── */
 body.es-role-citizen .citizen-note-item {
-    transition: background-color .18s ease;
+    transition: all .2s ease;
+    border-radius: .5rem;
+    padding: .65rem .2rem !important;
+    margin: 0 -.2rem;
 }
 
 body.es-role-citizen .citizen-note-item:hover {
-    background: rgba(239, 246, 255, 0.55) !important;
+    background: rgba(224,242,254,0.3) !important;
+    transform: translateX(2px);
 }
 
 body.es-role-citizen .citizen-note-title {
@@ -590,28 +735,49 @@ body.es-role-citizen .citizen-note-title {
 }
 
 body.es-role-citizen .citizen-note-time {
-    font-size: .73rem;
+    font-size: .72rem;
+    color: #94A3B8;
 }
 
 body.es-role-citizen .citizen-note-badge {
-    background: #E0F2FE;
-    color: #0369A1;
-    border: 1px solid #BAE6FD;
-    font-size: .62rem;
+    background: linear-gradient(135deg, #0EA5E9, #6366F1);
+    color: #fff;
+    border: none;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: .18rem .48rem;
+    box-shadow: 0 2px 8px rgba(14,165,233,0.3);
+    animation: citizenBadgePulse 2s ease-in-out infinite;
 }
 
+@keyframes citizenBadgePulse {
+    0%, 100% { box-shadow: 0 2px 8px rgba(14,165,233,0.3); }
+    50% { box-shadow: 0 2px 16px rgba(14,165,233,0.5); }
+}
+
+/* ── Responsive ── */
 @media (max-width: 991.98px) {
     body.es-role-citizen .citizen-actions-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    body.es-role-citizen .citizen-actions-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: .5rem;
+    }
+    body.es-role-citizen .citizen-action-link {
+        padding: .75rem .5rem;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     body.es-role-citizen .citizen-hero-orb,
-    body.es-role-citizen .citizen-action-link,
-    body.es-role-citizen .citizen-appointment-card {
+    body.es-role-citizen .citizen-hero-card::before,
+    body.es-role-citizen .citizen-progress-bar .progress-bar::after,
+    body.es-role-citizen .citizen-note-badge {
         animation: none !important;
-        transition: none !important;
     }
 }
 </style>

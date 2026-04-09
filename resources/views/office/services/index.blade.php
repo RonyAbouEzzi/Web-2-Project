@@ -213,182 +213,100 @@
 
 @push('styles')
 <style>
+/* ═══════════════════════════════════════════════════════
+   OFFICE SERVICES — PREMIUM GLASSMORPHISM
+   ═══════════════════════════════════════════════════════ */
+
 body.es-role-office_user .office-service-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: .95rem;
-    flex-wrap: wrap;
-    gap: .75rem;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: .95rem; flex-wrap: wrap; gap: .75rem;
 }
-
 body.es-role-office_user .office-service-title {
-    font-weight: 800;
-    margin: 0;
-    font-size: 1rem;
-    color: #0F172A;
+    font-weight: 800; margin: 0; font-size: 1rem;
+    background: linear-gradient(135deg, #1E3A8A, #2563EB);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
-
-body.es-role-office_user .office-service-sub {
-    color: #94A3B8;
-    font-size: .78rem;
-    margin: 0;
-}
-
-body.es-role-office_user .office-service-name {
-    font-weight: 600;
-    font-size: .83rem;
-}
-
-body.es-role-office_user .office-service-desc {
-    font-size: .72rem;
-    color: #94A3B8;
-}
-
+body.es-role-office_user .office-service-sub { color: #94A3B8; font-size: .78rem; margin: 0; }
+body.es-role-office_user .office-service-name { font-weight: 600; font-size: .83rem; }
+body.es-role-office_user .office-service-desc { font-size: .72rem; color: #94A3B8; }
 body.es-role-office_user .office-service-category,
-body.es-role-office_user .office-service-duration {
-    color: #64748B;
-    font-size: .8rem;
-}
-
-body.es-role-office_user .office-service-price {
-    font-weight: 700;
-}
-
-body.es-role-office_user .office-service-actions {
-    display: inline-flex;
-    gap: .35rem;
-    justify-content: flex-end;
-}
+body.es-role-office_user .office-service-duration { color: #64748B; font-size: .8rem; }
+body.es-role-office_user .office-service-price { font-weight: 700; }
+body.es-role-office_user .office-service-actions { display: inline-flex; gap: .35rem; justify-content: flex-end; }
 
 body.es-role-office_user .office-icon-btn {
-    background: #F1F5F9;
-    border: none;
-    color: #334155;
+    background: rgba(241,245,249,0.6); backdrop-filter: blur(4px);
+    border: 1px solid rgba(37,99,235,0.08); color: #334155;
+    transition: all .22s ease;
 }
-
+body.es-role-office_user .office-icon-btn:hover {
+    background: linear-gradient(135deg, #2563EB, #0EA5E9); color: #fff; border-color: transparent;
+}
 body.es-role-office_user .office-trash-btn {
-    background: #FEE2E2;
-    border: none;
-    color: #DC2626;
+    background: rgba(254,226,226,0.6); backdrop-filter: blur(4px);
+    border: 1px solid rgba(220,38,38,0.1); color: #DC2626;
+    transition: all .22s ease;
 }
-
-body.es-role-office_user .office-service-empty-cell {
-    padding: 1.8rem .8rem !important;
+body.es-role-office_user .office-trash-btn:hover {
+    background: #DC2626; color: #fff; border-color: transparent;
 }
+body.es-role-office_user .office-service-empty-cell { padding: 1.8rem .8rem !important; }
 
+/* Mobile rows — glass with hover */
 body.es-role-office_user .office-service-mobile-row {
-    padding: .9rem 1rem;
-    border-bottom: 1px solid #E2E8F0;
-    display: flex;
-    align-items: center;
-    gap: .75rem;
+    padding: .9rem 1rem; border-bottom: 1px solid rgba(226,232,240,0.5);
+    display: flex; align-items: center; gap: .75rem;
+    transition: background .22s ease, transform .22s ease;
 }
-
+body.es-role-office_user .office-service-mobile-row:hover {
+    background: rgba(224,242,254,0.15); transform: translateX(4px);
+}
 body.es-role-office_user .office-service-mobile-icon {
-    width: 2.35rem;
-    height: 2.35rem;
-    border-radius: .7rem;
-    background: #DBEAFE;
-    color: #1D4ED8;
-    border: 1px solid #BFDBFE;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .94rem;
-    flex-shrink: 0;
+    width: 2.35rem; height: 2.35rem; border-radius: .7rem;
+    background: linear-gradient(135deg, #2563EB, #0EA5E9);
+    color: #fff; display: inline-flex; align-items: center; justify-content: center;
+    font-size: .94rem; flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(37,99,235,0.18); border: none;
 }
+body.es-role-office_user .office-service-mobile-main { flex: 1; min-width: 0; }
+body.es-role-office_user .office-service-mobile-name { font-weight: 700; font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.es-role-office_user .office-service-mobile-meta { font-size: .73rem; color: #94A3B8; }
+body.es-role-office_user .office-service-empty-mobile { padding: 1.25rem .55rem 1.4rem; }
+body.es-role-office_user .office-service-pagination { padding: .75rem 1rem; border-top: 1px solid rgba(226,232,240,0.5); }
 
-body.es-role-office_user .office-service-mobile-main {
-    flex: 1;
-    min-width: 0;
-}
-
-body.es-role-office_user .office-service-mobile-name {
-    font-weight: 700;
-    font-size: .85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-body.es-role-office_user .office-service-mobile-meta {
-    font-size: .73rem;
-    color: #94A3B8;
-}
-
-body.es-role-office_user .office-service-empty-mobile {
-    padding: 1.25rem .55rem 1.4rem;
-}
-
-body.es-role-office_user .office-service-pagination {
-    padding: .75rem 1rem;
-    border-top: 1px solid #E2E8F0;
-}
-
-body.es-role-office_user .office-modal-lg {
-    max-width: 540px;
-}
-
-body.es-role-office_user .office-modal-md {
-    max-width: 480px;
-}
-
+/* Modals — glass */
+body.es-role-office_user .office-modal-lg { max-width: 540px; }
+body.es-role-office_user .office-modal-md { max-width: 480px; }
 body.es-role-office_user .office-modal-content {
-    border: none;
+    border: 1px solid rgba(37,99,235,0.08) !important;
     border-radius: .92rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, .15);
+    background: rgba(255,255,255,0.85) !important;
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    box-shadow: 0 24px 64px rgba(15,23,42,0.18);
 }
-
-body.es-role-office_user .office-modal-header {
-    border: none;
-    padding: 1.25rem 1.25rem .5rem;
-}
-
-body.es-role-office_user .office-modal-header .modal-title {
-    font-weight: 800;
-}
-
-body.es-role-office_user .office-modal-body {
-    padding: .75rem 1.25rem;
-}
-
-body.es-role-office_user .office-modal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .65rem;
-}
-
-body.es-role-office_user .office-doc-row {
-    display: flex;
-    gap: .4rem;
-    margin-bottom: .4rem;
-}
-
+body.es-role-office_user .office-modal-header { border: none; padding: 1.25rem 1.25rem .5rem; }
+body.es-role-office_user .office-modal-header .modal-title { font-weight: 800; }
+body.es-role-office_user .office-modal-body { padding: .75rem 1.25rem; }
+body.es-role-office_user .office-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+body.es-role-office_user .office-doc-row { display: flex; gap: .4rem; margin-bottom: .4rem; }
 body.es-role-office_user .office-doc-add-btn {
-    background: #DBEAFE;
-    border: none;
-    color: #1D4ED8;
-    flex-shrink: 0;
+    background: linear-gradient(135deg, #2563EB, #0EA5E9);
+    border: none; color: #fff; flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(37,99,235,0.2);
 }
-
 body.es-role-office_user .office-doc-remove-btn {
-    background: #FEE2E2;
-    border: none;
-    color: #DC2626;
-    flex-shrink: 0;
+    background: #FEE2E2; border: none; color: #DC2626; flex-shrink: 0;
 }
-
-body.es-role-office_user .office-modal-footer {
-    border: none;
-    padding: .75rem 1.25rem 1.25rem;
-    gap: .5rem;
-}
+body.es-role-office_user .office-modal-footer { border: none; padding: .75rem 1.25rem 1.25rem; gap: .5rem; }
 
 @media (max-width: 575.98px) {
-    body.es-role-office_user .office-modal-grid {
-        grid-template-columns: 1fr;
-    }
+    body.es-role-office_user .office-modal-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.es-role-office_user .office-icon-btn,
+    body.es-role-office_user .office-trash-btn,
+    body.es-role-office_user .office-service-mobile-row { transition: none; }
 }
 </style>
 @endpush

@@ -295,6 +295,10 @@
 
 @push('styles')
 <style>
+/* ═══════════════════════════════════════════════════════
+   CITIZEN PROFILE — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════ */
+
 body.es-role-citizen .citizen-profile-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -302,8 +306,9 @@ body.es-role-citizen .citizen-profile-grid {
 }
 
 body.es-role-citizen .citizen-profile-alert {
-    border-color: #FCD34D;
-    background: linear-gradient(180deg, #FFFBEB 0%, #FFF7E1 100%);
+    border-color: rgba(252,211,77,0.5);
+    background: rgba(255,251,235,0.7);
+    backdrop-filter: blur(8px);
 }
 
 body.es-role-citizen .citizen-profile-alert .card-body {
@@ -333,63 +338,84 @@ body.es-role-citizen .citizen-profile-alert-copy {
 body.es-role-citizen .citizen-profile-head .card-body {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.2rem;
     flex-wrap: wrap;
+    padding: 1.5rem;
 }
 
+/* ── Avatar with animated gradient ring ── */
 body.es-role-citizen .citizen-profile-avatar-wrap {
     position: relative;
     flex-shrink: 0;
 }
 
+body.es-role-citizen .citizen-profile-avatar-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 999px;
+    background: conic-gradient(from 0deg, #0EA5E9, #6366F1, #8B5CF6, #EC4899, #F97316, #0EA5E9);
+    animation: citizenAvatarSpin 4s linear infinite;
+    z-index: 0;
+}
+
+@keyframes citizenAvatarSpin {
+    to { transform: rotate(360deg); }
+}
+
 body.es-role-citizen .citizen-profile-avatar {
-    width: 4.5rem;
-    height: 4.5rem;
+    width: 5rem;
+    height: 5rem;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     color: #fff;
-    font-size: 1.7rem;
+    font-size: 1.8rem;
     font-weight: 800;
     letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%);
+    background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%);
     border: 3px solid #fff;
-    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 12px 28px rgba(14,165,233,0.25);
+    position: relative;
+    z-index: 1;
 }
 
 body.es-role-citizen .citizen-profile-avatar-img {
-    width: 4.5rem;
-    height: 4.5rem;
+    width: 5rem;
+    height: 5rem;
     border-radius: 999px;
     object-fit: cover;
     border: 3px solid #fff;
-    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 12px 28px rgba(14,165,233,0.25);
+    position: relative;
+    z-index: 1;
 }
 
 body.es-role-citizen .citizen-avatar-edit {
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 1.7rem;
+    height: 1.7rem;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #2563EB;
+    background: linear-gradient(135deg, #0EA5E9, #6366F1);
     color: #fff;
-    font-size: .68rem;
+    font-size: .7rem;
     cursor: pointer;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 6px rgba(0,0,0,.15);
-    transition: background .18s ease, transform .18s ease;
+    border: 2.5px solid #fff;
+    box-shadow: 0 3px 10px rgba(14,165,233,0.3);
+    transition: all .25s cubic-bezier(.4,0,.2,1);
+    z-index: 2;
 }
 
 body.es-role-citizen .citizen-avatar-edit:hover {
-    background: #1D4ED8;
-    transform: scale(1.1);
+    transform: scale(1.15);
+    box-shadow: 0 4px 16px rgba(14,165,233,0.4);
 }
 
 body.es-role-citizen .citizen-profile-main {
@@ -398,55 +424,60 @@ body.es-role-citizen .citizen-profile-main {
 }
 
 body.es-role-citizen .citizen-profile-name {
-    margin: 0 0 .12rem;
-    font-size: 1.45rem;
+    margin: 0 0 .15rem;
+    font-size: 1.55rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
-    color: #0F172A;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #0F172A 0%, #0EA5E9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 body.es-role-citizen .citizen-profile-email {
     font-size: .84rem;
     color: #64748B;
-    margin-bottom: .6rem;
+    margin-bottom: .65rem;
 }
 
 body.es-role-citizen .citizen-profile-badges {
     display: flex;
     flex-wrap: wrap;
-    gap: .38rem;
+    gap: .4rem;
 }
 
 body.es-role-citizen .citizen-badge {
     display: inline-flex;
     align-items: center;
-    padding: .24rem .62rem;
+    padding: .25rem .65rem;
     border-radius: 999px;
-    font-size: .7rem;
+    font-size: .69rem;
     font-weight: 600;
     color: #475569;
-    background: #EEF2FF;
-    border: 1px solid #E2E8F0;
+    background: rgba(238,242,255,0.6);
+    border: 1px solid rgba(226,232,240,0.6);
+    backdrop-filter: blur(4px);
 }
 
 body.es-role-citizen .citizen-badge.is-primary {
-    color: #0369A1;
-    background: #E0F2FE;
-    border-color: #BAE6FD;
+    color: #0284C7;
+    background: rgba(224,242,254,0.5);
+    border-color: rgba(14,165,233,0.2);
 }
 
 body.es-role-citizen .citizen-badge.is-success {
     color: #047857;
-    background: #ECFDF5;
-    border-color: #A7F3D0;
+    background: rgba(236,253,245,0.5);
+    border-color: rgba(16,185,129,0.2);
 }
 
 body.es-role-citizen .citizen-badge.is-muted {
     color: #64748B;
-    background: #F1F5F9;
-    border-color: #E2E8F0;
+    background: rgba(241,245,249,0.5);
+    border-color: rgba(226,232,240,0.5);
 }
 
+/* ── Stat cards with gradient icons ── */
 body.es-role-citizen .citizen-stats-mini {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -454,50 +485,53 @@ body.es-role-citizen .citizen-stats-mini {
 }
 
 body.es-role-citizen .citizen-mini-card .card-body {
-    padding: .95rem 1rem;
+    padding: 1rem;
+    text-align: center;
+}
+
+body.es-role-citizen .citizen-mini-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(14,165,233,0.1);
 }
 
 body.es-role-citizen .citizen-mini-icon {
-    width: 2rem;
-    height: 2rem;
-    border-radius: .6rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: .7rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: .92rem;
-    margin-bottom: .5rem;
+    font-size: .95rem;
+    margin-bottom: .55rem;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 body.es-role-citizen .citizen-mini-icon.is-info {
-    color: #0369A1;
-    background: #E0F2FE;
-    border: 1px solid #BAE6FD;
+    background: linear-gradient(135deg, #0EA5E9, #0284C7);
 }
 
 body.es-role-citizen .citizen-mini-icon.is-success {
-    color: #047857;
-    background: #ECFDF5;
-    border: 1px solid #A7F3D0;
+    background: linear-gradient(135deg, #10B981, #059669);
 }
 
 body.es-role-citizen .citizen-mini-icon.is-amber {
-    color: #B45309;
-    background: #FFFBEB;
-    border: 1px solid #FDE68A;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
 }
 
 body.es-role-citizen .citizen-mini-value {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     line-height: 1;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     color: #0F172A;
 }
 
 body.es-role-citizen .citizen-mini-label {
-    margin-top: .24rem;
-    font-size: .74rem;
-    color: #64748B;
+    margin-top: .28rem;
+    font-size: .72rem;
+    color: #94A3B8;
+    font-weight: 500;
 }
 
 body.es-role-citizen .citizen-profile-cols {
@@ -518,12 +552,17 @@ body.es-role-citizen .citizen-input-wrap {
 
 body.es-role-citizen .citizen-input-icon {
     position: absolute;
-    left: .76rem;
+    left: .78rem;
     top: 50%;
     transform: translateY(-50%);
     color: #94A3B8;
     font-size: .83rem;
     pointer-events: none;
+    transition: color .2s ease;
+}
+
+body.es-role-citizen .citizen-input-wrap:focus-within .citizen-input-icon {
+    color: #0EA5E9;
 }
 
 body.es-role-citizen .citizen-input-wrap .form-control {
@@ -531,26 +570,28 @@ body.es-role-citizen .citizen-input-wrap .form-control {
 }
 
 body.es-role-citizen .citizen-disabled-input {
-    background: #F8FAFC;
+    background: rgba(248,250,252,0.7) !important;
     cursor: not-allowed;
-    opacity: .82;
+    opacity: .75;
 }
 
 body.es-role-citizen .citizen-upload-zone {
-    border: 1.5px dashed #BFDBFE;
-    border-radius: .8rem;
-    padding: 1rem;
+    border: 1.5px dashed rgba(191,219,254,0.8);
+    border-radius: .85rem;
+    padding: 1.1rem;
     text-align: center;
     cursor: pointer;
-    background: #F8FAFF;
-    transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
+    background: rgba(248,250,255,0.5);
+    backdrop-filter: blur(4px);
+    transition: all .25s cubic-bezier(.4,0,.2,1);
 }
 
 body.es-role-citizen .citizen-upload-zone:hover,
 body.es-role-citizen .citizen-upload-zone.drag {
     border-color: #60A5FA;
-    background: #EFF6FF;
-    transform: translateY(-1px);
+    background: rgba(239,246,255,0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(14,165,233,0.08);
 }
 
 body.es-role-citizen .citizen-upload-zone input {
@@ -559,7 +600,7 @@ body.es-role-citizen .citizen-upload-zone input {
 
 body.es-role-citizen .citizen-upload-icon {
     font-size: 1.35rem;
-    color: #0369A1;
+    color: #0EA5E9;
     margin-bottom: .3rem;
 }
 
@@ -581,15 +622,15 @@ body.es-role-citizen .citizen-upload-preview {
     margin-top: .55rem;
     padding: .5rem .7rem;
     border-radius: .62rem;
-    border: 1px solid #A7F3D0;
-    background: #ECFDF5;
+    border: 1px solid rgba(16,185,129,0.2);
+    background: rgba(236,253,245,0.6);
     color: #047857;
     font-size: .76rem;
 }
 
 body.es-role-citizen .citizen-password-zone {
-    border-top: 1px solid #E2E8F0;
-    padding-top: .95rem;
+    border-top: 1px solid rgba(226,232,240,0.5);
+    padding-top: 1rem;
 }
 
 body.es-role-citizen .citizen-password-label {
@@ -605,10 +646,11 @@ body.es-role-citizen .citizen-password-grid {
 }
 
 body.es-role-citizen .citizen-otp-box {
-    background: #F0FDF4;
-    border: 1px solid #A7F3D0;
-    border-radius: .65rem;
-    padding: .75rem;
+    background: rgba(240,253,244,0.6);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: .7rem;
+    padding: .8rem;
+    backdrop-filter: blur(4px);
 }
 
 body.es-role-citizen .citizen-otp-info {
@@ -634,20 +676,21 @@ body.es-role-citizen .citizen-id-missing {
     align-items: center;
     gap: .5rem;
     padding: .65rem .9rem;
-    border-radius: .65rem;
+    border-radius: .7rem;
     font-size: .8rem;
     font-weight: 600;
+    backdrop-filter: blur(4px);
 }
 
 body.es-role-citizen .citizen-id-verified {
-    background: #ECFDF5;
-    border: 1px solid #A7F3D0;
+    background: rgba(236,253,245,0.6);
+    border: 1px solid rgba(16,185,129,0.2);
     color: #047857;
 }
 
 body.es-role-citizen .citizen-id-missing {
-    background: #FFF7ED;
-    border: 1px solid #FED7AA;
+    background: rgba(255,247,237,0.6);
+    border: 1px solid rgba(234,88,12,0.15);
     color: #9A3412;
 }
 
@@ -656,8 +699,8 @@ body.es-role-citizen .citizen-info-row {
     align-items: center;
     justify-content: space-between;
     gap: .8rem;
-    padding: .5rem 0;
-    border-bottom: 1px solid #E2E8F0;
+    padding: .55rem 0;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
 }
 
 body.es-role-citizen .citizen-info-row:last-child {
@@ -666,7 +709,7 @@ body.es-role-citizen .citizen-info-row:last-child {
 
 body.es-role-citizen .citizen-info-label {
     font-size: .77rem;
-    color: #64748B;
+    color: #94A3B8;
 }
 
 body.es-role-citizen .citizen-info-value {
@@ -680,15 +723,16 @@ body.es-role-citizen .citizen-mono {
     letter-spacing: .04em;
 }
 
+/* ── Activity links ── */
 body.es-role-citizen .citizen-activity-link {
     display: flex;
     align-items: center;
     gap: .75rem;
-    padding: .8rem 1rem;
-    border-bottom: 1px solid #E2E8F0;
+    padding: .82rem 1rem;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
     text-decoration: none;
     color: inherit;
-    transition: background-color .18s ease;
+    transition: all .22s cubic-bezier(.4,0,.2,1);
 }
 
 body.es-role-citizen .citizen-activity-link:last-child {
@@ -696,30 +740,32 @@ body.es-role-citizen .citizen-activity-link:last-child {
 }
 
 body.es-role-citizen .citizen-activity-link:hover {
-    background: rgba(239, 246, 255, .58);
+    background: rgba(224,242,254,0.25);
     color: inherit;
+    transform: translateX(3px);
 }
 
 body.es-role-citizen .citizen-activity-icon {
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: .65rem;
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: .7rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
 }
 
 body.es-role-citizen .citizen-activity-icon.is-success {
-    background: #ECFDF5;
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
     color: #047857;
-    border: 1px solid #A7F3D0;
+    border: 1px solid rgba(16,185,129,0.15);
 }
 
 body.es-role-citizen .citizen-activity-icon.is-primary {
-    background: #E0F2FE;
+    background: linear-gradient(135deg, #E0F2FE, #BAE6FD);
     color: #0369A1;
-    border: 1px solid #BAE6FD;
+    border: 1px solid rgba(14,165,233,0.15);
 }
 
 body.es-role-citizen .citizen-activity-main {
@@ -738,27 +784,27 @@ body.es-role-citizen .citizen-activity-title {
 body.es-role-citizen .citizen-activity-sub {
     margin-top: .15rem;
     font-size: .72rem;
-    color: #64748B;
+    color: #94A3B8;
 }
 
 body.es-role-citizen .citizen-activity-amount {
-    font-size: .86rem;
-    font-weight: 700;
-    color: #047857;
+    font-size: .88rem;
+    font-weight: 800;
+    color: #059669;
     flex-shrink: 0;
 }
 
 body.es-role-citizen .citizen-panel-empty {
-    padding: 2rem 1rem;
+    padding: 2.2rem 1rem;
     text-align: center;
-    color: #64748B;
+    color: #94A3B8;
 }
 
 body.es-role-citizen .citizen-panel-empty i {
-    font-size: 1.8rem;
-    color: #94A3B8;
+    font-size: 2rem;
+    color: #CBD5E1;
     display: block;
-    margin-bottom: .45rem;
+    margin-bottom: .5rem;
 }
 
 body.es-role-citizen .citizen-panel-empty p {
@@ -785,6 +831,12 @@ body.es-role-citizen .citizen-panel-empty p {
 @media (max-width: 767.98px) {
     body.es-role-citizen .citizen-stats-mini {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.es-role-citizen .citizen-profile-avatar-wrap::before {
+        animation: none !important;
     }
 }
 </style>

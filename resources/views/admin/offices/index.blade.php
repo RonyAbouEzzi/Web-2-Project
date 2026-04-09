@@ -4,49 +4,38 @@
 
 @push('styles')
 <style>
-    .admin-row-main {
-        font-weight: 600;
-        font-size: .84rem;
-    }
-    .admin-row-sub {
-        font-size: .72rem;
-        color: var(--es-muted);
-    }
+    /* ═══ ADMIN OFFICES — PREMIUM GLASS ═══ */
+    .admin-row-main { font-weight: 600; font-size: .84rem; }
+    .admin-row-sub { font-size: .72rem; color: var(--es-muted); }
     .admin-mobile-item {
         padding: .9rem 1rem;
-        border-bottom: 1px solid var(--es-border-soft);
+        border-bottom: 1px solid rgba(226,232,240,0.5);
+        transition: background .22s ease, transform .22s ease;
     }
-    .admin-empty {
-        text-align: center;
-        padding: 2rem;
-        color: var(--es-muted);
+    .admin-mobile-item:hover {
+        background: rgba(224,231,255,0.12);
+        transform: translateX(4px);
     }
-    .admin-modal .modal-dialog {
-        max-width: 480px;
-    }
-    .admin-modal.narrow .modal-dialog {
-        max-width: 440px;
-    }
+    .admin-empty { text-align: center; padding: 2rem; color: var(--es-muted); }
+
+    /* Modals — glass */
+    .admin-modal .modal-dialog { max-width: 480px; }
+    .admin-modal.narrow .modal-dialog { max-width: 440px; }
     .admin-modal .modal-content {
-        border: 1px solid var(--es-border-soft);
+        border: 1px solid rgba(79,70,229,0.08) !important;
         border-radius: .9rem;
-        box-shadow: 0 20px 48px rgba(15, 23, 42, .14);
+        background: rgba(255,255,255,0.85) !important;
+        backdrop-filter: blur(20px) saturate(1.6);
+        -webkit-backdrop-filter: blur(20px) saturate(1.6);
+        box-shadow: 0 24px 64px rgba(15,23,42,0.18);
     }
-    .admin-modal .modal-header {
-        border: none;
-        padding: 1.1rem 1.25rem .45rem;
-    }
-    .admin-modal .modal-title {
-        font-weight: 700;
-        color: #566A7F;
-    }
-    .admin-modal .modal-body {
-        padding: .75rem 1.25rem;
-    }
-    .admin-modal .modal-footer {
-        border: none;
-        padding: .75rem 1.25rem 1.1rem;
-        gap: .5rem;
+    .admin-modal .modal-header { border: none; padding: 1.1rem 1.25rem .45rem; }
+    .admin-modal .modal-title { font-weight: 700; color: #566A7F; }
+    .admin-modal .modal-body { padding: .75rem 1.25rem; }
+    .admin-modal .modal-footer { border: none; padding: .75rem 1.25rem 1.1rem; gap: .5rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .admin-mobile-item { transition: none; }
     }
 </style>
 @endpush

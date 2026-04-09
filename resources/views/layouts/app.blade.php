@@ -259,281 +259,994 @@
             box-shadow: 1px 0 0 rgba(15, 23, 42, 0.03);
         }
 
+        /* ═══════════════════════════════════════════════════════
+           CITIZEN PORTAL — PREMIUM DESIGN SYSTEM
+           Glass-morphism · Dark sidebar · Animated backgrounds
+           ═══════════════════════════════════════════════════════ */
+
         body.es-role-citizen .es-wrapper {
             letter-spacing: .01px;
         }
 
+        /* ── Animated mesh background ── */
         body.es-role-citizen .es-content {
-            background: radial-gradient(circle at 12% -12%, rgba(56, 189, 248, 0.18) 0%, rgba(56, 189, 248, 0) 42%),
-                        radial-gradient(circle at 100% 102%, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0) 45%),
-                        var(--es-bg);
+            position: relative;
+            background:
+                radial-gradient(ellipse at 15% -5%, rgba(56,189,248,0.18) 0%, transparent 55%),
+                radial-gradient(ellipse at 85% 110%, rgba(99,102,241,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 50%, rgba(16,185,129,0.05) 0%, transparent 65%),
+                var(--es-bg);
+            overflow: hidden;
         }
 
+        body.es-role-citizen .es-content::before,
+        body.es-role-citizen .es-content::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(80px);
+        }
+
+        body.es-role-citizen .es-content::before {
+            width: 500px;
+            height: 500px;
+            top: -120px;
+            right: -80px;
+            background: radial-gradient(circle, rgba(14,165,233,0.12) 0%, rgba(99,102,241,0.06) 50%, transparent 70%);
+            animation: citizenOrbitA 25s ease-in-out infinite;
+        }
+
+        body.es-role-citizen .es-content::after {
+            width: 400px;
+            height: 400px;
+            bottom: -100px;
+            left: -60px;
+            background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, rgba(14,165,233,0.05) 50%, transparent 70%);
+            animation: citizenOrbitB 30s ease-in-out infinite;
+        }
+
+        body.es-role-citizen .es-content > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes citizenOrbitA {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-40px, 60px) scale(1.1); }
+            66% { transform: translate(30px, -30px) scale(0.95); }
+        }
+
+        @keyframes citizenOrbitB {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, -40px) scale(1.08); }
+        }
+
+        /* ── Dark glass sidebar ── */
         body.es-role-citizen .es-sidebar {
-            box-shadow: 1px 0 0 rgba(15, 23, 42, 0.04), 8px 0 22px rgba(15, 23, 42, 0.03);
+            background: linear-gradient(180deg, #0B1120 0%, #111B2E 50%, #0F1729 100%);
+            border-right: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.3), 1px 0 0 rgba(255,255,255,0.04);
+        }
+
+        body.es-role-citizen .es-sidebar-brand {
+            border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+        }
+
+        body.es-role-citizen .es-brand-name {
+            color: #F1F5F9 !important;
+        }
+
+        body.es-role-citizen .es-brand-sub {
+            color: #64748B !important;
         }
 
         body.es-role-citizen .es-nav-section {
-            color: #94A3B8;
-            letter-spacing: .08em;
-            font-size: .68rem;
+            color: rgba(148,163,184,0.6);
+            letter-spacing: .1em;
+            font-size: .62rem;
+            text-transform: uppercase;
+            font-weight: 700;
         }
 
         body.es-role-citizen .es-nav-link {
-            margin: .12rem .7rem;
+            margin: .15rem .65rem;
             border: 1px solid transparent;
-            padding: .56rem .88rem;
+            border-radius: .6rem;
+            padding: .58rem .9rem;
             font-weight: 500;
-            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+            color: #94A3B8;
+            transition: all .22s cubic-bezier(.4,0,.2,1);
+        }
+
+        body.es-role-citizen .es-nav-link i {
+            color: #64748B;
+            transition: color .22s ease;
         }
 
         body.es-role-citizen .es-nav-link:hover {
-            transform: translateX(2px);
-            border-color: #BFDBFE;
-            background: #F0F9FF;
-            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.14);
+            transform: translateX(3px);
+            color: #E2E8F0;
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.08);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        body.es-role-citizen .es-nav-link:hover i {
+            color: #38BDF8;
         }
 
         body.es-role-citizen .es-nav-link.active {
-            border-color: #93C5FD;
-            background: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 100%);
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.15);
+            color: #FFFFFF;
+            border-color: rgba(56,189,248,0.25);
+            background: linear-gradient(135deg, rgba(14,165,233,0.2) 0%, rgba(99,102,241,0.15) 100%);
+            box-shadow: 0 8px 24px rgba(14,165,233,0.2), inset 0 1px 0 rgba(255,255,255,0.06);
         }
 
+        body.es-role-citizen .es-nav-link.active i {
+            color: #38BDF8;
+        }
+
+        body.es-role-citizen .es-nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            border-radius: 0 3px 3px 0;
+            background: linear-gradient(180deg, #38BDF8, #818CF8);
+            box-shadow: 0 0 12px rgba(56,189,248,0.5);
+        }
+
+        body.es-role-citizen .es-nav-badge {
+            background: linear-gradient(135deg, #0EA5E9, #6366F1) !important;
+            color: #fff !important;
+            box-shadow: 0 2px 8px rgba(14,165,233,0.4);
+        }
+
+        body.es-role-citizen .es-sidebar .es-nav-link[type="submit"],
+        body.es-role-citizen .es-sidebar button.es-nav-link {
+            color: #94A3B8;
+        }
+
+        body.es-role-citizen .es-sidebar .es-nav-link[type="submit"]:hover,
+        body.es-role-citizen .es-sidebar button.es-nav-link:hover {
+            color: #FCA5A5;
+            background: rgba(239,68,68,0.1);
+            border-color: rgba(239,68,68,0.2);
+        }
+
+        /* ── Glass topbar ── */
         body.es-role-citizen .es-topbar {
-            border-bottom-color: #E2E8F0;
-            background: color-mix(in srgb, var(--es-surface) 84%, transparent);
-            transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+            transition: all .3s cubic-bezier(.4,0,.2,1);
         }
 
         body.es-role-citizen .es-topbar.is-scrolled {
-            border-bottom-color: #CBD5E1;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-            background: color-mix(in srgb, var(--es-surface) 78%, transparent);
+            border-bottom-color: rgba(203,213,225,0.5);
+            box-shadow: 0 8px 32px rgba(15,23,42,0.08);
+            background: rgba(255,255,255,0.72);
         }
 
         body.es-role-citizen .es-topbar-title {
             color: #0F172A;
-            font-size: 1.02rem;
-            font-weight: 700;
-            letter-spacing: -0.01em;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
+        body.es-role-citizen .es-topbar-btn {
+            transition: all .2s ease;
+        }
+
+        body.es-role-citizen .es-topbar-btn:hover {
+            background: rgba(14,165,233,0.08);
+            color: #0EA5E9;
+        }
+
+        /* ── Avatar glow ── */
         body.es-role-citizen .es-avatar {
             color: #0369A1;
-            background: #E0F2FE;
-            border-color: #7DD3FC;
-            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.22);
+            background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
+            border: 2px solid rgba(56,189,248,0.4);
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.1), 0 8px 20px rgba(14,165,233,0.2);
+            transition: all .3s ease;
         }
 
+        body.es-role-citizen .es-avatar:hover {
+            box-shadow: 0 0 0 4px rgba(14,165,233,0.15), 0 12px 28px rgba(14,165,233,0.3);
+            transform: scale(1.05);
+        }
+
+        /* ── Glass cards ── */
         body.es-role-citizen .card {
-            border-radius: .95rem;
-            border-color: color-mix(in srgb, var(--es-border) 72%, #BFDBFE 28%);
-            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+            border-radius: 1rem;
+            border: 1px solid rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(12px) saturate(1.4);
+            -webkit-backdrop-filter: blur(12px) saturate(1.4);
+            box-shadow: 0 4px 16px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.02);
+            transition: all .3s cubic-bezier(.4,0,.2,1);
         }
 
         body.es-role-citizen .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(15,23,42,0.08), 0 8px 16px rgba(14,165,233,0.06);
+            border-color: rgba(14,165,233,0.2);
+        }
+
+        body.es-role-citizen .card-header {
+            background: rgba(255,255,255,0.3);
+            border-bottom: 1px solid rgba(226,232,240,0.6);
+        }
+
+        /* ── Gradient primary button with glow ── */
+        body.es-role-citizen .btn-primary {
+            background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%);
+            border: none;
+            box-shadow: 0 4px 14px rgba(14,165,233,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+            transition: all .25s cubic-bezier(.4,0,.2,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.es-role-citizen .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+            transition: left .5s ease;
+        }
+
+        body.es-role-citizen .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
-            border-color: color-mix(in srgb, var(--es-primary) 26%, var(--es-border) 74%);
+            box-shadow: 0 8px 24px rgba(14,165,233,0.4), 0 0 0 2px rgba(14,165,233,0.1);
+            background: linear-gradient(135deg, #0284C7 0%, #4F46E5 100%);
         }
 
-        body.es-role-citizen .btn {
-            transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
+        body.es-role-citizen .btn-primary:hover::before {
+            left: 100%;
         }
 
-        body.es-role-citizen .btn:hover {
-            transform: translateY(-1px);
+        body.es-role-citizen .btn-outline-primary {
+            border: 1.5px solid rgba(14,165,233,0.4);
+            color: #0284C7;
+            background: rgba(224,242,254,0.3);
+            transition: all .22s ease;
+        }
+
+        body.es-role-citizen .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(14,165,233,0.3);
+        }
+
+        /* ── Enhanced table ── */
+        body.es-role-citizen .table {
+            --bs-table-bg: transparent;
+        }
+
+        body.es-role-citizen .table th {
+            background: rgba(248,250,252,0.6);
+            backdrop-filter: blur(4px);
+            font-size: .67rem;
+            letter-spacing: .08em;
+            color: #94A3B8;
         }
 
         body.es-role-citizen .table-hover tbody tr {
-            transition: transform .16s ease;
+            transition: all .2s cubic-bezier(.4,0,.2,1);
         }
 
         body.es-role-citizen .table-hover tbody tr:hover {
-            transform: translateX(1px);
+            transform: scale(1.005);
+            background: rgba(224,242,254,0.25) !important;
         }
 
+        body.es-role-citizen .table-hover tbody tr:hover > td {
+            background: transparent;
+        }
+
+        /* ── Form inputs glass ── */
+        body.es-role-citizen .form-control,
+        body.es-role-citizen .form-select {
+            background: rgba(255,255,255,0.7);
+            border: 1.5px solid rgba(203,213,225,0.5);
+            backdrop-filter: blur(4px);
+            transition: all .25s ease;
+        }
+
+        body.es-role-citizen .form-control:focus,
+        body.es-role-citizen .form-select:focus {
+            background: rgba(255,255,255,0.9);
+            border-color: #0EA5E9;
+            box-shadow: 0 0 0 4px rgba(14,165,233,0.1), 0 4px 12px rgba(14,165,233,0.08);
+        }
+
+        /* ── Staggered reveal animation ── */
         body.es-role-citizen .citizen-reveal,
         body.es-role-citizen [data-citizen-reveal] {
             opacity: 0;
-            transform: translateY(10px);
-            transition: opacity .34s ease, transform .34s ease;
+            transform: translateY(16px) scale(0.98);
+            transition: opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1);
         }
 
         body.es-role-citizen .citizen-reveal.is-visible,
         body.es-role-citizen [data-citizen-reveal].is-visible {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
+
+        /* Stagger children */
+        body.es-role-citizen .citizen-reveal:nth-child(2) { transition-delay: .06s; }
+        body.es-role-citizen .citizen-reveal:nth-child(3) { transition-delay: .12s; }
+        body.es-role-citizen .citizen-reveal:nth-child(4) { transition-delay: .18s; }
+        body.es-role-citizen .citizen-reveal:nth-child(5) { transition-delay: .24s; }
+        body.es-role-citizen .citizen-reveal:nth-child(6) { transition-delay: .30s; }
+
+        /* ── Utility: shimmer sweep ── */
+        @keyframes citizenShimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* ── Utility: gradient text ── */
+        body.es-role-citizen .citizen-gradient-text {
+            background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 50%, #8B5CF6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── Scrollbar styling for citizen ── */
+        body.es-role-citizen .es-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        body.es-role-citizen .es-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        body.es-role-citizen .es-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        body.es-role-citizen .es-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* ── Footer ── */
+        body.es-role-citizen .es-footer {
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(8px);
+            border-top-color: rgba(226,232,240,0.5);
+        }
+
+        /* ── Reduced motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            body.es-role-citizen .es-content::before,
+            body.es-role-citizen .es-content::after,
+            body.es-role-citizen .card,
+            body.es-role-citizen .btn,
+            body.es-role-citizen .es-nav-link,
+            body.es-role-citizen .citizen-reveal,
+            body.es-role-citizen [data-citizen-reveal] {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           OFFICE PANEL — PREMIUM DESIGN SYSTEM
+           Dark sidebar · Glass cards · Gradient accents
+           ═══════════════════════════════════════════════════════ */
 
         body.es-role-office_user .es-wrapper {
             letter-spacing: .01px;
         }
 
         body.es-role-office_user .es-content {
-            background: radial-gradient(circle at 4% -8%, rgba(59, 130, 246, 0.16) 0%, rgba(59, 130, 246, 0) 34%),
-                        radial-gradient(circle at 96% 108%, rgba(14, 165, 233, 0.1) 0%, rgba(14, 165, 233, 0) 38%),
-                        var(--es-bg);
+            position: relative;
+            background:
+                radial-gradient(ellipse at 10% -5%, rgba(59,130,246,0.16) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 110%, rgba(14,165,233,0.1) 0%, transparent 50%),
+                var(--es-bg);
+            overflow: hidden;
         }
 
+        body.es-role-office_user .es-content::before {
+            content: '';
+            position: fixed;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            top: -100px;
+            right: -60px;
+            background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+            animation: officeOrbit 22s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(60px);
+        }
+
+        body.es-role-office_user .es-content > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes officeOrbit {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-30px, 40px) scale(1.05); }
+        }
+
+        /* ── Dark sidebar ── */
         body.es-role-office_user .es-sidebar {
-            box-shadow: 1px 0 0 rgba(15, 23, 42, 0.04), 8px 0 20px rgba(15, 23, 42, 0.03);
+            background: linear-gradient(180deg, #0C1222 0%, #131D33 50%, #0E1628 100%);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.25), 1px 0 0 rgba(255,255,255,0.03);
+        }
+
+        body.es-role-office_user .es-sidebar-brand {
+            border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+        }
+
+        body.es-role-office_user .es-brand-name {
+            color: #F1F5F9 !important;
+        }
+
+        body.es-role-office_user .es-brand-sub {
+            color: #64748B !important;
         }
 
         body.es-role-office_user .es-nav-section {
-            color: #94A3B8;
-            letter-spacing: .08em;
-            font-size: .68rem;
+            color: rgba(148,163,184,0.55);
+            letter-spacing: .1em;
+            font-size: .62rem;
+            text-transform: uppercase;
+            font-weight: 700;
         }
 
         body.es-role-office_user .es-nav-link {
-            margin: .12rem .72rem;
+            margin: .15rem .65rem;
             border: 1px solid transparent;
-            padding: .56rem .88rem;
+            border-radius: .6rem;
+            padding: .58rem .9rem;
             font-weight: 500;
-            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+            color: #94A3B8;
+            transition: all .22s cubic-bezier(.4,0,.2,1);
+        }
+
+        body.es-role-office_user .es-nav-link i {
+            color: #64748B;
+            transition: color .22s ease;
         }
 
         body.es-role-office_user .es-nav-link:hover {
-            transform: translateX(2px);
-            border-color: #BFDBFE;
-            background: #F0F7FF;
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+            transform: translateX(3px);
+            color: #E2E8F0;
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.07);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+        }
+
+        body.es-role-office_user .es-nav-link:hover i {
+            color: #60A5FA;
         }
 
         body.es-role-office_user .es-nav-link.active {
-            border-color: #93C5FD;
-            background: linear-gradient(135deg, #E0ECFF 0%, #DBEAFE 100%);
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.14);
+            color: #FFFFFF;
+            border-color: rgba(59,130,246,0.25);
+            background: linear-gradient(135deg, rgba(37,99,235,0.2) 0%, rgba(14,165,233,0.15) 100%);
+            box-shadow: 0 8px 24px rgba(37,99,235,0.18), inset 0 1px 0 rgba(255,255,255,0.05);
         }
 
+        body.es-role-office_user .es-nav-link.active i {
+            color: #60A5FA;
+        }
+
+        body.es-role-office_user .es-nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            border-radius: 0 3px 3px 0;
+            background: linear-gradient(180deg, #3B82F6, #06B6D4);
+            box-shadow: 0 0 12px rgba(59,130,246,0.5);
+        }
+
+        body.es-role-office_user .es-nav-badge {
+            background: linear-gradient(135deg, #2563EB, #0EA5E9) !important;
+            color: #fff !important;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.4);
+        }
+
+        body.es-role-office_user .es-sidebar .es-nav-link[type="submit"],
+        body.es-role-office_user .es-sidebar button.es-nav-link {
+            color: #94A3B8;
+        }
+
+        body.es-role-office_user .es-sidebar .es-nav-link[type="submit"]:hover,
+        body.es-role-office_user .es-sidebar button.es-nav-link:hover {
+            color: #FCA5A5;
+            background: rgba(239,68,68,0.1);
+            border-color: rgba(239,68,68,0.2);
+        }
+
+        /* ── Glass topbar ── */
         body.es-role-office_user .es-topbar {
-            border-bottom-color: #E2E8F0;
-            background: color-mix(in srgb, var(--es-surface) 86%, transparent);
-            transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(18px) saturate(1.5);
+            -webkit-backdrop-filter: blur(18px) saturate(1.5);
+            box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+            transition: all .3s cubic-bezier(.4,0,.2,1);
         }
 
         body.es-role-office_user .es-topbar.is-scrolled {
-            border-bottom-color: #CBD5E1;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-            background: color-mix(in srgb, var(--es-surface) 80%, transparent);
+            border-bottom-color: rgba(203,213,225,0.45);
+            box-shadow: 0 8px 28px rgba(15,23,42,0.07);
+            background: rgba(255,255,255,0.68);
         }
 
         body.es-role-office_user .es-topbar-title {
             color: #0F172A;
-            font-size: 1.01rem;
-            font-weight: 700;
-            letter-spacing: -0.01em;
+            font-size: 1.04rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         body.es-role-office_user .es-avatar {
             color: #1D4ED8;
-            background: #DBEAFE;
-            border-color: #93C5FD;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+            background: linear-gradient(135deg, #DBEAFE 0%, #C7D2FE 100%);
+            border: 2px solid rgba(59,130,246,0.35);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.08), 0 8px 20px rgba(37,99,235,0.18);
+            transition: all .3s ease;
         }
 
+        body.es-role-office_user .es-avatar:hover {
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.12), 0 12px 28px rgba(37,99,235,0.25);
+            transform: scale(1.05);
+        }
+
+        /* ── Glass cards ── */
         body.es-role-office_user .card {
-            border-radius: .9rem;
-            border-color: color-mix(in srgb, var(--es-border) 72%, #BFDBFE 28%);
-            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+            border-radius: 1rem;
+            border: 1px solid rgba(255,255,255,0.45);
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(12px) saturate(1.3);
+            -webkit-backdrop-filter: blur(12px) saturate(1.3);
+            box-shadow: 0 4px 16px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.02);
+            transition: all .3s cubic-bezier(.4,0,.2,1);
         }
 
         body.es-role-office_user .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
-            border-color: color-mix(in srgb, var(--es-primary) 22%, var(--es-border) 78%);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(15,23,42,0.07), 0 8px 16px rgba(37,99,235,0.05);
+            border-color: rgba(37,99,235,0.18);
         }
 
-        body.es-role-office_user .btn {
-            transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
+        body.es-role-office_user .card-header {
+            background: rgba(255,255,255,0.25);
+            border-bottom: 1px solid rgba(226,232,240,0.55);
+        }
+
+        /* ── Gradient primary button ── */
+        body.es-role-office_user .btn-primary {
+            background: linear-gradient(135deg, #2563EB 0%, #0EA5E9 100%);
+            border: none;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+            transition: all .25s cubic-bezier(.4,0,.2,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.es-role-office_user .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+            transition: left .5s ease;
+        }
+
+        body.es-role-office_user .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37,99,235,0.4), 0 0 0 2px rgba(37,99,235,0.08);
+            background: linear-gradient(135deg, #1D4ED8 0%, #0284C7 100%);
+        }
+
+        body.es-role-office_user .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        body.es-role-office_user .btn-outline-primary {
+            border: 1.5px solid rgba(37,99,235,0.35);
+            color: #1D4ED8;
+            background: rgba(219,234,254,0.25);
+            transition: all .22s ease;
+        }
+
+        body.es-role-office_user .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #2563EB 0%, #0EA5E9 100%);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(37,99,235,0.28);
         }
 
         body.es-role-office_user .btn:hover {
             transform: translateY(-1px);
         }
 
+        /* ── Enhanced tables ── */
+        body.es-role-office_user .table th {
+            background: rgba(248,250,252,0.55);
+            backdrop-filter: blur(4px);
+        }
+
         body.es-role-office_user .table-hover tbody tr {
-            transition: transform .16s ease;
+            transition: all .2s cubic-bezier(.4,0,.2,1);
         }
 
         body.es-role-office_user .table-hover tbody tr:hover {
-            transform: translateX(1px);
+            transform: scale(1.004);
+            background: rgba(219,234,254,0.2) !important;
         }
 
+        body.es-role-office_user .table-hover tbody tr:hover > td {
+            background: transparent;
+        }
+
+        /* ── Staggered reveal ── */
         body.es-role-office_user .office-reveal,
         body.es-role-office_user [data-office-reveal] {
             opacity: 0;
-            transform: translateY(10px);
-            transition: opacity .34s ease, transform .34s ease;
+            transform: translateY(14px) scale(0.98);
+            transition: opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1);
         }
 
         body.es-role-office_user .office-reveal.is-visible,
         body.es-role-office_user [data-office-reveal].is-visible {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+        }
+
+        body.es-role-office_user .office-reveal:nth-child(2) { transition-delay: .06s; }
+        body.es-role-office_user .office-reveal:nth-child(3) { transition-delay: .12s; }
+        body.es-role-office_user .office-reveal:nth-child(4) { transition-delay: .18s; }
+        body.es-role-office_user .office-reveal:nth-child(5) { transition-delay: .24s; }
+
+        /* ── Glass forms ── */
+        body.es-role-office_user .form-control,
+        body.es-role-office_user .form-select {
+            background: rgba(255,255,255,0.65);
+            border: 1.5px solid rgba(203,213,225,0.45);
+            backdrop-filter: blur(4px);
+            transition: all .25s ease;
+        }
+
+        body.es-role-office_user .form-control:focus,
+        body.es-role-office_user .form-select:focus {
+            background: rgba(255,255,255,0.9);
+            border-color: #2563EB;
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1), 0 4px 12px rgba(37,99,235,0.06);
+        }
+
+        /* ── Scrollbar ── */
+        body.es-role-office_user .es-sidebar::-webkit-scrollbar { width: 4px; }
+        body.es-role-office_user .es-sidebar::-webkit-scrollbar-track { background: transparent; }
+        body.es-role-office_user .es-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        body.es-role-office_user .es-footer {
+            background: rgba(255,255,255,0.45);
+            backdrop-filter: blur(8px);
+            border-top-color: rgba(226,232,240,0.45);
+        }
+
+        /* ═══════════════════════════════════════════════════════
+           ADMIN PANEL — PREMIUM DESIGN SYSTEM
+           Dark sidebar · Glass cards · Indigo accents
+           ═══════════════════════════════════════════════════════ */
+
+        body.es-role-admin .es-content {
+            position: relative;
+            background:
+                radial-gradient(ellipse at 8% -8%, rgba(37,99,235,0.12) 0%, transparent 48%),
+                radial-gradient(ellipse at 95% 105%, rgba(99,102,241,0.08) 0%, transparent 48%),
+                var(--es-bg);
+            overflow: hidden;
+        }
+
+        body.es-role-admin .es-content::before {
+            content: '';
+            position: fixed;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            top: -80px;
+            left: -40px;
+            background: radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%);
+            animation: adminOrbit 28s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(60px);
+        }
+
+        body.es-role-admin .es-content > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes adminOrbit {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(40px, 50px) scale(1.06); }
+        }
+
+        /* ── Dark sidebar ── */
+        body.es-role-admin .es-sidebar {
+            background: linear-gradient(180deg, #0D1321 0%, #141E30 50%, #101826 100%);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.28), 1px 0 0 rgba(255,255,255,0.03);
+        }
+
+        body.es-role-admin .es-sidebar-brand {
+            border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+        }
+
+        body.es-role-admin .es-brand-name {
+            color: #F1F5F9 !important;
+        }
+
+        body.es-role-admin .es-brand-sub {
+            color: #64748B !important;
         }
 
         body.es-role-admin .es-nav-section {
-            color: #A1ACB8;
-            font-size: 0.68rem;
+            color: rgba(148,163,184,0.5);
+            letter-spacing: .1em;
+            font-size: .62rem;
+            text-transform: uppercase;
+            font-weight: 700;
         }
 
         body.es-role-admin .es-nav-link {
             border: 1px solid transparent;
-            margin: 0.12rem 0.75rem;
-            padding: 0.56rem 0.9rem;
+            margin: .15rem .65rem;
+            padding: .58rem .9rem;
+            border-radius: .6rem;
             font-weight: 500;
+            color: #94A3B8;
+            transition: all .22s cubic-bezier(.4,0,.2,1);
+        }
+
+        body.es-role-admin .es-nav-link i {
+            color: #64748B;
+            transition: color .22s ease;
         }
 
         body.es-role-admin .es-nav-link:hover {
-            border-color: var(--es-border);
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            transform: translateX(3px);
+            color: #E2E8F0;
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.07);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+        }
+
+        body.es-role-admin .es-nav-link:hover i {
+            color: #818CF8;
         }
 
         body.es-role-admin .es-nav-link.active {
-            border-color: var(--es-primary-m);
-            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.12);
+            color: #FFFFFF;
+            border-color: rgba(99,102,241,0.25);
+            background: linear-gradient(135deg, rgba(37,99,235,0.22) 0%, rgba(99,102,241,0.16) 100%);
+            box-shadow: 0 8px 24px rgba(37,99,235,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        body.es-role-admin .es-nav-link.active i {
+            color: #818CF8;
+        }
+
+        body.es-role-admin .es-nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            border-radius: 0 3px 3px 0;
+            background: linear-gradient(180deg, #6366F1, #2563EB);
+            box-shadow: 0 0 12px rgba(99,102,241,0.5);
         }
 
         body.es-role-admin .es-nav-badge {
-            background: var(--es-primary);
+            background: linear-gradient(135deg, #6366F1, #2563EB) !important;
+            color: #fff !important;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.4);
         }
 
+        body.es-role-admin .es-sidebar .es-nav-link[type="submit"],
+        body.es-role-admin .es-sidebar button.es-nav-link {
+            color: #94A3B8;
+        }
+
+        body.es-role-admin .es-sidebar .es-nav-link[type="submit"]:hover,
+        body.es-role-admin .es-sidebar button.es-nav-link:hover {
+            color: #FCA5A5;
+            background: rgba(239,68,68,0.1);
+            border-color: rgba(239,68,68,0.2);
+        }
+
+        /* ── Glass topbar ── */
         body.es-role-admin .es-topbar {
-            border-bottom-color: var(--es-border-soft);
+            border-bottom: 1px solid rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(18px) saturate(1.5);
+            -webkit-backdrop-filter: blur(18px) saturate(1.5);
+            box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+            transition: all .3s cubic-bezier(.4,0,.2,1);
+        }
+
+        body.es-role-admin .es-topbar.is-scrolled {
+            border-bottom-color: rgba(203,213,225,0.4);
+            box-shadow: 0 8px 28px rgba(15,23,42,0.07);
+            background: rgba(255,255,255,0.68);
         }
 
         body.es-role-admin .es-topbar-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #566A7F;
+            font-size: 1.04rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #0F172A 0%, #475569 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         body.es-role-admin .es-avatar {
-            background: var(--es-primary-s);
-            border-color: var(--es-primary-m);
-            color: var(--es-primary);
+            background: linear-gradient(135deg, #DBEAFE 0%, #E0E7FF 100%);
+            border: 2px solid rgba(99,102,241,0.3);
+            color: #4338CA;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.08), 0 8px 20px rgba(99,102,241,0.16);
+            transition: all .3s ease;
         }
 
+        body.es-role-admin .es-avatar:hover {
+            box-shadow: 0 0 0 4px rgba(99,102,241,0.12), 0 12px 28px rgba(99,102,241,0.22);
+            transform: scale(1.05);
+        }
+
+        /* ── Glass cards ── */
         body.es-role-admin .card {
-            border-radius: 0.75rem;
-            border: 1px solid var(--es-border-soft);
+            border-radius: .95rem;
+            border: 1px solid rgba(255,255,255,0.45);
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(12px) saturate(1.3);
+            -webkit-backdrop-filter: blur(12px) saturate(1.3);
+            box-shadow: 0 4px 16px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.02);
+            transition: all .3s cubic-bezier(.4,0,.2,1);
+        }
+
+        body.es-role-admin .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(15,23,42,0.07), 0 6px 14px rgba(37,99,235,0.04);
+            border-color: rgba(37,99,235,0.15);
         }
 
         body.es-role-admin .card-header {
             padding-top: 1.05rem;
             padding-bottom: 0.8rem;
+            background: rgba(255,255,255,0.25);
+            border-bottom: 1px solid rgba(226,232,240,0.55);
         }
 
         body.es-role-admin .card-title {
-            color: #566A7F;
+            color: #334155;
         }
 
         body.es-role-admin .table th {
-            background: #F8FAFC;
+            background: rgba(248,250,252,0.55);
+            backdrop-filter: blur(4px);
             color: #8A96A8;
+        }
+
+        body.es-role-admin .table-hover tbody tr {
+            transition: all .2s cubic-bezier(.4,0,.2,1);
+        }
+
+        body.es-role-admin .table-hover tbody tr:hover {
+            transform: scale(1.003);
+            background: rgba(219,234,254,0.18) !important;
+        }
+
+        body.es-role-admin .table-hover tbody tr:hover > td {
+            background: transparent;
+        }
+
+        /* ── Gradient primary button ── */
+        body.es-role-admin .btn-primary {
+            background: linear-gradient(135deg, #4F46E5 0%, #2563EB 100%);
+            border: none;
+            box-shadow: 0 4px 14px rgba(79,70,229,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+            transition: all .25s cubic-bezier(.4,0,.2,1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.es-role-admin .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+            transition: left .5s ease;
+        }
+
+        body.es-role-admin .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(79,70,229,0.4), 0 0 0 2px rgba(79,70,229,0.08);
+            background: linear-gradient(135deg, #4338CA 0%, #1D4ED8 100%);
+        }
+
+        body.es-role-admin .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        body.es-role-admin .btn-outline-primary {
+            border: 1.5px solid rgba(79,70,229,0.35);
+            color: #4338CA;
+            background: rgba(238,242,255,0.25);
+            transition: all .22s ease;
+        }
+
+        body.es-role-admin .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #4F46E5 0%, #2563EB 100%);
+            border-color: transparent;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(79,70,229,0.28);
+        }
+
+        /* ── Glass forms ── */
+        body.es-role-admin .form-control,
+        body.es-role-admin .form-select {
+            background: rgba(255,255,255,0.65);
+            border: 1.5px solid rgba(203,213,225,0.45);
+            backdrop-filter: blur(4px);
+            transition: all .25s ease;
+        }
+
+        body.es-role-admin .form-control:focus,
+        body.es-role-admin .form-select:focus {
+            background: rgba(255,255,255,0.9);
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 4px rgba(79,70,229,0.1), 0 4px 12px rgba(79,70,229,0.06);
         }
 
         body.es-role-admin .breadcrumb-item a {
@@ -541,7 +1254,18 @@
         }
 
         body.es-role-admin .breadcrumb-item.active {
-            color: #566A7F;
+            color: #334155;
+        }
+
+        /* ── Scrollbar ── */
+        body.es-role-admin .es-sidebar::-webkit-scrollbar { width: 4px; }
+        body.es-role-admin .es-sidebar::-webkit-scrollbar-track { background: transparent; }
+        body.es-role-admin .es-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+        body.es-role-admin .es-footer {
+            background: rgba(255,255,255,0.45);
+            backdrop-filter: blur(8px);
+            border-top-color: rgba(226,232,240,0.45);
         }
 
         body.es-role-admin .admin-page-head {
@@ -1934,13 +2658,42 @@ function closeSidebar() {
         root.querySelectorAll('.admin-reveal').forEach((el, index) => {
             if (el.dataset.revealBound === '1') return;
             el.dataset.revealBound = '1';
-            el.style.transitionDelay = `${Math.min(index * 45, 180)}ms`;
+            el.style.transitionDelay = `${Math.min(index * 60, 360)}ms`;
 
             if (prefersReducedMotion || !revealObserver) {
                 el.classList.add('is-visible');
             } else {
                 revealObserver.observe(el);
             }
+        });
+    };
+
+    /* ── Admin topbar scroll shadow ── */
+    const initAdminTopbar = () => {
+        const topbar = document.querySelector('.es-topbar');
+        if (!topbar || topbar.dataset.adminScrollBound === '1') return;
+        topbar.dataset.adminScrollBound = '1';
+        let ticking = false;
+        const sync = () => { topbar.classList.toggle('is-scrolled', window.scrollY > 6); ticking = false; };
+        sync();
+        window.addEventListener('scroll', () => {
+            if (!ticking) { ticking = true; requestAnimationFrame(sync); }
+        }, { passive: true });
+    };
+
+    /* ── Admin KPI card tilt ── */
+    const initAdminTilt = (root) => {
+        if (prefersReducedMotion) return;
+        root.querySelectorAll('.admin-kpi-card').forEach((card) => {
+            if (card.dataset.adminTiltBound === '1') return;
+            card.dataset.adminTiltBound = '1';
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                card.style.transform = `perspective(600px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg) translateY(-3px)`;
+            });
+            card.addEventListener('mouseleave', () => { card.style.transform = ''; });
         });
     };
 
@@ -1951,6 +2704,8 @@ function closeSidebar() {
         initBusyTargets(root);
         initDirtyModalForms(root);
         initReveals(root);
+        initAdminTopbar();
+        initAdminTilt(root);
     };
 
     window.initAdminGlobalUX(document);
@@ -1976,16 +2731,21 @@ function closeSidebar() {
     if (!body.classList.contains('es-role-citizen')) return;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    /* ── Topbar scroll state ── */
     const topbar = document.querySelector('.es-topbar');
     if (topbar) {
+        let ticking = false;
         const syncTopbarState = () => {
             topbar.classList.toggle('is-scrolled', window.scrollY > 6);
+            ticking = false;
         };
-
         syncTopbarState();
-        window.addEventListener('scroll', syncTopbarState, { passive: true });
+        window.addEventListener('scroll', () => {
+            if (!ticking) { ticking = true; requestAnimationFrame(syncTopbarState); }
+        }, { passive: true });
     }
 
+    /* ── Smooth elastic counter animation ── */
     const animateCounter = (el) => {
         if (!el || el.dataset.counterAnimated === '1') return;
         el.dataset.counterAnimated = '1';
@@ -1998,11 +2758,17 @@ function closeSidebar() {
             return;
         }
 
-        const duration = 700;
+        const duration = 1000;
         const startTime = performance.now();
+        /* Elastic ease-out for a satisfying bounce */
+        const elasticOut = (t) => {
+            if (t === 0 || t === 1) return t;
+            return Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
+        };
+
         const step = (now) => {
             const progress = Math.min((now - startTime) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
+            const eased = elasticOut(progress);
             el.textContent = String(Math.round(target * eased));
             if (progress < 1) {
                 requestAnimationFrame(step);
@@ -2014,6 +2780,7 @@ function closeSidebar() {
         requestAnimationFrame(step);
     };
 
+    /* ── Intersection observer for reveals + counters ── */
     const revealObserver = !prefersReducedMotion && 'IntersectionObserver' in window
         ? new IntersectionObserver((entries, observer) => {
             entries.forEach((entry) => {
@@ -2024,15 +2791,17 @@ function closeSidebar() {
                 }
                 observer.unobserve(entry.target);
             });
-        }, { threshold: 0.12 })
+        }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' })
         : null;
 
+    /* ── Global UX initializer ── */
     window.initCitizenGlobalUX = function initCitizenGlobalUX(root = document) {
         const revealItems = root.querySelectorAll('.citizen-reveal, [data-citizen-reveal]');
         revealItems.forEach((el, index) => {
             if (el.dataset.citizenRevealBound === '1') return;
             el.dataset.citizenRevealBound = '1';
-            el.style.transitionDelay = `${Math.min(index * 40, 180)}ms`;
+            /* Stagger: 60ms per item, max 360ms */
+            el.style.transitionDelay = `${Math.min(index * 60, 360)}ms`;
 
             if (prefersReducedMotion || !revealObserver) {
                 el.classList.add('is-visible');
@@ -2054,6 +2823,21 @@ function closeSidebar() {
     };
 
     window.initCitizenGlobalUX(document);
+
+    /* ── Card tilt micro-interaction on hover ── */
+    if (!prefersReducedMotion) {
+        document.querySelectorAll('.citizen-kpi-card, .citizen-hero-panel').forEach((card) => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                card.style.transform = `perspective(600px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg) translateY(-3px)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+    }
 })();
 
 (function () {
@@ -2061,15 +2845,25 @@ function closeSidebar() {
     if (!body.classList.contains('es-role-office_user')) return;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    /* ── Topbar scroll shadow ── */
     const topbar = document.querySelector('.es-topbar');
     if (topbar) {
+        let ticking = false;
         const syncTopbarState = () => {
             topbar.classList.toggle('is-scrolled', window.scrollY > 6);
+            ticking = false;
         };
-
         syncTopbarState();
-        window.addEventListener('scroll', syncTopbarState, { passive: true });
+        window.addEventListener('scroll', () => {
+            if (!ticking) { ticking = true; requestAnimationFrame(syncTopbarState); }
+        }, { passive: true });
     }
+
+    /* ── Elastic ease-out counter animation ── */
+    const elasticEaseOut = (t) => {
+        if (t === 0 || t === 1) return t;
+        return Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
+    };
 
     const animateCounter = (el) => {
         if (!el || el.dataset.officeCounterAnimated === '1') return;
@@ -2083,11 +2877,11 @@ function closeSidebar() {
             return;
         }
 
-        const duration = 700;
+        const duration = 900;
         const startTime = performance.now();
         const step = (now) => {
             const progress = Math.min((now - startTime) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
+            const eased = elasticEaseOut(progress);
             el.textContent = String(Math.round(target * eased));
             if (progress < 1) {
                 requestAnimationFrame(step);
@@ -2099,6 +2893,7 @@ function closeSidebar() {
         requestAnimationFrame(step);
     };
 
+    /* ── IntersectionObserver for reveals ── */
     const revealObserver = !prefersReducedMotion && 'IntersectionObserver' in window
         ? new IntersectionObserver((entries, observer) => {
             entries.forEach((entry) => {
@@ -2113,11 +2908,12 @@ function closeSidebar() {
         : null;
 
     window.initOfficeGlobalUX = function initOfficeGlobalUX(root = document) {
+        /* Staggered reveals — wider delay */
         const revealItems = root.querySelectorAll('.office-reveal, [data-office-reveal]');
         revealItems.forEach((el, index) => {
             if (el.dataset.officeRevealBound === '1') return;
             el.dataset.officeRevealBound = '1';
-            el.style.transitionDelay = `${Math.min(index * 40, 180)}ms`;
+            el.style.transitionDelay = `${Math.min(index * 60, 360)}ms`;
 
             if (prefersReducedMotion || !revealObserver) {
                 el.classList.add('is-visible');
@@ -2126,6 +2922,7 @@ function closeSidebar() {
             }
         });
 
+        /* Counters */
         root.querySelectorAll('[data-office-counter]').forEach((counter) => {
             if (counter.dataset.officeCounterBound === '1') return;
             counter.dataset.officeCounterBound = '1';
@@ -2136,6 +2933,23 @@ function closeSidebar() {
                 revealObserver.observe(counter);
             }
         });
+
+        /* ── Card tilt micro-interaction ── */
+        if (!prefersReducedMotion) {
+            root.querySelectorAll('.office-kpi-card, .office-hero-panel').forEach((card) => {
+                if (card.dataset.officeTiltBound === '1') return;
+                card.dataset.officeTiltBound = '1';
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width - 0.5;
+                    const y = (e.clientY - rect.top) / rect.height - 0.5;
+                    card.style.transform = `perspective(600px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg) translateY(-3px)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = '';
+                });
+            });
+        }
     };
 
     window.initOfficeGlobalUX(document);

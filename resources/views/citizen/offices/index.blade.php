@@ -125,10 +125,14 @@
 
 @push('styles')
 <style>
+/* ═══════════════════════════════════════════════════════
+   CITIZEN OFFICES — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════ */
+
 body.es-role-citizen .citizen-office-filter-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 14rem auto auto;
-    gap: .64rem;
+    gap: .65rem;
     align-items: center;
 }
 
@@ -138,21 +142,26 @@ body.es-role-citizen .citizen-office-search-wrap {
 
 body.es-role-citizen .citizen-office-search-icon {
     position: absolute;
-    left: .8rem;
+    left: .82rem;
     top: 50%;
     transform: translateY(-50%);
     color: #94A3B8;
     font-size: .85rem;
     pointer-events: none;
+    transition: color .2s ease;
+}
+
+body.es-role-citizen .citizen-office-search-wrap:focus-within .citizen-office-search-icon {
+    color: #0EA5E9;
 }
 
 body.es-role-citizen .citizen-office-search-input {
-    padding-left: 2.25rem;
+    padding-left: 2.3rem;
 }
 
 body.es-role-citizen .citizen-office-filter-select,
 body.es-role-citizen .citizen-office-filter-btn {
-    height: 2.45rem;
+    height: 2.5rem;
 }
 
 body.es-role-citizen .citizen-office-map-meta {
@@ -163,10 +172,10 @@ body.es-role-citizen .citizen-office-map-meta {
 body.es-role-citizen .citizen-office-map {
     width: 100%;
     height: 26rem;
-    border-radius: .95rem;
+    border-radius: 1rem;
     overflow: hidden;
-    border: 1px solid #CBD5E1;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34), 0 10px 22px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(203,213,225,0.5);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3), 0 12px 28px rgba(15,23,42,0.08);
 }
 
 body.es-role-citizen .citizen-office-map-empty {
@@ -180,61 +189,71 @@ body.es-role-citizen .citizen-office-grid {
     gap: 1rem;
 }
 
+/* ── Office cards: glass with gradient glow ── */
 body.es-role-citizen .office-card-wrap {
     position: relative;
     overflow: hidden;
-    border-radius: .95rem;
-    border: 1px solid color-mix(in srgb, var(--es-border) 72%, #BFDBFE 28%);
-    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    border-radius: 1rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(12px) saturate(1.3);
+    -webkit-backdrop-filter: blur(12px) saturate(1.3);
+    box-shadow: 0 4px 16px rgba(15,23,42,0.04);
+    transition: all .3s cubic-bezier(.4,0,.2,1);
 }
 
 body.es-role-citizen .office-card-wrap:hover {
-    transform: translateY(-3px);
-    border-color: #93C5FD;
-    box-shadow: 0 16px 30px rgba(37, 99, 235, 0.14);
+    transform: translateY(-6px);
+    border-color: rgba(14,165,233,0.25);
+    box-shadow: 0 24px 48px rgba(14,165,233,0.12), 0 0 0 1px rgba(14,165,233,0.08);
 }
 
 body.es-role-citizen .office-card-glow {
     position: absolute;
-    top: -46%;
-    right: -24%;
-    width: 9rem;
-    height: 9rem;
+    top: -50%;
+    right: -25%;
+    width: 10rem;
+    height: 10rem;
     border-radius: 999px;
-    background: radial-gradient(circle, rgba(14, 165, 233, 0.22) 0%, rgba(14, 165, 233, 0) 72%);
+    background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, rgba(99,102,241,0.05) 50%, transparent 70%);
     pointer-events: none;
+    transition: opacity .3s ease;
+    opacity: 0.6;
+}
+
+body.es-role-citizen .office-card-wrap:hover .office-card-glow {
+    opacity: 1;
 }
 
 body.es-role-citizen .office-card-header {
     display: flex;
     align-items: center;
-    gap: .8rem;
-    padding: 1rem 1rem .72rem;
+    gap: .85rem;
+    padding: 1.1rem 1.1rem .75rem;
 }
 
 body.es-role-citizen .office-card-logo,
 body.es-role-citizen .office-card-logo-placeholder {
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: .72rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: .8rem;
     flex-shrink: 0;
 }
 
 body.es-role-citizen .office-card-logo {
     object-fit: cover;
-    border: 1px solid #DBEAFE;
+    border: 1.5px solid rgba(219,234,254,0.8);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.06);
 }
 
 body.es-role-citizen .office-card-logo-placeholder {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #0369A1;
-    background: #E0F2FE;
-    border: 1px solid #BAE6FD;
-    font-size: 1rem;
+    color: #fff;
+    background: linear-gradient(135deg, #0EA5E9, #6366F1);
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(14,165,233,0.25);
 }
 
 body.es-role-citizen .citizen-min-w-0 {
@@ -243,7 +262,7 @@ body.es-role-citizen .citizen-min-w-0 {
 
 body.es-role-citizen .office-card-name {
     margin: 0;
-    font-size: .88rem;
+    font-size: .9rem;
     font-weight: 800;
     line-height: 1.2;
     color: #0F172A;
@@ -251,12 +270,13 @@ body.es-role-citizen .office-card-name {
 
 body.es-role-citizen .office-card-municipality {
     margin-top: .2rem;
-    font-size: .74rem;
-    color: #64748B;
+    font-size: .72rem;
+    color: #94A3B8;
+    font-weight: 500;
 }
 
 body.es-role-citizen .office-card-body {
-    padding: 0 1rem .82rem;
+    padding: 0 1.1rem .85rem;
 }
 
 body.es-role-citizen .office-card-meta {
@@ -267,7 +287,7 @@ body.es-role-citizen .office-card-meta {
 }
 
 body.es-role-citizen .office-card-meta-icon {
-    color: #0369A1;
+    color: #0EA5E9;
     font-size: .82rem;
     margin-top: .12rem;
 }
@@ -279,8 +299,8 @@ body.es-role-citizen .office-card-meta-text {
 }
 
 body.es-role-citizen .office-card-footer {
-    border-top: 1px solid #E2E8F0;
-    padding: .72rem 1rem .84rem;
+    border-top: 1px solid rgba(226,232,240,0.5);
+    padding: .75rem 1.1rem .88rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -292,23 +312,24 @@ body.es-role-citizen .office-card-chip {
     display: inline-flex;
     align-items: center;
     gap: .25rem;
-    font-size: .7rem;
+    font-size: .68rem;
     font-weight: 700;
-    color: #0F766E;
-    background: #ECFEFF;
-    border: 1px solid #A5F3FC;
+    color: #0EA5E9;
+    background: rgba(224,242,254,0.5);
+    border: 1px solid rgba(14,165,233,0.15);
     border-radius: 999px;
-    padding: .18rem .5rem;
+    padding: .2rem .55rem;
+    backdrop-filter: blur(4px);
 }
 
 body.es-role-citizen .office-card-chip.is-rating {
-    color: #92400E;
-    background: #FEF3C7;
-    border-color: #FDE68A;
+    color: #D97706;
+    background: rgba(254,243,199,0.5);
+    border-color: rgba(217,119,6,0.15);
 }
 
 body.es-role-citizen .office-card-chip.is-rating i {
-    color: #B45309;
+    color: #F59E0B;
 }
 
 @media (max-width: 991.98px) {

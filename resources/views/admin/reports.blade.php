@@ -4,119 +4,59 @@
 
 @push('styles')
 <style>
-    .reports-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    .report-reveal {
-        transition: opacity .36s ease, transform .36s ease;
-    }
-    body.es-role-admin.reports-motion .report-reveal {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    body.es-role-admin.reports-motion .report-reveal.is-visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    .report-row {
-        display: flex;
-        align-items: center;
-        gap: .75rem;
-        margin-bottom: .75rem;
-    }
-    .report-label {
-        font-size: .78rem;
-        font-weight: 500;
-        color: #566A7F;
-        min-width: 110px;
-        flex-shrink: 0;
-    }
+    /* ═══ ADMIN REPORTS — PREMIUM GLASS ═══ */
+    .reports-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    .report-reveal { transition: opacity .36s ease, transform .36s ease; }
+    body.es-role-admin.reports-motion .report-reveal { opacity: 0; transform: translateY(10px); }
+    body.es-role-admin.reports-motion .report-reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+    .report-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; }
+    .report-label { font-size: .78rem; font-weight: 500; color: #566A7F; min-width: 110px; flex-shrink: 0; }
+
+    /* Status bar track — glass */
     .report-track {
-        flex: 1;
-        height: 22px;
-        background: var(--es-bg);
-        border-radius: 99px;
-        overflow: hidden;
-        border: 1px solid var(--es-border-soft);
+        flex: 1; height: 22px;
+        background: rgba(255,255,255,0.4);
+        backdrop-filter: blur(4px);
+        border-radius: 99px; overflow: hidden;
+        border: 1px solid rgba(79,70,229,0.06);
     }
     .report-fill {
-        height: 100%;
-        border-radius: 99px;
+        height: 100%; border-radius: 99px;
         transition: width .55s cubic-bezier(.2,.8,.2,1);
+        box-shadow: 0 2px 8px rgba(79,70,229,0.15);
     }
-    .report-count {
-        font-size: .78rem;
-        font-weight: 700;
-        color: #566A7F;
-        min-width: 30px;
-        text-align: right;
-    }
+    .report-count { font-size: .78rem; font-weight: 700; color: #566A7F; min-width: 30px; text-align: right; }
+
+    /* Chips — gradient */
     .report-chip {
-        background: var(--es-primary-s);
-        color: var(--es-primary);
-        border: 1px solid var(--es-primary-m);
-        padding: .2rem .6rem;
-        border-radius: 20px;
-        font-size: .72rem;
-        font-weight: 600;
+        background: linear-gradient(135deg, #4F46E5, #2563EB);
+        color: #fff; border: none;
+        padding: .2rem .6rem; border-radius: 20px;
+        font-size: .72rem; font-weight: 600;
+        box-shadow: 0 2px 6px rgba(79,70,229,0.2);
     }
-    .report-empty {
-        text-align: center;
-        padding: 1.5rem;
-        color: var(--es-muted);
-    }
-    .report-month-chart {
-        display: flex;
-        align-items: flex-end;
-        gap: .4rem;
-        height: 120px;
-        padding-bottom: .5rem;
-    }
-    .report-month-col {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: .3rem;
-        height: 100%;
-    }
-    .report-month-track {
-        flex: 1;
-        width: 100%;
-        display: flex;
-        align-items: flex-end;
-    }
+    .report-empty { text-align: center; padding: 1.5rem; color: var(--es-muted); }
+
+    /* Month chart — enhanced bars */
+    .report-month-chart { display: flex; align-items: flex-end; gap: .4rem; height: 120px; padding-bottom: .5rem; }
+    .report-month-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .3rem; height: 100%; }
+    .report-month-track { flex: 1; width: 100%; display: flex; align-items: flex-end; }
     .report-month-bar {
-        width: 100%;
-        border-radius: 4px 4px 0 0;
+        width: 100%; border-radius: 4px 4px 0 0;
         transition: transform .55s ease, opacity .4s ease;
+        box-shadow: 0 -2px 8px rgba(79,70,229,0.1);
     }
-    body.es-role-admin.reports-motion .report-month-bar {
-        transform-origin: bottom;
-        transform: scaleY(.4);
-        opacity: .68;
-    }
-    body.es-role-admin.reports-motion .report-month-chart.is-ready .report-month-bar {
-        transform: scaleY(1);
-        opacity: 1;
-    }
-    .report-month-label {
-        font-size: .6rem;
-        color: var(--es-muted);
-        font-weight: 500;
-    }
+    body.es-role-admin.reports-motion .report-month-bar { transform-origin: bottom; transform: scaleY(.4); opacity: .68; }
+    body.es-role-admin.reports-motion .report-month-chart.is-ready .report-month-bar { transform: scaleY(1); opacity: 1; }
+    .report-month-label { font-size: .6rem; color: var(--es-muted); font-weight: 500; }
+
     @media(min-width: 768px) {
         .reports-grid { grid-template-columns: 1fr 1fr; }
         .reports-grid .card:last-child { grid-column: 1 / -1; }
     }
     @media (prefers-reduced-motion: reduce) {
-        .report-reveal,
-        .report-fill,
-        .report-month-bar {
-            transition: none !important;
-        }
+        .report-reveal, .report-fill, .report-month-bar { transition: none !important; }
     }
 </style>
 @endpush

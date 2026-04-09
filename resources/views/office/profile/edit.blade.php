@@ -143,150 +143,84 @@
 
 @push('styles')
 <style>
-body.es-role-office_user .office-profile-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    max-width: 880px;
-}
+/* ═══════════════════════════════════════════════════════
+   OFFICE PROFILE — PREMIUM GLASSMORPHISM
+   ═══════════════════════════════════════════════════════ */
 
+body.es-role-office_user .office-profile-wrap { display: flex; flex-direction: column; gap: 1rem; max-width: 880px; }
+
+/* Header — glass with sweep */
 body.es-role-office_user .office-profile-head {
-    border: 1px solid color-mix(in srgb, var(--es-primary) 18%, var(--es-border) 82%);
-    background: radial-gradient(circle at 8% -15%, rgba(59, 130, 246, 0.2) 0, rgba(59, 130, 246, 0) 48%),
-                radial-gradient(circle at 92% 118%, rgba(14, 165, 233, 0.14) 0, rgba(14, 165, 233, 0) 56%),
-                linear-gradient(145deg, rgba(255, 255, 255, 0.97) 0%, rgba(243, 248, 255, 0.92) 100%);
+    border: 1px solid rgba(37,99,235,0.12) !important;
+    background: rgba(255,255,255,0.55) !important;
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    position: relative; overflow: hidden;
 }
-
 body.es-role-office_user .office-profile-kicker {
-    display: inline-flex;
-    padding: .22rem .58rem;
-    border-radius: 999px;
-    background: #DBEAFE;
-    border: 1px solid #BFDBFE;
-    color: #1D4ED8;
-    font-size: .67rem;
-    font-weight: 700;
-    letter-spacing: .05em;
-    text-transform: uppercase;
+    display: inline-flex; padding: .24rem .62rem; border-radius: 999px;
+    background: linear-gradient(135deg, #2563EB, #0EA5E9);
+    color: #fff; font-size: .65rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.22); border: none;
 }
-
 body.es-role-office_user .office-profile-title {
-    margin: .72rem 0 .18rem;
-    font-size: clamp(1.2rem, 2.1vw, 1.5rem);
-    font-weight: 800;
-    color: #0F172A;
-    letter-spacing: -0.02em;
+    margin: .72rem 0 .18rem; font-size: clamp(1.2rem, 2.1vw, 1.5rem); font-weight: 800; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #1E3A8A, #2563EB, #0EA5E9);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
+body.es-role-office_user .office-profile-sub { margin: 0; color: #475569; font-size: .83rem; }
 
-body.es-role-office_user .office-profile-sub {
-    margin: 0;
-    color: #475569;
-    font-size: .83rem;
-}
-
+/* Logo box — gradient */
 body.es-role-office_user .office-profile-logo-box {
-    width: 3.3rem;
-    height: 3.3rem;
-    border-radius: 1rem;
-    border: 1px solid #BFDBFE;
-    background: linear-gradient(155deg, #EFF6FF 0%, #DBEAFE 100%);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 12px 24px rgba(29, 78, 216, 0.12);
+    width: 3.3rem; height: 3.3rem; border-radius: 1rem;
+    border: none;
+    background: linear-gradient(155deg, #2563EB, #0EA5E9);
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    box-shadow: 0 12px 24px rgba(37,99,235,0.2);
 }
+body.es-role-office_user .office-profile-logo { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+body.es-role-office_user .office-profile-logo-placeholder { font-size: 1.2rem; font-weight: 800; color: #fff; }
 
-body.es-role-office_user .office-profile-logo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: inherit;
-}
+/* Form grid */
+body.es-role-office_user .office-profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .78rem; }
+body.es-role-office_user .office-profile-full { grid-column: 1 / -1; }
+body.es-role-office_user .office-profile-section { margin-top: .95rem; }
 
-body.es-role-office_user .office-profile-logo-placeholder {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #1D4ED8;
-}
-
-body.es-role-office_user .office-profile-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: .78rem;
-}
-
-body.es-role-office_user .office-profile-full {
-    grid-column: 1 / -1;
-}
-
-body.es-role-office_user .office-profile-section {
-    margin-top: .95rem;
-}
-
-body.es-role-office_user .office-hours-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: .52rem;
-}
-
+/* Hours — glass items */
+body.es-role-office_user .office-hours-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .52rem; }
 body.es-role-office_user .office-hours-item {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    border-radius: .72rem;
-    border: 1px solid #DBEAFE;
-    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%);
+    display: flex; align-items: center; gap: .5rem; border-radius: .72rem;
+    border: 1px solid rgba(37,99,235,0.08);
+    background: rgba(255,255,255,0.45);
+    backdrop-filter: blur(6px);
     padding: .5rem .68rem;
+    transition: border-color .22s ease;
 }
-
+body.es-role-office_user .office-hours-item:focus-within { border-color: rgba(37,99,235,0.25); }
 body.es-role-office_user .office-hours-day {
-    width: 2.1rem;
-    flex-shrink: 0;
-    color: #334155;
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .03em;
-    text-transform: uppercase;
+    width: 2.1rem; flex-shrink: 0; color: #334155;
+    font-size: .72rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
 }
 
+/* Map — glass wrapper */
 body.es-role-office_user .office-map-wrap {
-    border-radius: .86rem;
-    overflow: hidden;
-    border: 1px solid #DBEAFE;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    border-radius: .86rem; overflow: hidden;
+    border: 1px solid rgba(37,99,235,0.1);
+    box-shadow: 0 8px 24px rgba(37,99,235,0.08);
 }
-
-body.es-role-office_user .office-map-frame {
-    border: 0;
-    display: block;
-}
-
+body.es-role-office_user .office-map-frame { border: 0; display: block; }
 body.es-role-office_user .office-map-fallback {
-    min-height: 11.2rem;
-    border-radius: .86rem;
-    border: 1px solid #DBEAFE;
-    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%);
-    color: #64748B;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: .35rem;
+    min-height: 11.2rem; border-radius: .86rem;
+    border: 1px solid rgba(37,99,235,0.08);
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(8px);
+    color: #64748B; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .35rem;
 }
-
-body.es-role-office_user .office-map-fallback i {
-    font-size: 1.35rem;
-}
-
-body.es-role-office_user .office-profile-actions {
-    margin-top: 1.05rem;
-}
+body.es-role-office_user .office-map-fallback i { font-size: 1.35rem; }
+body.es-role-office_user .office-profile-actions { margin-top: 1.05rem; }
 
 @media (max-width: 767.98px) {
-    body.es-role-office_user .office-profile-grid {
-        grid-template-columns: 1fr;
-    }
+    body.es-role-office_user .office-profile-grid { grid-template-columns: 1fr; }
 }
 </style>
 @endpush

@@ -12,26 +12,29 @@
 {{-- Summary cards --}}
 <div class="row g-3 mb-3 citizen-reveal" data-citizen-reveal>
     <div class="col-6 col-md-4">
-        <div class="card h-100 border-0" style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);">
+        <div class="card h-100 citizen-pay-summary-card">
             <div class="card-body text-center py-3">
-                <div style="font-size:1.5rem;font-weight:800;color:#059669;">{{ $paidCount }}</div>
-                <div style="font-size:.74rem;color:#047857;font-weight:600;">Paid</div>
+                <div class="citizen-pay-summary-icon" style="background:linear-gradient(135deg,#10B981,#059669);"><i class="bi bi-check-circle"></i></div>
+                <div class="citizen-pay-summary-value" style="color:#059669;" data-citizen-counter="{{ $paidCount }}">{{ $paidCount }}</div>
+                <div class="citizen-pay-summary-label" style="color:#047857;">Paid</div>
             </div>
         </div>
     </div>
     <div class="col-6 col-md-4">
-        <div class="card h-100 border-0" style="background:linear-gradient(135deg,#FFF7ED,#FFEDD5);">
+        <div class="card h-100 citizen-pay-summary-card">
             <div class="card-body text-center py-3">
-                <div style="font-size:1.5rem;font-weight:800;color:#EA580C;">{{ $unpaidCount }}</div>
-                <div style="font-size:.74rem;color:#C2410C;font-weight:600;">Unpaid</div>
+                <div class="citizen-pay-summary-icon" style="background:linear-gradient(135deg,#F97316,#EA580C);"><i class="bi bi-hourglass-split"></i></div>
+                <div class="citizen-pay-summary-value" style="color:#EA580C;" data-citizen-counter="{{ $unpaidCount }}">{{ $unpaidCount }}</div>
+                <div class="citizen-pay-summary-label" style="color:#C2410C;">Unpaid</div>
             </div>
         </div>
     </div>
     <div class="col-12 col-md-4">
-        <div class="card h-100 border-0" style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);">
+        <div class="card h-100 citizen-pay-summary-card">
             <div class="card-body text-center py-3">
-                <div style="font-size:1.5rem;font-weight:800;color:#2563EB;">{{ $paidCount + $unpaidCount }}</div>
-                <div style="font-size:.74rem;color:#1D4ED8;font-weight:600;">Total Requests</div>
+                <div class="citizen-pay-summary-icon" style="background:linear-gradient(135deg,#0EA5E9,#6366F1);"><i class="bi bi-receipt"></i></div>
+                <div class="citizen-pay-summary-value" style="color:#2563EB;" data-citizen-counter="{{ $paidCount + $unpaidCount }}">{{ $paidCount + $unpaidCount }}</div>
+                <div class="citizen-pay-summary-label" style="color:#1D4ED8;">Total Requests</div>
             </div>
         </div>
     </div>
@@ -147,40 +150,100 @@
 
 @push('styles')
 <style>
-body.es-role-citizen .citizen-pay-subtitle {
-    margin-top: .18rem;
-    font-size: .74rem;
-    color: #64748B;
+/* ═══════════════════════════════════════════════════════
+   CITIZEN PAYMENTS — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════ */
+
+body.es-role-citizen .citizen-pay-summary-card {
+    border: none !important;
+    background: rgba(255,255,255,0.6) !important;
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
 }
 
-body.es-role-citizen .citizen-pay-mobile-item {
-    display: flex;
-    align-items: center;
-    gap: .72rem;
-    padding: .82rem .92rem;
-    border-bottom: 1px solid #E2E8F0;
+body.es-role-citizen .citizen-pay-summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: inherit;
 }
 
-body.es-role-citizen .citizen-pay-mobile-icon {
+body.es-role-citizen .citizen-pay-summary-card:nth-child(1)::before { background: linear-gradient(90deg, #10B981, #059669); }
+
+body.es-role-citizen .citizen-pay-summary-icon {
     width: 2.4rem;
     height: 2.4rem;
     border-radius: .7rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
+    font-size: .9rem;
+    margin-bottom: .5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+body.es-role-citizen .citizen-pay-summary-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+body.es-role-citizen .citizen-pay-summary-label {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-top: .1rem;
+}
+
+body.es-role-citizen .citizen-pay-subtitle {
+    margin-top: .18rem;
+    font-size: .73rem;
+    color: #94A3B8;
+}
+
+body.es-role-citizen .citizen-pay-mobile-item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .85rem .95rem;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
+    transition: all .22s cubic-bezier(.4,0,.2,1);
+}
+
+body.es-role-citizen .citizen-pay-mobile-item:hover {
+    background: rgba(224,242,254,0.2);
+    transform: translateX(3px);
+}
+
+body.es-role-citizen .citizen-pay-mobile-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: .8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    font-size: .95rem;
 }
 
 body.es-role-citizen .citizen-pay-mobile-icon.is-paid {
-    background: #D1FAE5;
-    border: 1px solid #A7F3D0;
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+    border: 1px solid rgba(16,185,129,0.2);
     color: #059669;
+    box-shadow: 0 3px 8px rgba(16,185,129,0.12);
 }
 
 body.es-role-citizen .citizen-pay-mobile-icon.is-unpaid {
-    background: #FFEDD5;
-    border: 1px solid #FED7AA;
+    background: linear-gradient(135deg, #FFEDD5, #FED7AA);
+    border: 1px solid rgba(234,88,12,0.15);
     color: #EA580C;
+    box-shadow: 0 3px 8px rgba(234,88,12,0.1);
 }
 
 body.es-role-citizen .citizen-pay-mobile-main {
@@ -207,18 +270,19 @@ body.es-role-citizen .citizen-pay-mobile-end {
     flex-direction: column;
     align-items: flex-end;
     flex-shrink: 0;
-    gap: .25rem;
+    gap: .3rem;
 }
 
 body.es-role-citizen .citizen-pay-mobile-amount {
-    font-size: .84rem;
-    font-weight: 700;
+    font-size: .88rem;
+    font-weight: 800;
     color: #0F172A;
+    letter-spacing: -0.01em;
 }
 
 body.es-role-citizen .citizen-pay-pagination {
-    border-top: 1px solid #E2E8F0;
-    padding: .85rem 1rem;
+    border-top: 1px solid rgba(226,232,240,0.5);
+    padding: .9rem 1rem;
 }
 </style>
 @endpush

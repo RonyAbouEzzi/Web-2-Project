@@ -76,146 +76,62 @@
 
 @push('styles')
 <style>
-body.es-role-office_user .office-feedback-head-score {
-    display: inline-flex;
-    align-items: center;
-    gap: .38rem;
-}
+/* ═══════════════════════════════════════════════════════
+   OFFICE FEEDBACK — PREMIUM GLASSMORPHISM
+   ═══════════════════════════════════════════════════════ */
 
-body.es-role-office_user .office-feedback-head-score i {
-    color: #F59E0B;
-    font-size: .84rem;
-}
+body.es-role-office_user .office-feedback-head-score { display: inline-flex; align-items: center; gap: .38rem; }
+body.es-role-office_user .office-feedback-head-score i { color: #F59E0B; font-size: .84rem; }
+body.es-role-office_user .office-feedback-score { font-weight: 800; font-size: .9rem; color: #0F172A; }
+body.es-role-office_user .office-feedback-count { font-size: .75rem; color: #94A3B8; }
 
-body.es-role-office_user .office-feedback-score {
-    font-weight: 800;
-    font-size: .9rem;
-    color: #0F172A;
-}
-
-body.es-role-office_user .office-feedback-count {
-    font-size: .75rem;
-    color: #94A3B8;
-}
-
+/* Feedback items — glass hover */
 body.es-role-office_user .office-feedback-item {
     padding: 1.05rem 1.2rem;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
+    transition: background .22s ease;
 }
-
-body.es-role-office_user .office-feedback-item:last-child {
-    border-bottom: 0;
-}
+body.es-role-office_user .office-feedback-item:last-child { border-bottom: 0; }
+body.es-role-office_user .office-feedback-item:hover { background: rgba(224,242,254,0.1); }
 
 body.es-role-office_user .office-feedback-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: .75rem;
-    flex-wrap: wrap;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: .75rem; flex-wrap: wrap;
 }
+body.es-role-office_user .office-feedback-user { display: flex; align-items: center; gap: .65rem; }
 
-body.es-role-office_user .office-feedback-user {
-    display: flex;
-    align-items: center;
-    gap: .65rem;
-}
-
+/* Avatar — gradient */
 body.es-role-office_user .office-feedback-avatar {
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 999px;
-    background: #EFF6FF;
-    color: #2563EB;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .82rem;
-    font-weight: 700;
-    flex-shrink: 0;
+    width: 2.25rem; height: 2.25rem; border-radius: 999px;
+    background: linear-gradient(135deg, #2563EB, #0EA5E9);
+    color: #fff; display: inline-flex; align-items: center; justify-content: center;
+    font-size: .82rem; font-weight: 700; flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(37,99,235,0.18);
 }
+body.es-role-office_user .office-feedback-name { font-weight: 700; font-size: .85rem; }
+body.es-role-office_user .office-feedback-stars { display: inline-flex; gap: 1px; color: #F59E0B; font-size: .75rem; }
+body.es-role-office_user .office-feedback-time { font-size: .72rem; color: #94A3B8; }
+body.es-role-office_user .office-feedback-comment { font-size: .82rem; color: #334155; margin: .72rem 0 .42rem; line-height: 1.5; }
 
-body.es-role-office_user .office-feedback-name {
-    font-weight: 700;
-    font-size: .85rem;
-}
-
-body.es-role-office_user .office-feedback-stars {
-    display: inline-flex;
-    gap: 1px;
-    color: #F59E0B;
-    font-size: .75rem;
-}
-
-body.es-role-office_user .office-feedback-time {
-    font-size: .72rem;
-    color: #94A3B8;
-}
-
-body.es-role-office_user .office-feedback-comment {
-    font-size: .82rem;
-    color: #334155;
-    margin: .72rem 0 .42rem;
-    line-height: 1.5;
-}
-
+/* Reply — glass with gradient left border */
 body.es-role-office_user .office-feedback-reply {
-    background: #ECFDF5;
-    border-radius: .56rem;
-    padding: .65rem .9rem;
-    margin-top: .55rem;
-    border-left: 3px solid #16A34A;
+    background: rgba(236,253,245,0.5); backdrop-filter: blur(6px);
+    border-radius: .56rem; padding: .65rem .9rem; margin-top: .55rem;
+    border-left: 3px solid #10B981;
 }
+body.es-role-office_user .office-feedback-reply-title { font-size: .7rem; font-weight: 700; color: #16A34A; margin-bottom: .2rem; }
+body.es-role-office_user .office-feedback-reply-title span { color: #94A3B8; font-weight: 400; }
+body.es-role-office_user .office-feedback-reply p { font-size: .8rem; color: #334155; margin: 0; }
 
-body.es-role-office_user .office-feedback-reply-title {
-    font-size: .7rem;
-    font-weight: 700;
-    color: #16A34A;
-    margin-bottom: .2rem;
-}
-
-body.es-role-office_user .office-feedback-reply-title span {
-    color: #94A3B8;
-    font-weight: 400;
-}
-
-body.es-role-office_user .office-feedback-reply p {
-    font-size: .8rem;
-    color: #334155;
-    margin: 0;
-}
-
-body.es-role-office_user .office-feedback-form {
-    margin-top: .65rem;
-    display: flex;
-    gap: .5rem;
-    flex-wrap: wrap;
-}
-
-body.es-role-office_user .office-feedback-form .form-control {
-    flex: 1;
-    min-width: 180px;
-}
-
-body.es-role-office_user .office-feedback-visibility {
-    max-width: 110px;
-}
-
-body.es-role-office_user .office-feedback-reply-btn {
-    flex-shrink: 0;
-}
-
-body.es-role-office_user .office-feedback-pagination {
-    padding: .75rem 1rem;
-    border-top: 1px solid #E2E8F0;
-}
+/* Reply form — glass input */
+body.es-role-office_user .office-feedback-form { margin-top: .65rem; display: flex; gap: .5rem; flex-wrap: wrap; }
+body.es-role-office_user .office-feedback-form .form-control { flex: 1; min-width: 180px; }
+body.es-role-office_user .office-feedback-visibility { max-width: 110px; }
+body.es-role-office_user .office-feedback-reply-btn { flex-shrink: 0; }
+body.es-role-office_user .office-feedback-pagination { padding: .75rem 1rem; border-top: 1px solid rgba(226,232,240,0.5); }
 
 @media (max-width: 575.98px) {
     body.es-role-office_user .office-feedback-visibility,
-    body.es-role-office_user .office-feedback-reply-btn {
-        width: 100%;
-        max-width: none;
-    }
+    body.es-role-office_user .office-feedback-reply-btn { width: 100%; max-width: none; }
 }
 </style>
 @endpush

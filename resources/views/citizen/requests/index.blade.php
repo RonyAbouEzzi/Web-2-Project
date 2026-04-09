@@ -167,14 +167,18 @@
 
 @push('styles')
 <style>
+/* ═══════════════════════════════════════════════════════
+   CITIZEN REQUESTS — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════ */
+
 body.es-role-citizen .citizen-requests-filter-wrap {
-    padding: 1rem;
+    padding: 1.1rem;
 }
 
 body.es-role-citizen .citizen-requests-filter-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 12rem 10rem auto auto;
-    gap: .62rem;
+    gap: .65rem;
     align-items: center;
 }
 
@@ -184,23 +188,44 @@ body.es-role-citizen .citizen-filter-input-wrap {
 
 body.es-role-citizen .citizen-filter-input-icon {
     position: absolute;
-    left: .78rem;
+    left: .82rem;
     top: 50%;
     transform: translateY(-50%);
     color: #94A3B8;
-    font-size: .83rem;
+    font-size: .85rem;
     pointer-events: none;
+    transition: color .2s ease;
+}
+
+body.es-role-citizen .citizen-filter-input-wrap:focus-within .citizen-filter-input-icon {
+    color: #0EA5E9;
 }
 
 body.es-role-citizen .citizen-filter-input {
-    padding-left: 2.2rem;
+    padding-left: 2.3rem;
+    background: rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(203,213,225,0.4);
+    backdrop-filter: blur(4px);
+}
+
+body.es-role-citizen .citizen-filter-input:focus {
+    background: rgba(255,255,255,0.9);
+    border-color: #0EA5E9;
+    box-shadow: 0 0 0 4px rgba(14,165,233,0.1), 0 4px 12px rgba(14,165,233,0.08);
+}
+
+body.es-role-citizen .citizen-filter-select {
+    background-color: rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(203,213,225,0.4);
+    backdrop-filter: blur(4px);
 }
 
 body.es-role-citizen .citizen-filter-select,
 body.es-role-citizen .citizen-filter-btn {
-    height: 2.45rem;
+    height: 2.5rem;
 }
 
+/* ── Status chips with gradient active ── */
 body.es-role-citizen .citizen-request-chips {
     display: flex;
     flex-wrap: wrap;
@@ -212,27 +237,35 @@ body.es-role-citizen .citizen-request-chip {
     display: inline-flex;
     align-items: center;
     gap: .4rem;
-    padding: .34rem .74rem;
+    padding: .36rem .78rem;
     border-radius: 999px;
-    border: 1px solid #BFDBFE;
-    background: #F0F9FF;
+    border: 1px solid rgba(191,219,254,0.6);
+    background: rgba(240,249,255,0.6);
+    backdrop-filter: blur(4px);
     color: #0369A1;
-    font-size: .74rem;
+    font-size: .73rem;
     font-weight: 700;
     text-decoration: none;
-    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+    transition: all .25s cubic-bezier(.4,0,.2,1);
 }
 
 body.es-role-citizen .citizen-request-chip:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 16px rgba(14, 165, 233, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(14,165,233,0.15);
     color: #0369A1;
+    border-color: rgba(14,165,233,0.3);
 }
 
 body.es-role-citizen .citizen-request-chip.is-active {
-    color: #0F172A;
-    border-color: #93C5FD;
-    background: linear-gradient(135deg, #DBEAFE 0%, #E0F2FE 100%);
+    color: #fff;
+    border-color: transparent;
+    background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%);
+    box-shadow: 0 4px 16px rgba(14,165,233,0.3);
+}
+
+body.es-role-citizen .citizen-request-chip.is-active .citizen-request-chip-count {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
 }
 
 body.es-role-citizen .citizen-request-chip-count {
@@ -241,19 +274,19 @@ body.es-role-citizen .citizen-request-chip-count {
     justify-content: center;
     min-width: 1.2rem;
     border-radius: 999px;
-    padding: .05rem .38rem;
-    font-size: .65rem;
-    background: rgba(255, 255, 255, .72);
+    padding: .06rem .4rem;
+    font-size: .63rem;
+    background: rgba(255,255,255,0.7);
 }
 
 body.es-role-citizen .citizen-request-subtitle {
     margin-top: .18rem;
-    font-size: .74rem;
-    color: #64748B;
+    font-size: .73rem;
+    color: #94A3B8;
 }
 
 body.es-role-citizen .citizen-requests-table-wrap thead th {
-    font-size: .68rem;
+    font-size: .66rem;
 }
 
 body.es-role-citizen .citizen-request-service {
@@ -268,36 +301,39 @@ body.es-role-citizen .citizen-request-date {
 }
 
 body.es-role-citizen .citizen-requests-empty-cell {
-    padding: 1.8rem .8rem !important;
+    padding: 2rem .8rem !important;
 }
 
+/* ── Mobile cards: glass style ── */
 body.es-role-citizen .citizen-request-mobile-item {
     display: flex;
     align-items: center;
-    gap: .72rem;
-    padding: .82rem .92rem;
-    border-bottom: 1px solid #E2E8F0;
+    gap: .75rem;
+    padding: .85rem .95rem;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
     text-decoration: none;
     color: inherit;
-    transition: background-color .15s ease;
+    transition: all .22s cubic-bezier(.4,0,.2,1);
 }
 
 body.es-role-citizen .citizen-request-mobile-item:hover {
-    background: rgba(239, 246, 255, .58);
+    background: rgba(224,242,254,0.25);
     color: inherit;
+    transform: translateX(3px);
 }
 
 body.es-role-citizen .citizen-request-mobile-icon {
-    width: 2.4rem;
-    height: 2.4rem;
-    border-radius: .7rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: .8rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #E0F2FE;
-    border: 1px solid #BAE6FD;
-    color: #0369A1;
+    background: linear-gradient(135deg, #E0F2FE, #EDE9FE);
+    border: 1px solid rgba(14,165,233,0.15);
+    color: #0284C7;
     flex-shrink: 0;
+    font-size: 1rem;
 }
 
 body.es-role-citizen .citizen-request-mobile-main {
@@ -322,7 +358,11 @@ body.es-role-citizen .citizen-request-mobile-sub {
 body.es-role-citizen .citizen-request-mobile-main code {
     display: inline-block;
     margin-top: .2rem;
-    font-size: .68rem;
+    font-size: .67rem;
+    background: rgba(14,165,233,0.06);
+    padding: .1rem .35rem;
+    border-radius: .25rem;
+    color: #0284C7;
 }
 
 body.es-role-citizen .citizen-request-mobile-status {
@@ -336,15 +376,21 @@ body.es-role-citizen .citizen-request-mobile-arrow {
     color: #CBD5E1;
     font-size: .82rem;
     flex-shrink: 0;
+    transition: transform .2s ease;
+}
+
+body.es-role-citizen .citizen-request-mobile-item:hover .citizen-request-mobile-arrow {
+    transform: translateX(3px);
+    color: #0EA5E9;
 }
 
 body.es-role-citizen .citizen-requests-empty-mobile {
-    padding: 1.25rem .55rem 1.4rem;
+    padding: 1.5rem .55rem 1.6rem;
 }
 
 body.es-role-citizen .citizen-request-pagination {
-    border-top: 1px solid #E2E8F0;
-    padding: .85rem 1rem;
+    border-top: 1px solid rgba(226,232,240,0.5);
+    padding: .9rem 1rem;
 }
 
 @media (max-width: 1199.98px) {

@@ -268,6 +268,10 @@
 
 @push('styles')
 <style>
+/* ═══════════════════════════════════════════════════════
+   CITIZEN REQUEST DETAIL — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════ */
+
 body.es-role-citizen .citizen-request-head {
     display: flex;
     justify-content: space-between;
@@ -278,22 +282,26 @@ body.es-role-citizen .citizen-request-head {
 
 body.es-role-citizen .citizen-request-head-kicker {
     display: inline-flex;
-    padding: .2rem .55rem;
+    padding: .22rem .6rem;
     border-radius: 999px;
-    background: #E0F2FE;
-    border: 1px solid #BAE6FD;
-    color: #0369A1;
-    font-size: .67rem;
+    background: linear-gradient(135deg, #0EA5E9, #6366F1);
+    color: #fff;
+    font-size: .65rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .05em;
+    letter-spacing: .06em;
+    box-shadow: 0 2px 8px rgba(14,165,233,0.3);
 }
 
 body.es-role-citizen .citizen-request-head-title {
-    margin: .55rem 0 .18rem;
-    font-size: 1rem;
+    margin: .6rem 0 .2rem;
+    font-size: 1.1rem;
     font-weight: 800;
-    color: #0F172A;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #0F172A 0%, #0EA5E9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 body.es-role-citizen .citizen-request-head-sub {
@@ -315,9 +323,10 @@ body.es-role-citizen .citizen-request-right-col {
     gap: 1rem;
 }
 
+/* ── Timeline with gradient line ── */
 body.es-role-citizen .citizen-timeline-item {
     display: flex;
-    gap: .75rem;
+    gap: .8rem;
     margin-bottom: .9rem;
 }
 
@@ -333,23 +342,25 @@ body.es-role-citizen .citizen-timeline-rail {
 }
 
 body.es-role-citizen .citizen-timeline-dot {
-    width: 1.65rem;
-    height: 1.65rem;
+    width: 1.75rem;
+    height: 1.75rem;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #E0F2FE;
-    color: #0369A1;
-    border: 1px solid #BAE6FD;
-    font-size: .7rem;
+    background: linear-gradient(135deg, #E0F2FE, #EDE9FE);
+    color: #0284C7;
+    border: 1.5px solid rgba(14,165,233,0.2);
+    font-size: .72rem;
+    box-shadow: 0 3px 8px rgba(14,165,233,0.12);
 }
 
 body.es-role-citizen .citizen-timeline-line {
-    width: 1px;
+    width: 2px;
     flex: 1;
-    background: #E2E8F0;
+    background: linear-gradient(180deg, rgba(14,165,233,0.2) 0%, rgba(99,102,241,0.1) 100%);
     margin-top: .2rem;
+    border-radius: 1px;
 }
 
 body.es-role-citizen .citizen-timeline-title {
@@ -360,44 +371,55 @@ body.es-role-citizen .citizen-timeline-title {
 
 body.es-role-citizen .citizen-timeline-time {
     font-size: .72rem;
-    color: #64748B;
+    color: #94A3B8;
     margin-top: .1rem;
 }
 
 body.es-role-citizen .citizen-timeline-note {
-    margin-top: .22rem;
+    margin-top: .25rem;
     font-size: .78rem;
-    color: #334155;
+    color: #475569;
+    padding: .35rem .55rem;
+    background: rgba(241,245,249,0.5);
+    border-radius: .4rem;
+    border-left: 2px solid rgba(14,165,233,0.3);
 }
 
 body.es-role-citizen .citizen-muted-note {
-    color: #64748B;
+    color: #94A3B8;
     font-size: .79rem;
 }
 
+/* ── Document rows ── */
 body.es-role-citizen .citizen-doc-row {
     display: flex;
     align-items: center;
-    gap: .72rem;
-    padding: .82rem 1rem;
-    border-bottom: 1px solid #E2E8F0;
+    gap: .75rem;
+    padding: .85rem 1rem;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
+    transition: all .2s ease;
 }
 
 body.es-role-citizen .citizen-doc-row:last-child {
     border-bottom: 0;
 }
 
+body.es-role-citizen .citizen-doc-row:hover {
+    background: rgba(224,242,254,0.15);
+}
+
 body.es-role-citizen .citizen-doc-icon {
-    width: 2.1rem;
-    height: 2.1rem;
-    border-radius: .65rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: .7rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #E0F2FE;
-    color: #0369A1;
-    border: 1px solid #BAE6FD;
+    background: linear-gradient(135deg, #E0F2FE, #EDE9FE);
+    color: #0284C7;
+    border: 1px solid rgba(14,165,233,0.15);
     flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(14,165,233,0.08);
 }
 
 body.es-role-citizen .citizen-doc-main {
@@ -415,19 +437,20 @@ body.es-role-citizen .citizen-doc-name {
 
 body.es-role-citizen .citizen-doc-sub {
     font-size: .72rem;
-    color: #64748B;
+    color: #94A3B8;
 }
 
+/* ── Chat: glass style ── */
 body.es-role-citizen .chat-box {
-    max-height: 20rem;
+    max-height: 22rem;
     overflow: auto;
     padding: 1rem;
-    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%);
+    background: rgba(248,250,255,0.5);
 }
 
 body.es-role-citizen .citizen-chat-empty {
     text-align: center;
-    color: #64748B;
+    color: #94A3B8;
     font-size: .8rem;
 }
 
@@ -450,8 +473,8 @@ body.es-role-citizen .msg.theirs {
 }
 
 body.es-role-citizen .msg-av {
-    width: 1.85rem;
-    height: 1.85rem;
+    width: 1.9rem;
+    height: 1.9rem;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
@@ -462,36 +485,37 @@ body.es-role-citizen .msg-av {
 }
 
 body.es-role-citizen .msg-av.av-me {
-    background: #DBEAFE;
+    background: linear-gradient(135deg, #DBEAFE, #E0F2FE);
     color: #1D4ED8;
-    border: 1px solid #BFDBFE;
+    border: 1px solid rgba(37,99,235,0.15);
     order: 2;
 }
 
 body.es-role-citizen .msg-av.av-other {
-    background: #ECFEFF;
+    background: linear-gradient(135deg, #ECFEFF, #D1FAE5);
     color: #0F766E;
-    border: 1px solid #A5F3FC;
+    border: 1px solid rgba(15,118,110,0.15);
 }
 
 body.es-role-citizen .msg-bubble {
     max-width: min(80%, 27rem);
-    border-radius: .85rem;
-    padding: .55rem .66rem;
-    border: 1px solid #E2E8F0;
-    background: #FFFFFF;
+    border-radius: .9rem;
+    padding: .6rem .72rem;
+    border: 1px solid rgba(226,232,240,0.5);
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(4px);
 }
 
 body.es-role-citizen .msg.mine .msg-bubble {
-    background: #E0F2FE;
-    border-color: #BAE6FD;
+    background: linear-gradient(135deg, rgba(224,242,254,0.7) 0%, rgba(219,234,254,0.7) 100%);
+    border-color: rgba(14,165,233,0.15);
     order: 1;
 }
 
 body.es-role-citizen .msg-name {
-    font-size: .68rem;
+    font-size: .67rem;
     font-weight: 700;
-    color: #475569;
+    color: #94A3B8;
     margin-bottom: .15rem;
 }
 
@@ -499,22 +523,24 @@ body.es-role-citizen .msg-bubble p {
     margin: 0;
     font-size: .79rem;
     color: #0F172A;
-    line-height: 1.45;
+    line-height: 1.5;
     white-space: pre-wrap;
 }
 
 body.es-role-citizen .msg-time {
     margin-top: .2rem;
-    font-size: .66rem;
-    color: #64748B;
+    font-size: .65rem;
+    color: #94A3B8;
     text-align: right;
 }
 
 body.es-role-citizen .citizen-chat-input-wrap {
-    border-top: 1px solid #E2E8F0;
-    padding: .75rem 1rem;
+    border-top: 1px solid rgba(226,232,240,0.5);
+    padding: .8rem 1rem;
+    background: rgba(255,255,255,0.3);
 }
 
+/* ── Sidebar cards ── */
 body.es-role-citizen .citizen-side-card-title {
     font-size: .84rem;
     font-weight: 700;
@@ -524,8 +550,9 @@ body.es-role-citizen .citizen-side-card-title {
 
 body.es-role-citizen .citizen-qr-image {
     max-width: 10rem;
-    border-radius: .6rem;
-    border: 1px solid #CBD5E1;
+    border-radius: .7rem;
+    border: 1px solid rgba(203,213,225,0.5);
+    box-shadow: 0 4px 12px rgba(15,23,42,0.06);
 }
 
 body.es-role-citizen .citizen-side-row {
@@ -533,33 +560,43 @@ body.es-role-citizen .citizen-side-row {
     justify-content: space-between;
     align-items: center;
     font-size: .8rem;
-    color: #475569;
-    padding: .3rem 0;
+    color: #64748B;
+    padding: .35rem 0;
+    border-bottom: 1px solid rgba(226,232,240,0.3);
+}
+
+body.es-role-citizen .citizen-side-row:last-of-type {
+    border-bottom: 0;
 }
 
 body.es-role-citizen .citizen-side-row strong {
     color: #0F172A;
+    font-weight: 700;
 }
 
 body.es-role-citizen .citizen-paid-ok {
     text-align: center;
-    margin: .65rem 0;
-    color: #047857;
-    font-size: .79rem;
+    margin: .7rem 0;
+    color: #059669;
+    font-size: .8rem;
     font-weight: 700;
+    padding: .45rem;
+    background: rgba(236,253,245,0.5);
+    border-radius: .5rem;
+    border: 1px solid rgba(16,185,129,0.15);
 }
 
 body.es-role-citizen .citizen-panel-empty {
-    padding: 1.4rem 1rem;
+    padding: 1.6rem 1rem;
     text-align: center;
-    color: #64748B;
+    color: #94A3B8;
 }
 
 body.es-role-citizen .citizen-panel-empty i {
-    font-size: 1.5rem;
-    color: #94A3B8;
+    font-size: 1.6rem;
+    color: #CBD5E1;
     display: block;
-    margin-bottom: .35rem;
+    margin-bottom: .4rem;
 }
 
 body.es-role-citizen .citizen-panel-empty p {
@@ -568,9 +605,10 @@ body.es-role-citizen .citizen-panel-empty p {
 }
 
 body.es-role-citizen .citizen-apt-modal {
-    border: 1px solid #DBEAFE;
-    border-radius: 1rem;
-    box-shadow: 0 24px 56px rgba(15, 23, 42, 0.22);
+    border: 1px solid rgba(219,234,254,0.5);
+    border-radius: 1.1rem;
+    box-shadow: 0 24px 56px rgba(15,23,42,0.2);
+    backdrop-filter: blur(8px);
 }
 
 @media (min-width: 768px) {

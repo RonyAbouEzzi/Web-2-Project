@@ -113,31 +113,43 @@
 
 @push('styles')
 <style>
+/* ═══════════════════════════════════════════════════════
+   CITIZEN APPOINTMENTS — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════ */
+
 body.es-role-citizen .citizen-appt-subtitle {
     margin-top: .18rem;
-    font-size: .74rem;
-    color: #64748B;
+    font-size: .73rem;
+    color: #94A3B8;
 }
 
 body.es-role-citizen .citizen-appt-mobile-item {
     display: flex;
     align-items: center;
-    gap: .72rem;
-    padding: .82rem .92rem;
-    border-bottom: 1px solid #E2E8F0;
+    gap: .75rem;
+    padding: .85rem .95rem;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
+    transition: all .22s cubic-bezier(.4,0,.2,1);
+}
+
+body.es-role-citizen .citizen-appt-mobile-item:hover {
+    background: rgba(224,242,254,0.2);
+    transform: translateX(3px);
 }
 
 body.es-role-citizen .citizen-appt-mobile-icon {
-    width: 2.4rem;
-    height: 2.4rem;
-    border-radius: .7rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: .8rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #E0F2FE;
-    border: 1px solid #BAE6FD;
-    color: #0369A1;
+    background: linear-gradient(135deg, #E0F2FE, #EDE9FE);
+    border: 1px solid rgba(14,165,233,0.15);
+    color: #0284C7;
     flex-shrink: 0;
+    font-size: 1rem;
+    box-shadow: 0 3px 8px rgba(14,165,233,0.1);
 }
 
 body.es-role-citizen .citizen-appt-mobile-main {
@@ -160,7 +172,7 @@ body.es-role-citizen .citizen-appt-mobile-sub {
 }
 
 body.es-role-citizen .citizen-appt-mobile-time {
-    margin-top: .2rem;
+    margin-top: .22rem;
     font-size: .68rem;
     color: #94A3B8;
 }
@@ -170,8 +182,8 @@ body.es-role-citizen .citizen-appt-mobile-status {
 }
 
 body.es-role-citizen .citizen-appt-pagination {
-    border-top: 1px solid #E2E8F0;
-    padding: .85rem 1rem;
+    border-top: 1px solid rgba(226,232,240,0.5);
+    padding: .9rem 1rem;
 }
 </style>
 @endpush

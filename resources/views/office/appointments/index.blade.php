@@ -105,93 +105,69 @@
 
 @push('styles')
 <style>
-body.es-role-office_user .office-apt-total {
-    font-size: .75rem;
-    color: #64748B;
-}
+/* ═══════════════════════════════════════════════════════
+   OFFICE APPOINTMENTS — PREMIUM GLASSMORPHISM
+   ═══════════════════════════════════════════════════════ */
 
-body.es-role-office_user .office-apt-name {
-    font-weight: 600;
-    font-size: .83rem;
-}
+body.es-role-office_user .office-apt-total { font-size: .75rem; color: #64748B; }
+body.es-role-office_user .office-apt-name { font-weight: 600; font-size: .83rem; }
+body.es-role-office_user .office-apt-email { font-size: .72rem; color: #94A3B8; }
+body.es-role-office_user .office-apt-date { font-weight: 600; }
+body.es-role-office_user .office-apt-notes { font-size: .78rem; color: #64748B; max-width: 160px; }
 
-body.es-role-office_user .office-apt-email {
-    font-size: .72rem;
-    color: #94A3B8;
-}
-
-body.es-role-office_user .office-apt-date {
-    font-weight: 600;
-}
-
-body.es-role-office_user .office-apt-notes {
-    font-size: .78rem;
-    color: #64748B;
-    max-width: 160px;
-}
-
-body.es-role-office_user .office-apt-actions {
-    display: flex;
-    gap: .4rem;
-    flex-wrap: wrap;
-}
-
+body.es-role-office_user .office-apt-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
 body.es-role-office_user .office-apt-action-btn {
-    font-size: .7rem;
-    padding: .3rem .56rem;
-    background: #F1F5F9;
-    border: none;
-    color: #334155;
+    font-size: .7rem; padding: .3rem .56rem;
+    background: rgba(255,255,255,0.5); backdrop-filter: blur(6px);
+    border: 1px solid rgba(37,99,235,0.1); color: #334155;
+    border-radius: .5rem;
+    transition: all .22s ease;
+}
+body.es-role-office_user .office-apt-action-btn:hover {
+    background: linear-gradient(135deg, #2563EB, #0EA5E9);
+    color: #fff; border-color: transparent;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.2);
 }
 
-body.es-role-office_user .office-apt-empty-cell {
-    padding: 1.8rem .8rem !important;
-}
+body.es-role-office_user .office-apt-empty-cell { padding: 1.8rem .8rem !important; }
 
+/* Mobile rows — glass with hover slide */
 body.es-role-office_user .office-apt-mobile-row {
     padding: .9rem 1rem;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
+    transition: background .22s ease, transform .22s ease;
 }
-
+body.es-role-office_user .office-apt-mobile-row:hover {
+    background: rgba(224,242,254,0.15);
+    transform: translateX(4px);
+}
 body.es-role-office_user .office-apt-mobile-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: .4rem;
-    gap: .6rem;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: .4rem; gap: .6rem;
 }
+body.es-role-office_user .office-apt-mobile-name { font-weight: 700; font-size: .87rem; }
+body.es-role-office_user .office-apt-mobile-time { font-size: .73rem; color: #94A3B8; }
 
-body.es-role-office_user .office-apt-mobile-name {
-    font-weight: 700;
-    font-size: .87rem;
-}
-
-body.es-role-office_user .office-apt-mobile-time {
-    font-size: .73rem;
-    color: #94A3B8;
-}
-
-body.es-role-office_user .office-apt-mobile-actions {
-    display: flex;
-    gap: .4rem;
-    flex-wrap: wrap;
-}
-
+body.es-role-office_user .office-apt-mobile-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
 body.es-role-office_user .office-apt-mobile-btn {
-    font-size: .72rem;
-    padding: .28rem .6rem;
-    background: #F1F5F9;
-    border: none;
-    color: #334155;
+    font-size: .72rem; padding: .28rem .6rem;
+    background: rgba(255,255,255,0.5); backdrop-filter: blur(6px);
+    border: 1px solid rgba(37,99,235,0.08); color: #334155;
+    border-radius: .5rem;
+    transition: all .22s ease;
+}
+body.es-role-office_user .office-apt-mobile-btn:hover {
+    background: linear-gradient(135deg, #2563EB, #0EA5E9);
+    color: #fff; border-color: transparent;
 }
 
-body.es-role-office_user .office-apt-empty-mobile {
-    padding: 1.25rem .55rem 1.4rem;
-}
+body.es-role-office_user .office-apt-empty-mobile { padding: 1.25rem .55rem 1.4rem; }
+body.es-role-office_user .office-apt-pagination { padding: .75rem 1rem; border-top: 1px solid rgba(226,232,240,0.5); }
 
-body.es-role-office_user .office-apt-pagination {
-    padding: .75rem 1rem;
-    border-top: 1px solid #E2E8F0;
+@media (prefers-reduced-motion: reduce) {
+    body.es-role-office_user .office-apt-action-btn,
+    body.es-role-office_user .office-apt-mobile-btn,
+    body.es-role-office_user .office-apt-mobile-row { transition: none; }
 }
 </style>
 @endpush

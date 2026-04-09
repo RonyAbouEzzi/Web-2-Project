@@ -4,163 +4,111 @@
 
 @push('styles')
 <style>
-    .admin-filter-form {
-        display: flex;
-        flex-wrap: wrap;
-        gap: .6rem;
-        align-items: flex-end;
-    }
-    .admin-filter-search {
-        flex: 1;
-        min-width: 160px;
-    }
-    .admin-filter-role {
-        min-width: 140px;
-    }
-    .admin-plain-btn {
-        margin-top: auto;
-    }
+    /* ═══ ADMIN USERS — PREMIUM GLASS ═══ */
+    .admin-filter-form { display: flex; flex-wrap: wrap; gap: .6rem; align-items: flex-end; }
+    .admin-filter-search { flex: 1; min-width: 160px; }
+    .admin-filter-role { min-width: 140px; }
+    .admin-plain-btn { margin-top: auto; }
+
+    /* Avatars — gradient */
     .admin-avatar {
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        background: var(--es-primary-s);
-        color: var(--es-primary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: .78rem;
-        font-weight: 700;
-        flex-shrink: 0;
-        border: 1px solid var(--es-primary-m);
+        width: 34px; height: 34px; border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5, #2563EB);
+        color: #fff; display: flex; align-items: center; justify-content: center;
+        font-size: .78rem; font-weight: 700; flex-shrink: 0; border: none;
+        box-shadow: 0 3px 8px rgba(79,70,229,0.18);
     }
-    .admin-avatar.mobile {
-        width: 38px;
-        height: 38px;
-        font-size: .85rem;
-    }
-    .admin-row-name {
-        font-weight: 600;
-        font-size: .83rem;
-    }
-    .admin-row-email {
-        font-size: .72rem;
-        color: var(--es-muted);
-    }
+    .admin-avatar.mobile { width: 38px; height: 38px; font-size: .85rem; }
+
+    .admin-row-name { font-weight: 600; font-size: .83rem; }
+    .admin-row-email { font-size: .72rem; color: var(--es-muted); }
+
+    /* Role chips — glass with color coding */
     .admin-role-chip {
-        padding: .22rem .65rem;
-        border-radius: 20px;
-        font-size: .7rem;
-        font-weight: 600;
-        border: 1px solid transparent;
+        padding: .22rem .65rem; border-radius: 20px;
+        font-size: .7rem; font-weight: 600; border: 1px solid transparent;
+        backdrop-filter: blur(4px);
     }
     .admin-role-admin {
-        background: #EEF2FF;
-        color: #4338CA;
-        border-color: #C7D2FE;
+        background: linear-gradient(135deg, rgba(238,242,255,0.7), rgba(224,231,255,0.7));
+        color: #4338CA; border-color: rgba(199,210,254,0.5);
     }
     .admin-role-office_user {
-        background: #DCFCE7;
-        color: #15803D;
-        border-color: #BBF7D0;
+        background: linear-gradient(135deg, rgba(220,252,231,0.7), rgba(209,250,229,0.7));
+        color: #15803D; border-color: rgba(187,247,208,0.5);
     }
     .admin-role-citizen {
-        background: var(--es-primary-s);
-        color: var(--es-primary);
-        border-color: var(--es-primary-m);
+        background: linear-gradient(135deg, rgba(219,234,254,0.7), rgba(191,219,254,0.7));
+        color: var(--es-primary); border-color: rgba(147,197,253,0.4);
     }
     .admin-role-default {
-        background: #EEF2F7;
-        color: #475569;
-        border-color: #DDE5EF;
+        background: rgba(238,242,247,0.6); color: #475569; border-color: rgba(221,229,239,0.5);
     }
-    .admin-date {
-        font-size: .78rem;
-        color: var(--es-muted);
-    }
+
+    .admin-date { font-size: .78rem; color: var(--es-muted); }
+
+    /* Action buttons — glass with hover gradient */
     .admin-action-danger {
-        background: #FEE2E2;
-        border: 1px solid #FECACA;
-        color: #DC2626;
+        background: rgba(254,226,226,0.6); backdrop-filter: blur(4px);
+        border: 1px solid rgba(254,202,202,0.5); color: #DC2626;
+        transition: all .22s ease;
     }
     .admin-action-danger:hover {
-        background: #FECACA;
-        color: #B91C1C;
+        background: #DC2626; color: #fff; border-color: transparent;
+        box-shadow: 0 4px 12px rgba(220,38,38,0.2);
     }
     .admin-action-success {
-        background: #D1FAE5;
-        border: 1px solid #A7F3D0;
-        color: #059669;
+        background: rgba(209,250,229,0.6); backdrop-filter: blur(4px);
+        border: 1px solid rgba(167,243,208,0.5); color: #059669;
+        transition: all .22s ease;
     }
     .admin-action-success:hover {
-        background: #A7F3D0;
-        color: #047857;
+        background: #059669; color: #fff; border-color: transparent;
+        box-shadow: 0 4px 12px rgba(5,150,105,0.2);
     }
-    .admin-empty {
-        text-align: center;
-        padding: 2rem;
-        color: var(--es-muted);
-    }
+
+    .admin-empty { text-align: center; padding: 2rem; color: var(--es-muted); }
+
+    /* Mobile items — glass hover */
     .admin-mobile-item {
         padding: .9rem 1rem;
-        border-bottom: 1px solid var(--es-border-soft);
-        display: flex;
-        align-items: center;
-        gap: .75rem;
+        border-bottom: 1px solid rgba(226,232,240,0.5);
+        display: flex; align-items: center; gap: .75rem;
+        transition: background .22s ease, transform .22s ease;
+    }
+    .admin-mobile-item:hover {
+        background: rgba(224,231,255,0.12);
+        transform: translateX(4px);
     }
     .admin-mobile-name {
-        font-weight: 700;
-        font-size: .85rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-weight: 700; font-size: .85rem;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .admin-modal .modal-dialog {
-        max-width: 440px;
-    }
+
+    /* Modals — glass */
+    .admin-modal .modal-dialog { max-width: 440px; }
     .admin-modal .modal-content {
-        border: 1px solid var(--es-border-soft);
+        border: 1px solid rgba(79,70,229,0.08) !important;
         border-radius: .9rem;
-        box-shadow: 0 20px 48px rgba(15, 23, 42, .14);
+        background: rgba(255,255,255,0.85) !important;
+        backdrop-filter: blur(20px) saturate(1.6);
+        -webkit-backdrop-filter: blur(20px) saturate(1.6);
+        box-shadow: 0 24px 64px rgba(15,23,42,0.18);
     }
-    .admin-modal .modal-header {
-        border: none;
-        padding: 1.1rem 1.25rem .45rem;
-    }
-    .admin-modal .modal-title {
-        font-weight: 700;
-        color: #566A7F;
-    }
-    .admin-modal .modal-body {
-        padding: .75rem 1.25rem;
-    }
-    .admin-modal .modal-footer {
-        border: none;
-        padding: .75rem 1.25rem 1.1rem;
-        gap: .5rem;
-    }
-    .admin-select-cell {
-        width: 34px;
-        text-align: center;
-    }
-    .admin-select-input {
-        cursor: pointer;
-        width: 1rem;
-        height: 1rem;
-    }
-    .admin-bulk-bar {
-        display: none;
-        align-items: center;
-        gap: .5rem;
-    }
-    .admin-bulk-bar.show {
-        display: inline-flex;
-    }
-    .admin-bulk-count {
-        font-size: .76rem;
-        color: #566A7F;
-        font-weight: 600;
-        margin-right: .2rem;
+    .admin-modal .modal-header { border: none; padding: 1.1rem 1.25rem .45rem; }
+    .admin-modal .modal-title { font-weight: 700; color: #566A7F; }
+    .admin-modal .modal-body { padding: .75rem 1.25rem; }
+    .admin-modal .modal-footer { border: none; padding: .75rem 1.25rem 1.1rem; gap: .5rem; }
+
+    /* Bulk select */
+    .admin-select-cell { width: 34px; text-align: center; }
+    .admin-select-input { cursor: pointer; width: 1rem; height: 1rem; }
+    .admin-bulk-bar { display: none; align-items: center; gap: .5rem; }
+    .admin-bulk-bar.show { display: inline-flex; }
+    .admin-bulk-count { font-size: .76rem; color: #566A7F; font-weight: 600; margin-right: .2rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .admin-action-danger, .admin-action-success, .admin-mobile-item { transition: none; }
     }
 </style>
 @endpush

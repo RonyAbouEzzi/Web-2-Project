@@ -252,26 +252,49 @@
 
 @push('styles')
 <style>
+/* ═══════════════════════════════════════════════════════
+   OFFICE DASHBOARD — PREMIUM GLASSMORPHISM STYLES
+   ═══════════════════════════════════════════════════════ */
+
+/* Hero card — glass with animated light sweep */
 body.es-role-office_user .office-hero-card {
     margin-bottom: 1rem;
-    border: 1px solid color-mix(in srgb, var(--es-primary) 16%, var(--es-border) 84%);
-    background: radial-gradient(circle at 12% -20%, rgba(59, 130, 246, 0.2) 0, rgba(59, 130, 246, 0) 50%),
-                radial-gradient(circle at 95% 120%, rgba(14, 165, 233, 0.15) 0, rgba(14, 165, 233, 0) 58%),
-                linear-gradient(140deg, rgba(255, 255, 255, 0.97) 0%, rgba(243, 248, 255, 0.9) 100%);
+    border: 1px solid rgba(37,99,235,0.12) !important;
+    background: rgba(255,255,255,0.55) !important;
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    position: relative;
+    overflow: hidden;
+}
+body.es-role-office_user .office-hero-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(105deg, transparent 40%, rgba(37,99,235,0.06) 45%, rgba(14,165,233,0.08) 50%, transparent 55%);
+    animation: officeHeroSweep 6s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes officeHeroSweep {
+    0%, 100% { transform: translateX(-30%) rotate(12deg); }
+    50%      { transform: translateX(30%) rotate(12deg); }
 }
 
 body.es-role-office_user .office-hero-eyebrow {
     display: inline-flex;
     align-items: center;
-    padding: .22rem .58rem;
+    padding: .24rem .62rem;
     border-radius: 999px;
-    background: #DBEAFE;
-    border: 1px solid #BFDBFE;
-    color: #1D4ED8;
-    font-size: .67rem;
+    background: linear-gradient(135deg, #2563EB, #0EA5E9);
+    color: #fff;
+    font-size: .65rem;
     font-weight: 700;
-    letter-spacing: .05em;
+    letter-spacing: .06em;
     text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.22);
+    border: none;
 }
 
 body.es-role-office_user .office-hero-title {
@@ -279,7 +302,10 @@ body.es-role-office_user .office-hero-title {
     font-size: clamp(1.28rem, 2.4vw, 1.75rem);
     font-weight: 800;
     letter-spacing: -0.02em;
-    color: #0F172A;
+    background: linear-gradient(135deg, #1E3A8A, #2563EB, #0EA5E9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 body.es-role-office_user .office-hero-copy {
@@ -288,11 +314,24 @@ body.es-role-office_user .office-hero-copy {
     font-size: .88rem;
 }
 
+/* Hero panel — glass with gradient border */
 body.es-role-office_user .office-hero-panel {
     border-radius: .95rem;
-    border: 1px solid #BFDBFE;
-    background: linear-gradient(145deg, rgba(219, 234, 254, .8) 0%, rgba(239, 246, 255, .95) 100%);
+    border: 1px solid rgba(37,99,235,0.15);
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     padding: .95rem;
+    position: relative;
+    overflow: hidden;
+}
+body.es-role-office_user .office-hero-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #2563EB, #0EA5E9);
+    border-radius: 3px 3px 0 0;
 }
 
 body.es-role-office_user .office-hero-panel-label {
@@ -306,7 +345,10 @@ body.es-role-office_user .office-hero-panel-value {
     font-size: 1.9rem;
     font-weight: 800;
     line-height: 1;
-    color: #0F172A;
+    background: linear-gradient(135deg, #1E3A8A, #2563EB);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 body.es-role-office_user .office-hero-panel-sub {
@@ -315,9 +357,35 @@ body.es-role-office_user .office-hero-panel-sub {
     font-size: .77rem;
 }
 
+/* KPI cards — glass with unique gradient accent per card */
 body.es-role-office_user .office-kpi-card {
     border-radius: .88rem;
+    border: 1px solid rgba(37,99,235,0.08) !important;
+    background: rgba(255,255,255,0.5) !important;
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    position: relative;
+    overflow: hidden;
+    transition: transform .28s cubic-bezier(.4,0,.2,1), box-shadow .28s cubic-bezier(.4,0,.2,1);
 }
+body.es-role-office_user .office-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    opacity: .6;
+    transition: opacity .28s ease;
+}
+body.es-role-office_user .office-kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(37,99,235,0.1);
+}
+body.es-role-office_user .office-kpi-card:hover::before { opacity: 1; }
+
+body.es-role-office_user .col-6:nth-child(1) .office-kpi-card::before { background: linear-gradient(90deg, #F59E0B, #EF4444); }
+body.es-role-office_user .col-6:nth-child(2) .office-kpi-card::before { background: linear-gradient(90deg, #0EA5E9, #2563EB); }
+body.es-role-office_user .col-6:nth-child(3) .office-kpi-card::before { background: linear-gradient(90deg, #14B8A6, #10B981); }
+body.es-role-office_user .col-6:nth-child(4) .office-kpi-card::before { background: linear-gradient(90deg, #8B5CF6, #6366F1); }
 
 body.es-role-office_user .office-kpi-label {
     display: block;
@@ -342,45 +410,53 @@ body.es-role-office_user .office-kpi-sub {
     color: #64748B;
 }
 
+/* Actions grid — glass cards with gradient icons */
 body.es-role-office_user .office-actions-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: .66rem;
 }
 
 body.es-role-office_user .office-action-link {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: .65rem;
-    border-radius: .8rem;
-    padding: .72rem .8rem;
-    border: 1px solid #D8E8FE;
-    background: linear-gradient(180deg, #FFFFFF 0%, #F6FAFF 100%);
+    text-align: center;
+    gap: .55rem;
+    border-radius: .9rem;
+    padding: 1rem .8rem;
+    border: 1px solid rgba(37,99,235,0.08);
+    background: rgba(255,255,255,0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     color: #0F172A;
     text-decoration: none;
-    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    transition: transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s ease, border-color .25s ease;
 }
 
 body.es-role-office_user .office-action-link:hover {
-    transform: translateY(-2px);
-    border-color: #93C5FD;
-    box-shadow: 0 12px 20px rgba(37, 99, 235, 0.12);
+    transform: translateY(-4px);
+    border-color: rgba(37,99,235,0.2);
+    box-shadow: 0 16px 32px rgba(37,99,235,0.1);
     color: #0F172A;
 }
 
 body.es-role-office_user .office-action-icon {
-    width: 2rem;
-    height: 2rem;
-    border-radius: .62rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: .8rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: .92rem;
-    color: #1D4ED8;
-    background: #DBEAFE;
-    border: 1px solid #BFDBFE;
+    font-size: 1.05rem;
+    color: #fff;
     flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.2);
 }
+body.es-role-office_user .office-action-link:nth-child(1) .office-action-icon { background: linear-gradient(135deg, #2563EB, #0EA5E9); }
+body.es-role-office_user .office-action-link:nth-child(2) .office-action-icon { background: linear-gradient(135deg, #8B5CF6, #6366F1); }
+body.es-role-office_user .office-action-link:nth-child(3) .office-action-icon { background: linear-gradient(135deg, #14B8A6, #10B981); }
+body.es-role-office_user .office-action-link:nth-child(4) .office-action-icon { background: linear-gradient(135deg, #F59E0B, #EA580C); }
 
 body.es-role-office_user .office-action-title {
     display: block;
@@ -392,15 +468,23 @@ body.es-role-office_user .office-action-title {
 body.es-role-office_user .office-action-sub {
     display: block;
     margin-top: .14rem;
-    font-size: .72rem;
+    font-size: .68rem;
     color: #64748B;
 }
 
+/* Appointment cards — glass */
 body.es-role-office_user .office-appointment-card {
     border-radius: .8rem;
-    border: 1px solid #D8E8FE;
-    background: linear-gradient(180deg, #FFFFFF 0%, #F6FAFF 100%);
+    border: 1px solid rgba(37,99,235,0.08);
+    background: rgba(255,255,255,0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: .72rem .78rem;
+    transition: transform .22s ease, box-shadow .22s ease;
+}
+body.es-role-office_user .office-appointment-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 6px 16px rgba(37,99,235,0.08);
 }
 
 body.es-role-office_user .office-appointment-card .fw-semibold {
@@ -417,8 +501,20 @@ body.es-role-office_user .office-feedback-comment {
 
 @media (max-width: 991.98px) {
     body.es-role-office_user .office-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 575.98px) {
+    body.es-role-office_user .office-actions-grid {
         grid-template-columns: 1fr;
     }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.es-role-office_user .office-hero-card::before { animation: none; }
+    body.es-role-office_user .office-kpi-card,
+    body.es-role-office_user .office-action-link,
+    body.es-role-office_user .office-appointment-card { transition: none; }
 }
 </style>
 @endpush
