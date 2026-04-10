@@ -12,6 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Trust Heroku's load balancer so HTTPS is detected correctly.
+        $middleware->trustProxies(at: '*');
         // Redirect authenticated users away from guest-only pages to their dashboard.
         $middleware->redirectUsersTo(function (\Illuminate\Http\Request $request) {
             $user = $request->user();
