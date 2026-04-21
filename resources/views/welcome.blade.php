@@ -968,9 +968,9 @@
             filter: blur(2px);
             transform: translate3d(0, 26px, 0);
             transition:
-                opacity 0.75s var(--ease),
-                transform 0.75s var(--ease),
-                filter 0.75s var(--ease);
+                opacity 0.65s var(--ease),
+                transform 0.65s var(--ease),
+                filter 0.65s var(--ease);
             transition-delay: var(--rv, 0ms);
             will-change: transform, opacity;
         }
@@ -983,6 +983,39 @@
         a:focus-visible, button:focus-visible {
             outline: 2px solid rgba(13,148,136,0.5);
             outline-offset: 2px;
+        }
+
+        /* ── SECTION PARALLAX DEPTH ──────────── */
+        .lp-section-depth {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .lp-depth-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            will-change: transform;
+        }
+        .lp-section.depth-visible .lp-depth-orb { opacity: 1; }
+        .lp-depth-orb--teal {
+            width: 320px; height: 320px;
+            background: radial-gradient(circle, rgba(13,148,136,0.10) 0%, transparent 70%);
+            top: -60px; left: -80px;
+        }
+        .lp-depth-orb--gold {
+            width: 260px; height: 260px;
+            background: radial-gradient(circle, rgba(246,196,83,0.10) 0%, transparent 70%);
+            bottom: -40px; right: -60px;
+        }
+        .lp-depth-orb--purple {
+            width: 280px; height: 280px;
+            background: radial-gradient(circle, rgba(109,40,217,0.07) 0%, transparent 70%);
+            top: 30%; right: 10%;
         }
 
         /* ── SCROLL PROGRESS BAR ──────────────── */
@@ -1111,14 +1144,22 @@
             transition: transform 0.7s var(--ease);
         }
 
-        /* ── STEPS LINE DRAW ──────────────────── */
-        .lp-steps-list::before {
+        /* ── STEPS SCROLL-LINKED LINE ────────── */
+        .lp-steps-list::after {
+            content: '';
+            position: absolute;
+            left: 19px; top: 38px; bottom: 38px;
+            width: 2px;
+            background: linear-gradient(180deg, var(--teal) 0%, var(--gold) 100%);
+            border-radius: 2px;
             transform-origin: top;
-            transform: scaleY(0);
-            transition: transform 1.4s var(--ease);
+            transform: scaleY(var(--line-progress, 0));
+            z-index: 1;
         }
-        .lp-steps-list.line-drawn::before {
-            transform: scaleY(1);
+        .lp-step.step-reached .lp-step-n {
+            background: var(--teal-dark);
+            box-shadow: 0 5px 18px rgba(13,148,136,0.25);
+            transform: scale(1.08);
         }
 
         /* ── STAT VALUE GLOW ON COUNT ─────────── */
@@ -1369,7 +1410,11 @@
 </div>
 
 {{-- ── FEATURES ──────────────────────────────────── --}}
-<section class="lp-section" style="background: var(--cream-light); border-bottom:1px solid #EAE6DF;">
+<section class="lp-section lp-parallax-section" style="background: var(--cream-light); border-bottom:1px solid #EAE6DF;">
+    <div class="lp-section-depth">
+        <div class="lp-depth-orb lp-depth-orb--teal" data-parallax-speed="0.035"></div>
+        <div class="lp-depth-orb lp-depth-orb--gold" data-parallax-speed="0.025"></div>
+    </div>
     <div class="lp-section-inner">
         <span class="lp-tag" data-reveal="left"><i class="bi bi-grid-3x3-gap-fill"></i> Platform capabilities</span>
         <h2 class="lp-section-title" data-reveal="left" data-delay="40">Everything you need in one place</h2>
@@ -1384,7 +1429,7 @@
                     <p>Pay service fees directly through the platform — credit card and cryptocurrency supported.</p>
                 </div>
             </div>
-            <div class="lp-feature" data-reveal="scale" data-delay="70">
+            <div class="lp-feature" data-reveal="scale" data-delay="50">
                 <div class="lp-feature-accent ac-s"></div>
                 <div class="lp-feature-body">
                     <div class="lp-fi fi-s"><i class="bi bi-qr-code-scan"></i></div>
@@ -1392,7 +1437,7 @@
                     <p>Every request gets a unique QR code for instant status lookup. No login required.</p>
                 </div>
             </div>
-            <div class="lp-feature" data-reveal="scale" data-delay="140">
+            <div class="lp-feature" data-reveal="scale" data-delay="100">
                 <div class="lp-feature-accent ac-a"></div>
                 <div class="lp-feature-body">
                     <div class="lp-fi fi-a"><i class="bi bi-calendar-check"></i></div>
@@ -1400,7 +1445,7 @@
                     <p>Book and manage appointments tied to your service requests with reminders.</p>
                 </div>
             </div>
-            <div class="lp-feature" data-reveal="scale" data-delay="210">
+            <div class="lp-feature" data-reveal="scale" data-delay="150">
                 <div class="lp-feature-accent ac-v"></div>
                 <div class="lp-feature-body">
                     <div class="lp-fi fi-v"><i class="bi bi-bell"></i></div>
@@ -1408,7 +1453,7 @@
                     <p>Get alerted on status changes, document requests, and payment deadlines instantly.</p>
                 </div>
             </div>
-            <div class="lp-feature" data-reveal="scale" data-delay="280">
+            <div class="lp-feature" data-reveal="scale" data-delay="200">
                 <div class="lp-feature-accent ac-e"></div>
                 <div class="lp-feature-body">
                     <div class="lp-fi fi-e"><i class="bi bi-file-earmark-arrow-up"></i></div>
@@ -1416,7 +1461,7 @@
                     <p>Attach supporting documents digitally. Offices can request additional files as needed.</p>
                 </div>
             </div>
-            <div class="lp-feature" data-reveal="scale" data-delay="350">
+            <div class="lp-feature" data-reveal="scale" data-delay="250">
                 <div class="lp-feature-accent ac-r"></div>
                 <div class="lp-feature-body">
                     <div class="lp-fi fi-r"><i class="bi bi-currency-exchange"></i></div>
@@ -1445,21 +1490,21 @@
                         <p>Create an account with email, Google, or GitHub. Enable two-factor authentication for added security.</p>
                     </div>
                 </div>
-                <div class="lp-step" data-reveal="right" data-delay="80">
+                <div class="lp-step" data-reveal="right" data-delay="60">
                     <span class="lp-step-n">2</span>
                     <div>
                         <h4>Select a municipality and submit a request</h4>
                         <p>Browse offices, review available services, and submit with any required supporting documents.</p>
                     </div>
                 </div>
-                <div class="lp-step" data-reveal="right" data-delay="160">
+                <div class="lp-step" data-reveal="right" data-delay="120">
                     <span class="lp-step-n">3</span>
                     <div>
                         <h4>Track progress and pay fees</h4>
                         <p>Monitor your request in real time. Pay online via card or cryptocurrency when ready.</p>
                     </div>
                 </div>
-                <div class="lp-step" data-reveal="right" data-delay="240">
+                <div class="lp-step" data-reveal="right" data-delay="180">
                     <span class="lp-step-n">4</span>
                     <div>
                         <h4>Receive your result</h4>
@@ -1472,7 +1517,11 @@
 </section>
 
 {{-- ── BUILT FOR EVERY ROLE ──────────────────────── --}}
-<section class="lp-section" style="background: var(--cream-light); border-top:1px solid #EAE6DF; border-bottom:1px solid #EAE6DF;">
+<section class="lp-section lp-parallax-section" style="background: var(--cream-light); border-top:1px solid #EAE6DF; border-bottom:1px solid #EAE6DF;">
+    <div class="lp-section-depth">
+        <div class="lp-depth-orb lp-depth-orb--purple" data-parallax-speed="0.03"></div>
+        <div class="lp-depth-orb lp-depth-orb--teal" style="top:auto;bottom:20%;left:auto;right:5%;" data-parallax-speed="0.02"></div>
+    </div>
     <div class="lp-section-inner">
         <div style="text-align:center; margin-bottom:2.75rem;" data-reveal="scale">
             <span class="lp-tag"><i class="bi bi-people"></i> Multi-role platform</span>
@@ -1712,6 +1761,30 @@
         }, { passive: true });
     }
 
+    /* ── Section parallax depth ──────────── */
+    var pSections = document.querySelectorAll('.lp-parallax-section');
+    if (!rm && pSections.length) {
+        var depthObs = new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) {
+                e.target.classList.toggle('depth-visible', e.isIntersecting);
+            });
+        }, { threshold: 0.05 });
+        pSections.forEach(function(s) { depthObs.observe(s); });
+
+        window.addEventListener('scroll', function() {
+            pSections.forEach(function(sec) {
+                if (!sec.classList.contains('depth-visible')) return;
+                var rect = sec.getBoundingClientRect();
+                var center = rect.top + rect.height / 2 - window.innerHeight / 2;
+                var orbs = sec.querySelectorAll('[data-parallax-speed]');
+                orbs.forEach(function(orb) {
+                    var speed = parseFloat(orb.dataset.parallaxSpeed) || 0.03;
+                    orb.style.transform = 'translateY(' + (center * speed * -1) + 'px)';
+                });
+            });
+        }, { passive: true });
+    }
+
     /* ── 3D card tilt ─────────────────────── */
     var cw = document.getElementById('cardWrap');
     var tc = document.getElementById('tiltCard');
@@ -1773,19 +1846,32 @@
         }
     }
 
-    /* ── Steps timeline draw ──────────────── */
+    /* ── Steps scroll-linked progress ─────── */
     var stepsList = document.querySelector('.lp-steps-list');
     if (stepsList && !rm) {
-        var stepsObs = new IntersectionObserver(function(entries, o) {
-            entries.forEach(function(e) {
-                if (!e.isIntersecting) return;
-                e.target.classList.add('line-drawn');
-                o.unobserve(e.target);
+        var steps = stepsList.querySelectorAll('.lp-step');
+        function updateStepProgress() {
+            var rect = stepsList.getBoundingClientRect();
+            var listTop = rect.top;
+            var listH = rect.height;
+            if (listH <= 0) return;
+            /* Progress: 0 when top hits 70% viewport, 1 when bottom hits 40% viewport */
+            var triggerTop = window.innerHeight * 0.7;
+            var triggerBot = window.innerHeight * 0.4;
+            var progress = (triggerTop - listTop) / (listH + triggerTop - triggerBot);
+            progress = Math.max(0, Math.min(1, progress));
+            stepsList.style.setProperty('--line-progress', progress);
+            /* Light up each step as line reaches it */
+            steps.forEach(function(step, i) {
+                var threshold = (i + 0.5) / steps.length;
+                step.classList.toggle('step-reached', progress >= threshold);
             });
-        }, { threshold: 0.2 });
-        stepsObs.observe(stepsList);
+        }
+        window.addEventListener('scroll', updateStepProgress, { passive: true });
+        updateStepProgress();
     } else if (stepsList) {
-        stepsList.classList.add('line-drawn');
+        stepsList.style.setProperty('--line-progress', '1');
+        stepsList.querySelectorAll('.lp-step').forEach(function(s) { s.classList.add('step-reached'); });
     }
 
     /* ── Back to top ──────────────────────── */
