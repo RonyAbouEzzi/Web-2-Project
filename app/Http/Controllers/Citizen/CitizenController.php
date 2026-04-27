@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 use App\Services\{QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Auth, Hash, Storage};
+use Illuminate\Support\Facades\{Auth, DB, Hash, Storage};
 use App\Events\MessageSent;
 use App\Events\MessagesRead;
 
@@ -229,28 +229,33 @@ class CitizenController extends Controller
             'documents.*'   => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
-        $serviceRequest = ServiceRequest::create([
-            'reference_number' => ServiceRequest::generateReference(),
-            'citizen_id'       => Auth::id(),
-            'service_id'       => $service->id,
-            'office_id'        => $service->office_id,
-            'notes'            => $request->notes,
-            'amount_paid'      => $service->price,
-        ]);
-
-        foreach ($request->file('documents') as $file) {
-            $path = $file->store('request_documents/' . $serviceRequest->id, 'private');
-            $document = $serviceRequest->documents()->create([
-                'file_path'     => $path,
-                'original_name' => $file->getClientOriginalName(),
-                'uploaded_by'   => 'citizen',
+        $serviceRequest = DB::transaction(function () use ($request, $service) {
+            $serviceRequest = ServiceRequest::create([
+                'reference_number' => ServiceRequest::generateReference(),
+                'citizen_id'       => Auth::id(),
+                'service_id'       => $service->id,
+                'office_id'        => $service->office_id,
+                'notes'            => $request->notes,
+                'amount_paid'      => $service->price,
             ]);
 
-            event(new RequestDocumentUploaded($serviceRequest, $document));
-        }
+            foreach ($request->file('documents') as $file) {
+                $path = $file->store('request_documents/' . $serviceRequest->id, 'private');
+                $document = $serviceRequest->documents()->create([
+                    'file_path'     => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'uploaded_by'   => 'citizen',
+                ]);
 
-        $qrPath = app(QrCodeService::class)->generate($serviceRequest);
-        $serviceRequest->update(['qr_code' => $qrPath]);
+                event(new RequestDocumentUploaded($serviceRequest, $document));
+            }
+
+            $qrPath = app(QrCodeService::class)->generate($serviceRequest);
+            $serviceRequest->update(['qr_code' => $qrPath]);
+
+            return $serviceRequest;
+        });
+
         event(new NewRequestSubmitted($serviceRequest));
 
         return redirect()->route('citizen.payment', $serviceRequest)
