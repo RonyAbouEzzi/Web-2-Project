@@ -69,19 +69,33 @@ class PaymentService
     }
 
     // ── Verify Stripe Session ──────────────────────────────────────
-    public function verifyStripeSession(string $sessionId): array
+    public function verifyStripeSession(string $sessionId, ServiceRequest $req): array
     {
         try {
             $session = StripeSession::retrieve($sessionId);
 
-            if ($session->payment_status === 'paid') {
-                return [
-                    'success'        => true,
-                    'transaction_id' => $session->payment_intent,
-                ];
+            if ($session->payment_status !== 'paid') {
+                return ['success' => false, 'message' => 'Payment not completed.'];
             }
 
-            return ['success' => false, 'message' => 'Payment not completed.'];
+            // Reject sessions that belong to a different ServiceRequest — without
+            // this check a paid session_id from one request could be replayed on
+            // another to mark it paid for free.
+            if ((int) ($session->metadata['service_request_id'] ?? 0) !== (int) $req->id) {
+                return ['success' => false, 'message' => 'Payment session does not match this request.'];
+            }
+
+            // Confirm the amount paid matches the expected price to prevent
+            // a $1 session being replayed against a $1000 request.
+            $expectedCents = (int) round($req->service->price * 100);
+            if ((int) $session->amount_total !== $expectedCents) {
+                return ['success' => false, 'message' => 'Payment amount does not match the request price.'];
+            }
+
+            return [
+                'success'        => true,
+                'transaction_id' => $session->payment_intent,
+            ];
         } catch (ApiErrorException $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }

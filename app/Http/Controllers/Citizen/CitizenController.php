@@ -310,7 +310,7 @@ class CitizenController extends Controller
 
         $sessionId = $request->query('session_id');
         $verified  = $sessionId
-            ? app(PaymentService::class)->verifyStripeSession($sessionId)
+            ? app(PaymentService::class)->verifyStripeSession($sessionId, $serviceRequest)
             : ['success' => false, 'message' => 'No session ID provided.'];
 
         if ($verified['success']) {
