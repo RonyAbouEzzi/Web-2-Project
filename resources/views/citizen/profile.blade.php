@@ -31,8 +31,8 @@
     <div class="card citizen-profile-head citizen-reveal" data-citizen-reveal>
         <div class="card-body">
             <div class="citizen-profile-avatar-wrap">
-                @if($user->avatar)
-                    <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" class="citizen-profile-avatar-img">
+                @if($user->avatar_url)
+                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="citizen-profile-avatar-img" referrerpolicy="no-referrer">
                 @else
                     <div class="citizen-profile-avatar">
                         {{ strtoupper(substr($user->name, 0, 1)) }}

@@ -2001,8 +2001,8 @@
 
                 {{-- User menu --}}
                 <div class="dropdown ms-1">
-                    @if($user->avatar)
-                        <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" class="es-avatar" data-bs-toggle="dropdown" role="button" aria-expanded="false" style="object-fit:cover;">
+                    @if($user->avatar_url)
+                        <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="es-avatar" data-bs-toggle="dropdown" role="button" aria-expanded="false" style="object-fit:cover;" referrerpolicy="no-referrer">
                     @else
                         <div class="es-avatar" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                             {{ strtoupper(substr($user->name, 0, 1)) }}
