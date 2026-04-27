@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Notification;
 use App\Services\{QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, DB, Hash, Storage};
+use Illuminate\Support\Str;
 use App\Events\MessageSent;
 use App\Events\MessagesRead;
 
@@ -52,13 +53,11 @@ class CitizenController extends Controller
     {
         $user = Auth::user();
         $data = $request->validate([
-            'password' => 'nullable|min:8|confirmed',
+            'password' => 'required|min:8|confirmed',
         ]);
 
-        if (!empty($data['password'])) {
-            $user->password = Hash::make($data['password']);
-            $user->save();
-        }
+        $user->password = Hash::make($data['password']);
+        $user->save();
 
         return back()->with('success', 'Password updated successfully.');
     }
@@ -71,8 +70,10 @@ class CitizenController extends Controller
 
         $user = Auth::user();
 
-        // Delete old avatar if exists
-        if ($user->avatar) {
+        // Delete old avatar only if it's a local upload — OAuth avatars are
+        // full URLs (e.g. https://lh3.googleusercontent.com/...) which the
+        // public disk cannot resolve.
+        if ($user->avatar && !Str::startsWith($user->avatar, ['http://', 'https://'])) {
             Storage::disk('public')->delete($user->avatar);
         }
 
