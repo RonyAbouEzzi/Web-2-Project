@@ -144,7 +144,7 @@ class PaymentService
         $rate = $rates[$crypto] ?? 1;
         $amount = $usdAmount / $rate;
 
-        return number_format($amount, $crypto === 'USDT' ? 2 : 8);
+        return number_format($amount, $crypto === 'USDT' ? 2 : 8, '.', '');
     }
 
     // ── Currency Conversion ────────────────────────────────────────

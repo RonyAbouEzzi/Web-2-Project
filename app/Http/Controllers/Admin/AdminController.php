@@ -158,7 +158,7 @@ class AdminController extends Controller
 
         // Monthly chart data (year grid + current filter scope)
         $monthlyRawQuery = ServiceRequest::query()
-            ->selectRaw('MONTH(created_at) as month_num, COUNT(*) as total')
+            ->selectRaw('EXTRACT(MONTH FROM created_at) as month_num, COUNT(*) as total')
             ->whereYear('created_at', now()->year);
 
         $this->applyRequestDashboardScope($monthlyRawQuery, $currentStart, $currentEnd, $municipalityId, $officeId);
@@ -166,7 +166,8 @@ class AdminController extends Controller
         $monthlyRaw = $monthlyRawQuery
             ->groupBy('month_num')
             ->orderBy('month_num')
-            ->pluck('total', 'month_num');
+            ->pluck('total', 'month_num')
+            ->mapWithKeys(fn ($total, $month) => [(int) $month => (int) $total]);
 
         $chartLabels = [];
         $chartValues = [];
@@ -422,9 +423,10 @@ class AdminController extends Controller
         $requestsByStatus = ServiceRequest::selectRaw('status, count(*) as total')
             ->groupBy('status')->pluck('total', 'status');
 
-        $monthlyRequests = ServiceRequest::selectRaw('MONTH(created_at) as month, COUNT(*) as total')
+        $monthlyRequests = ServiceRequest::selectRaw('EXTRACT(MONTH FROM created_at) as month, COUNT(*) as total')
             ->whereYear('created_at', now()->year)
-            ->groupBy('month')->pluck('total', 'month');
+            ->groupBy('month')->pluck('total', 'month')
+            ->mapWithKeys(fn ($total, $month) => [(int) $month => (int) $total]);
 
         return view('admin.reports', compact(
             'requestsByOffice', 'revenueByOffice', 'requestsByStatus', 'monthlyRequests'

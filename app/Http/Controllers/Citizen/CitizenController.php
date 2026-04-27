@@ -137,7 +137,7 @@ class CitizenController extends Controller
     {
         $appointments = Auth::user()->appointments()
             ->with(['office', 'request.service'])
-            ->orderByRaw("CASE WHEN appointment_date >= CURDATE() THEN 0 ELSE 1 END")
+            ->orderByRaw("CASE WHEN appointment_date >= CURRENT_DATE THEN 0 ELSE 1 END")
             ->orderBy('appointment_date')
             ->orderBy('appointment_time')
             ->paginate(15);
