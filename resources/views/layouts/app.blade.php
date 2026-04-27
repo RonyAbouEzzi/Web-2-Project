@@ -122,7 +122,7 @@
             width: 34px;
             height: 34px;
             overflow: hidden;
-            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
             flex-shrink: 0;
         }
 
@@ -2182,8 +2182,11 @@ function closeSidebar() {
         });
     }
 
-    /* Swipe */
+    /* Swipe — sidebar toggle on mobile */
     let tx=0,ty=0,drag=false;
+    const sb=document.querySelector('.layout-menu');
+    function openSb(){sb&&sb.classList.add('open');}
+    function closeSb(){sb&&sb.classList.remove('open');}
     document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;drag=false},{passive:true});
     document.addEventListener('touchmove',e=>{if(Math.abs(e.touches[0].clientX-tx)>Math.abs(e.touches[0].clientY-ty))drag=true},{passive:true});
     document.addEventListener('touchend',e=>{
