@@ -19,12 +19,13 @@ class RegistrationConfirmation extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Welcome to E-Services Platform')
-            ->greeting("Hello {$notifiable->name},")
-            ->line('Your account has been created successfully.')
-            ->line('You can now submit requests, track progress, and receive official updates online.')
-            ->action('Open Dashboard', route('citizen.dashboard'))
-            ->line('Thank you for using our e-services platform.');
+            ->subject('Welcome to CedarGov — Your Account is Ready')
+            ->greeting("Welcome, {$notifiable->name}!")
+            ->line('Your CedarGov citizen account has been created successfully.')
+            ->line('You can now browse municipal services, submit requests, make payments, and track your applications in real time.')
+            ->action('Go to My Dashboard', route('citizen.dashboard'))
+            ->line('If you have any questions, visit your nearest municipal office or contact us through the platform.')
+            ->salutation('— The CedarGov Team');
     }
 
     public function toArray(object $notifiable): array
@@ -35,4 +36,3 @@ class RegistrationConfirmation extends Notification implements ShouldQueue
         ];
     }
 }
-

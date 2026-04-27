@@ -1,0 +1,31 @@
+<?php
+// Variables
+return [
+  "creatorName" => "Municipal E-Services",
+  "creatorUrl" => "#",
+  "templateName" => "CedarGov",
+  "templateSuffix" => "Municipal Dashboard",
+  "templateVersion" => "1.0.0",
+  "templateFree" => true,
+  "templateDescription" => "Municipal E-Services Management Platform for Lebanese Municipalities",
+  "templateKeyword" => "municipal, e-services, dashboard, lebanon",
+  "licenseUrl" => "#",
+  "livePreview" => "#",
+  "productPage" => "#",
+  "support" => "#",
+  "adminTemplates" => "#",
+  "bootstrapDashboard" => "#",
+  "ogTitle" => "Municipal E-Services Platform",
+  "ogImage" => "",
+  "ogType" => "website",
+  "documentation" => "#",
+  "repository" => "#",
+  "gitRepo" => "#",
+  "gitRepoAccess" => "#",
+  "githubFreeUrl" => "#",
+  "facebookUrl" => "#",
+  "twitterUrl" => "#",
+  "githubUrl" => "#",
+  "dribbbleUrl" => "#",
+  "instagramUrl" => "#"
+];

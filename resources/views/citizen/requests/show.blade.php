@@ -3,113 +3,112 @@
 @section('page-title', 'Request Details')
 
 @section('content')
-
-{{-- Header --}}
-<div class="card mb-3">
-    <div class="card-body">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;flex-wrap:wrap">
-            <div style="min-width:0">
-                <h5 style="font-size:.95rem;font-weight:800;margin:0 0 .2rem;color:#111827">{{ $serviceRequest->service->name }}</h5>
-                <div style="font-size:.78rem;color:#6b7280;margin-bottom:.3rem">{{ $serviceRequest->office->name }}</div>
-                <code>{{ $serviceRequest->reference_number }}</code>
-            </div>
-            <span class="sbadge s-{{ $serviceRequest->status }}" style="font-size:.78rem;padding:.3rem .8rem;flex-shrink:0">
-                {{ ucfirst(str_replace('_',' ',$serviceRequest->status)) }}
-            </span>
+<div class="card mb-3 citizen-reveal" data-citizen-reveal>
+    <div class="card-body citizen-request-head">
+        <div>
+            <span class="citizen-request-head-kicker">Service Request</span>
+            <h5 class="citizen-request-head-title">{{ $serviceRequest->service->name }}</h5>
+            <div class="citizen-request-head-sub">{{ $serviceRequest->office->name }}</div>
+            <code>{{ $serviceRequest->reference_number }}</code>
         </div>
+        <x-status-pill :status="$serviceRequest->status" />
     </div>
 </div>
 
-{{-- Mobile: stacked, Desktop: two cols --}}
-<div style="display:grid;grid-template-columns:1fr;gap:1rem" class="detail-grid">
-
-    {{-- Left column --}}
-    <div style="display:flex;flex-direction:column;gap:1rem" class="left-col">
-
-        {{-- Status timeline --}}
-        <div class="card">
-            <div class="card-header"><span class="card-title"><i class="bi bi-clock-history me-2" style="color:var(--primary)"></i>Status History</span></div>
+<div class="citizen-request-detail-grid">
+    <div class="citizen-request-left-col">
+        <div class="card citizen-reveal" data-citizen-reveal>
+            <div class="card-header">
+                <span class="card-title"><i class="bi bi-clock-history me-2 text-primary"></i>Status History</span>
+            </div>
             <div class="card-body">
-                @php $statColors = ['pending'=>'#d97706','in_review'=>'#2563eb','missing_documents'=>'#dc2626','approved'=>'#16a34a','rejected'=>'#dc2626','completed'=>'#065f46']; @endphp
+                @php
+                    $statusIcons = [
+                        'pending' => 'bi-hourglass-split',
+                        'in_review' => 'bi-search',
+                        'missing_documents' => 'bi-exclamation-triangle',
+                        'approved' => 'bi-check2-circle',
+                        'rejected' => 'bi-x-circle',
+                        'completed' => 'bi-check-circle-fill',
+                    ];
+                @endphp
+
                 @forelse($serviceRequest->statusLogs as $log)
-                <div style="display:flex;gap:.75rem;margin-bottom:.9rem">
-                    <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
-                        <div style="width:26px;height:26px;border-radius:50%;background:{{ $statColors[$log->to_status] ?? '#6b7280' }}20;color:{{ $statColors[$log->to_status] ?? '#6b7280' }};display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700">
-                            <i class="bi bi-arrow-right"></i>
+                    <div class="citizen-timeline-item">
+                        <div class="citizen-timeline-rail">
+                            <div class="citizen-timeline-dot">
+                                <i class="bi {{ $statusIcons[$log->to_status] ?? 'bi-arrow-right' }}"></i>
+                            </div>
+                            @if(!$loop->last)
+                                <div class="citizen-timeline-line"></div>
+                            @endif
                         </div>
-                        @if(!$loop->last)
-                        <div style="width:1px;flex:1;background:#e5eaf0;margin-top:3px"></div>
-                        @endif
+                        <div class="citizen-timeline-content">
+                            <div class="citizen-timeline-title">{{ ucfirst(str_replace('_', ' ', $log->to_status)) }}</div>
+                            <div class="citizen-timeline-time">{{ $log->created_at->diffForHumans() }}</div>
+                            @if($log->comment)
+                                <div class="citizen-timeline-note">{{ $log->comment }}</div>
+                            @endif
+                        </div>
                     </div>
-                    <div style="padding-bottom:{{ $loop->last ? '0' : '.5rem' }}">
-                        <div style="font-size:.82rem;font-weight:600">{{ ucfirst(str_replace('_',' ',$log->to_status)) }}</div>
-                        <div style="font-size:.72rem;color:#9ca3af">{{ $log->created_at->diffForHumans() }}</div>
-                        @if($log->comment)<div style="font-size:.78rem;color:#374151;margin-top:2px">{{ $log->comment }}</div>@endif
-                    </div>
-                </div>
                 @empty
-                <p style="color:#9ca3af;font-size:.82rem;margin:0">No updates yet.</p>
+                    <p class="citizen-muted-note m-0">No updates yet.</p>
                 @endforelse
             </div>
         </div>
 
-        {{-- Documents --}}
-        <div class="card">
-            <div class="card-header"><span class="card-title"><i class="bi bi-paperclip me-2" style="color:var(--primary)"></i>Documents</span></div>
-            <div class="card-body" style="padding:0 !important">
+        <div class="card citizen-reveal" data-citizen-reveal>
+            <div class="card-header">
+                <span class="card-title"><i class="bi bi-paperclip me-2 text-primary"></i>Documents</span>
+            </div>
+            <div class="card-body p-0">
                 @forelse($serviceRequest->documents as $doc)
-                <div style="display:flex;align-items:center;gap:.75rem;padding:.85rem 1.2rem;border-bottom:1px solid #f3f4f6">
-                    <div style="width:34px;height:34px;border-radius:8px;background:#f3f4f6;color:#6b7280;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">
-                        <i class="bi bi-file-earmark"></i>
+                    <div class="citizen-doc-row">
+                        <div class="citizen-doc-icon">
+                            <i class="bi bi-file-earmark"></i>
+                        </div>
+                        <div class="citizen-doc-main">
+                            <div class="citizen-doc-name">{{ $doc->original_name }}</div>
+                            <div class="citizen-doc-sub">Uploaded by {{ ucfirst($doc->uploaded_by) }}</div>
+                        </div>
+                        <a href="{{ route('citizen.documents.download', [$serviceRequest, $doc->id]) }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download"></i>
+                        </a>
                     </div>
-                    <div style="flex:1;min-width:0">
-                        <div style="font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $doc->original_name }}</div>
-                        <div style="font-size:.7rem;color:#9ca3af">By {{ $doc->uploaded_by }}</div>
-                    </div>
-                    <a href="{{ route('citizen.documents.download', [$serviceRequest, $doc->id]) }}"
-                        class="btn btn-sm" style="background:#f3f4f6;border:none;color:#374151;flex-shrink:0">
-                        <i class="bi bi-download"></i>
-                    </a>
-                </div>
                 @empty
-                <div style="padding:1.25rem;color:#9ca3af;font-size:.82rem;text-align:center">No documents uploaded.</div>
+                    <div class="citizen-panel-empty">
+                        <i class="bi bi-folder2-open"></i>
+                        <p>No documents uploaded.</p>
+                    </div>
                 @endforelse
             </div>
         </div>
 
-        {{-- Chat --}}
-        <div class="card">
-            <div class="card-header"><span class="card-title"><i class="bi bi-chat-dots me-2" style="color:var(--primary)"></i>Messages</span></div>
+        <div class="card citizen-reveal" data-citizen-reveal>
+            <div class="card-header">
+                <span class="card-title"><i class="bi bi-chat-dots me-2 text-primary"></i>Messages</span>
+            </div>
             <div class="chat-box" id="chatBox">
                 @if($serviceRequest->messages->isEmpty())
-                    <div data-empty-chat style="padding:1rem;text-align:center;color:#9ca3af;font-size:.82rem">
-                        No messages yet. Start the conversation.
-                    </div>
+                    <div class="citizen-chat-empty">No messages yet. Start the conversation.</div>
                 @else
                     @foreach($serviceRequest->messages as $msg)
-                    @php $mine = $msg->sender_id === auth()->id(); @endphp
-                    <div class="msg {{ $mine ? 'mine' : 'theirs' }}" data-message-id="{{ $msg->id }}" data-read-at="{{ $msg->read_at }}">
-                        <div class="msg-av {{ $mine ? 'av-me' : 'av-other' }}">
-                            {{ strtoupper(substr($msg->sender->name,0,1)) }}
-                        </div>
-                        <div class="msg-bubble">
-                            <div style="font-size:.7rem;font-weight:700;margin-bottom:.2rem;color:#6b7280">
-                                {{ $mine ? 'You' : $msg->sender->name }}
+                        @php $mine = $msg->sender_id === auth()->id(); @endphp
+                        <div class="msg {{ $mine ? 'mine' : 'theirs' }}">
+                            <div class="msg-av {{ $mine ? 'av-me' : 'av-other' }}">
+                                {{ strtoupper(substr($msg->sender->name, 0, 1)) }}
                             </div>
-                            <p>{{ $msg->body }}</p>
-                            <div class="msg-time">
-                                {{ $msg->created_at->format('H:i') }}
-                                @if($msg->sender_id === auth()->id())
-                                    · {{ $msg->read_at ? 'Seen' : 'Sent' }}
-                                @endif
+                            <div class="msg-bubble">
+                                <div class="msg-name">{{ $mine ? 'You' : $msg->sender->name }}</div>
+                                <p>{{ $msg->body }}</p>
+                                <div class="msg-time">{{ $msg->created_at->format('H:i') }}</div>
                             </div>
                         </div>
-                    </div>
                     @endforeach
                 @endif
             </div>
-            <div style="border-top:1px solid #f3f4f6;padding:.75rem 1rem">
-                <div style="display:flex;gap:.5rem">
+            <div class="citizen-chat-input-wrap">
+                <div class="d-flex gap-2">
                     <input type="text" id="chatInput" class="form-control form-control-sm" placeholder="Type a message..." style="flex:1">
                     <button id="sendBtn" class="btn btn-primary btn-sm" style="flex-shrink:0"><i class="bi bi-send"></i></button>
                 </div>
@@ -117,124 +116,133 @@
         </div>
     </div>
 
-    {{-- Right column --}}
-    <div style="display:flex;flex-direction:column;gap:1rem" class="right-col">
-
-        {{-- QR Code --}}
+    <div class="citizen-request-right-col">
         @if($serviceRequest->qr_code)
-        <div class="card text-center">
-            <div class="card-body">
-                <div style="font-size:.83rem;font-weight:700;margin-bottom:.75rem">Track via QR Code</div>
-                <img src="{{ Storage::url($serviceRequest->qr_code) }}" alt="QR Code"
-                    style="max-width:160px;border-radius:8px;border:1px solid #e5eaf0">
-                <div style="font-size:.72rem;color:#9ca3af;margin-top:.6rem">Scan to check request status</div>
+            <div class="card text-center citizen-reveal" data-citizen-reveal>
+                <div class="card-body">
+                    <div class="citizen-side-card-title">Track via QR Code</div>
+                    <img src="{{ Storage::url($serviceRequest->qr_code) }}" alt="QR Code" class="citizen-qr-image">
+                    <div class="citizen-muted-note mt-2">Scan to check request status.</div>
+                </div>
             </div>
-        </div>
         @endif
 
-        {{-- Payment --}}
-        <div class="card">
-            <div class="card-header"><span class="card-title">Payment</span></div>
+        <div class="card citizen-reveal" data-citizen-reveal>
+            <div class="card-header">
+                <span class="card-title">Payment</span>
+            </div>
             <div class="card-body">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem">
-                    <span style="font-size:.8rem;color:#6b7280">Amount Due</span>
-                    <span style="font-size:.88rem;font-weight:700">${{ number_format($serviceRequest->service->price, 2) }}</span>
+                <div class="citizen-side-row">
+                    <span>Amount Due</span>
+                    <strong>${{ number_format($serviceRequest->service->price, 2) }}</strong>
                 </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem">
-                    <span style="font-size:.8rem;color:#6b7280">Status</span>
-                    <span class="sbadge s-{{ $serviceRequest->payment_status }}">{{ ucfirst($serviceRequest->payment_status) }}</span>
+                <div class="citizen-side-row">
+                    <span>Status</span>
+                    <x-status-pill :status="$serviceRequest->payment_status === 'paid' ? 'paid' : 'unpaid'" />
                 </div>
+                @if($serviceRequest->transaction_id)
+                    <div class="citizen-side-row">
+                        <span>Method</span>
+                        <strong>{{ ucfirst($serviceRequest->payment_method ?? '-') }}</strong>
+                    </div>
+                @endif
                 @if($serviceRequest->payment_status !== 'paid')
-                <a href="{{ route('citizen.payment', $serviceRequest) }}" class="btn btn-primary btn-block">
-                    <i class="bi bi-credit-card"></i> Pay Now
-                </a>
+                    <a href="{{ route('citizen.payment', $serviceRequest) }}" class="btn btn-primary w-100 mt-2">
+                        <i class="bi bi-credit-card me-1"></i> Pay Now
+                    </a>
                 @else
-                <div style="text-align:center;color:#16a34a;font-size:.8rem;font-weight:600"><i class="bi bi-check-circle me-1"></i>Payment complete</div>
+                    <div class="citizen-paid-ok"><i class="bi bi-check-circle me-1"></i>Payment complete</div>
+                    <a href="{{ route('citizen.requests.receipt', $serviceRequest) }}" class="btn btn-outline-success w-100">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Download Receipt
+                    </a>
                 @endif
             </div>
         </div>
 
-        {{-- Appointment --}}
-        <div class="card">
-            <div class="card-header"><span class="card-title">Appointment</span></div>
+        <div class="card citizen-reveal" data-citizen-reveal>
+            <div class="card-header">
+                <span class="card-title">Appointment</span>
+            </div>
             <div class="card-body">
                 @if($serviceRequest->appointment)
-                    <div style="font-size:.82rem;margin-bottom:.4rem"><strong>Date:</strong> {{ $serviceRequest->appointment->appointment_date }}</div>
-                    <div style="font-size:.82rem;margin-bottom:.6rem"><strong>Time:</strong> {{ $serviceRequest->appointment->appointment_time }}</div>
-                    <span class="sbadge s-{{ $serviceRequest->appointment->status }}">{{ ucfirst($serviceRequest->appointment->status) }}</span>
+                    <div class="citizen-side-row">
+                        <span>Date</span>
+                        <strong>{{ \Carbon\Carbon::parse($serviceRequest->appointment->appointment_date)->format('M d, Y') }}</strong>
+                    </div>
+                    <div class="citizen-side-row">
+                        <span>Time</span>
+                        <strong>{{ \Carbon\Carbon::parse($serviceRequest->appointment->appointment_time)->format('g:i A') }}</strong>
+                    </div>
+                    <x-status-pill :status="$serviceRequest->appointment->status" />
                 @else
-                    <p style="font-size:.8rem;color:#9ca3af;margin-bottom:.75rem">No appointment scheduled.</p>
-                    <button class="btn btn-sm" style="background:var(--primary-light);color:var(--primary);border:none;width:100%"
-                            data-bs-toggle="modal" data-bs-target="#aptModal">
-                        <i class="bi bi-calendar-plus"></i> Book Appointment
+                    <p class="citizen-muted-note">No appointment scheduled yet.</p>
+                    <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#aptModal">
+                        <i class="bi bi-calendar-plus me-1"></i> Book Appointment
                     </button>
                 @endif
             </div>
         </div>
 
         @if($serviceRequest->status === 'completed')
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">
-                    <i class="bi bi-star me-2" style="color:var(--primary)"></i>Feedback
-                </span>
+            <div class="card citizen-reveal" data-citizen-reveal>
+                <div class="card-header">
+                    <span class="card-title"><i class="bi bi-star me-2 text-primary"></i>Feedback</span>
+                </div>
+                <div class="card-body">
+                    @if($errors->any())
+                        <div class="alert alert-danger" style="font-size:.8rem">
+                            <ul class="mb-0 ps-3">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('citizen.feedback.submit') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="office_id" value="{{ $serviceRequest->office_id }}">
+                        <input type="hidden" name="service_request_id" value="{{ $serviceRequest->id }}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <select name="rating" class="form-select" required>
+                                <option value="">Select rating</option>
+                                <option value="5">5 - Excellent</option>
+                                <option value="4">4 - Very Good</option>
+                                <option value="3">3 - Good</option>
+                                <option value="2">2 - Fair</option>
+                                <option value="1">1 - Poor</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Comment</label>
+                            <textarea name="comment" class="form-control" rows="3" placeholder="Write your feedback..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-send me-1"></i> Submit Feedback
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="card-body">
-                @if($errors->any())
-                    <div class="alert alert-danger" style="font-size:.8rem">
-                        <ul style="margin:0;padding-left:1rem">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form action="{{ route('citizen.feedback.submit') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="office_id" value="{{ $serviceRequest->office_id }}">
-                    <input type="hidden" name="service_request_id" value="{{ $serviceRequest->id }}">
-
-                    <div class="mb-3">
-                        <label class="form-label">Rating</label>
-                        <select name="rating" class="form-select" required>
-                            <option value="">Select rating</option>
-                            <option value="5">5 - Excellent</option>
-                            <option value="4">4 - Very Good</option>
-                            <option value="3">3 - Good</option>
-                            <option value="2">2 - Fair</option>
-                            <option value="1">1 - Poor</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Comment</label>
-                        <textarea name="comment" class="form-control" rows="3" placeholder="Write your feedback..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-sm w-100">
-                        <i class="bi bi-send"></i> Submit Feedback
-                    </button>
-                </form>
-            </div>
-        </div>
         @endif
     </div>
 </div>
 
-{{-- Appointment modal --}}
 <div class="modal fade" id="aptModal" tabindex="-1" aria-labelledby="aptModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width:420px">
-        <div class="modal-content" style="border:none;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
-            <div class="modal-header" style="border:none;padding:1.25rem 1.25rem .5rem">
-                <h6 class="modal-title" id="aptModalLabel" style="font-weight:800">Book Appointment</h6>
+        <div class="modal-content citizen-apt-modal">
+            <div class="modal-header border-0 pb-1">
+                <h6 class="modal-title fw-bold" id="aptModalLabel">Book Appointment</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('citizen.appointments.book') }}" method="POST">
                 @csrf
                 <input type="hidden" name="office_id" value="{{ $serviceRequest->office_id }}">
                 <input type="hidden" name="service_request_id" value="{{ $serviceRequest->id }}">
-                <div class="modal-body" style="padding:1rem 1.25rem">
+                <div class="modal-body pt-2">
                     <div class="mb-3">
                         <label class="form-label">Preferred Date</label>
                         <input type="date" name="appointment_date" class="form-control" min="{{ now()->addDay()->format('Y-m-d') }}" required>
@@ -245,22 +253,368 @@
                     </div>
                     <div>
                         <label class="form-label">Notes (optional)</label>
-                        <textarea name="notes" class="form-control" rows="2" placeholder="Any specific reason or notes..."></textarea>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Any specific notes..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer" style="border:none;padding:.75rem 1.25rem 1.25rem;gap:.5rem">
-                    <button type="button" class="btn btn-sm" style="background:#f3f4f6;border:none;color:#374151" data-bs-dismiss="modal">Cancel</button>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary btn-sm">Confirm Booking</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+@endsection
 
 @push('styles')
 <style>
+/* ═══════════════════════════════════════════════════════
+   CITIZEN REQUEST DETAIL — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════ */
+
+body.es-role-citizen .citizen-request-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: .75rem;
+    flex-wrap: wrap;
+}
+
+body.es-role-citizen .citizen-request-head-kicker {
+    display: inline-flex;
+    padding: .22rem .6rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #0EA5E9, #6366F1);
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    box-shadow: 0 2px 8px rgba(14,165,233,0.3);
+}
+
+body.es-role-citizen .citizen-request-head-title {
+    margin: .6rem 0 .2rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #0F172A 0%, #0EA5E9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.es-role-citizen .citizen-request-head-sub {
+    color: #64748B;
+    font-size: .79rem;
+    margin-bottom: .3rem;
+}
+
+body.es-role-citizen .citizen-request-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+body.es-role-citizen .citizen-request-left-col,
+body.es-role-citizen .citizen-request-right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ── Timeline with gradient line ── */
+body.es-role-citizen .citizen-timeline-item {
+    display: flex;
+    gap: .8rem;
+    margin-bottom: .9rem;
+}
+
+body.es-role-citizen .citizen-timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+body.es-role-citizen .citizen-timeline-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+body.es-role-citizen .citizen-timeline-dot {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #E0F2FE, #EDE9FE);
+    color: #0284C7;
+    border: 1.5px solid rgba(14,165,233,0.2);
+    font-size: .72rem;
+    box-shadow: 0 3px 8px rgba(14,165,233,0.12);
+}
+
+body.es-role-citizen .citizen-timeline-line {
+    width: 2px;
+    flex: 1;
+    background: linear-gradient(180deg, rgba(14,165,233,0.2) 0%, rgba(99,102,241,0.1) 100%);
+    margin-top: .2rem;
+    border-radius: 1px;
+}
+
+body.es-role-citizen .citizen-timeline-title {
+    font-size: .84rem;
+    font-weight: 700;
+    color: #0F172A;
+}
+
+body.es-role-citizen .citizen-timeline-time {
+    font-size: .72rem;
+    color: #94A3B8;
+    margin-top: .1rem;
+}
+
+body.es-role-citizen .citizen-timeline-note {
+    margin-top: .25rem;
+    font-size: .78rem;
+    color: #475569;
+    padding: .35rem .55rem;
+    background: rgba(241,245,249,0.5);
+    border-radius: .4rem;
+    border-left: 2px solid rgba(14,165,233,0.3);
+}
+
+body.es-role-citizen .citizen-muted-note {
+    color: #94A3B8;
+    font-size: .79rem;
+}
+
+/* ── Document rows ── */
+body.es-role-citizen .citizen-doc-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .85rem 1rem;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
+    transition: all .2s ease;
+}
+
+body.es-role-citizen .citizen-doc-row:last-child {
+    border-bottom: 0;
+}
+
+body.es-role-citizen .citizen-doc-row:hover {
+    background: rgba(224,242,254,0.15);
+}
+
+body.es-role-citizen .citizen-doc-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: .7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #E0F2FE, #EDE9FE);
+    color: #0284C7;
+    border: 1px solid rgba(14,165,233,0.15);
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(14,165,233,0.08);
+}
+
+body.es-role-citizen .citizen-doc-main {
+    flex: 1;
+    min-width: 0;
+}
+
+body.es-role-citizen .citizen-doc-name {
+    font-size: .82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.es-role-citizen .citizen-doc-sub {
+    font-size: .72rem;
+    color: #94A3B8;
+}
+
+/* ── Chat: glass style ── */
+body.es-role-citizen .chat-box {
+    max-height: 22rem;
+    overflow: auto;
+    padding: 1rem;
+    background: rgba(248,250,255,0.5);
+}
+
+body.es-role-citizen .citizen-chat-empty {
+    text-align: center;
+    color: #94A3B8;
+    font-size: .8rem;
+}
+
+body.es-role-citizen .msg {
+    display: flex;
+    gap: .55rem;
+    margin-bottom: .7rem;
+}
+
+body.es-role-citizen .msg:last-child {
+    margin-bottom: 0;
+}
+
+body.es-role-citizen .msg.mine {
+    justify-content: flex-end;
+}
+
+body.es-role-citizen .msg.theirs {
+    justify-content: flex-start;
+}
+
+body.es-role-citizen .msg-av {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+body.es-role-citizen .msg-av.av-me {
+    background: linear-gradient(135deg, #DBEAFE, #E0F2FE);
+    color: #1D4ED8;
+    border: 1px solid rgba(37,99,235,0.15);
+    order: 2;
+}
+
+body.es-role-citizen .msg-av.av-other {
+    background: linear-gradient(135deg, #ECFEFF, #D1FAE5);
+    color: #0F766E;
+    border: 1px solid rgba(15,118,110,0.15);
+}
+
+body.es-role-citizen .msg-bubble {
+    max-width: min(80%, 27rem);
+    border-radius: .9rem;
+    padding: .6rem .72rem;
+    border: 1px solid rgba(226,232,240,0.5);
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(4px);
+}
+
+body.es-role-citizen .msg.mine .msg-bubble {
+    background: linear-gradient(135deg, rgba(224,242,254,0.7) 0%, rgba(219,234,254,0.7) 100%);
+    border-color: rgba(14,165,233,0.15);
+    order: 1;
+}
+
+body.es-role-citizen .msg-name {
+    font-size: .67rem;
+    font-weight: 700;
+    color: #94A3B8;
+    margin-bottom: .15rem;
+}
+
+body.es-role-citizen .msg-bubble p {
+    margin: 0;
+    font-size: .79rem;
+    color: #0F172A;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+body.es-role-citizen .msg-time {
+    margin-top: .2rem;
+    font-size: .65rem;
+    color: #94A3B8;
+    text-align: right;
+}
+
+body.es-role-citizen .citizen-chat-input-wrap {
+    border-top: 1px solid rgba(226,232,240,0.5);
+    padding: .8rem 1rem;
+    background: rgba(255,255,255,0.3);
+}
+
+/* ── Sidebar cards ── */
+body.es-role-citizen .citizen-side-card-title {
+    font-size: .84rem;
+    font-weight: 700;
+    margin-bottom: .7rem;
+    color: #0F172A;
+}
+
+body.es-role-citizen .citizen-qr-image {
+    max-width: 10rem;
+    border-radius: .7rem;
+    border: 1px solid rgba(203,213,225,0.5);
+    box-shadow: 0 4px 12px rgba(15,23,42,0.06);
+}
+
+body.es-role-citizen .citizen-side-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .8rem;
+    color: #64748B;
+    padding: .35rem 0;
+    border-bottom: 1px solid rgba(226,232,240,0.3);
+}
+
+body.es-role-citizen .citizen-side-row:last-of-type {
+    border-bottom: 0;
+}
+
+body.es-role-citizen .citizen-side-row strong {
+    color: #0F172A;
+    font-weight: 700;
+}
+
+body.es-role-citizen .citizen-paid-ok {
+    text-align: center;
+    margin: .7rem 0;
+    color: #059669;
+    font-size: .8rem;
+    font-weight: 700;
+    padding: .45rem;
+    background: rgba(236,253,245,0.5);
+    border-radius: .5rem;
+    border: 1px solid rgba(16,185,129,0.15);
+}
+
+body.es-role-citizen .citizen-panel-empty {
+    padding: 1.6rem 1rem;
+    text-align: center;
+    color: #94A3B8;
+}
+
+body.es-role-citizen .citizen-panel-empty i {
+    font-size: 1.6rem;
+    color: #CBD5E1;
+    display: block;
+    margin-bottom: .4rem;
+}
+
+body.es-role-citizen .citizen-panel-empty p {
+    margin: 0;
+    font-size: .8rem;
+}
+
+body.es-role-citizen .citizen-apt-modal {
+    border: 1px solid rgba(219,234,254,0.5);
+    border-radius: 1.1rem;
+    box-shadow: 0 24px 56px rgba(15,23,42,0.2);
+    backdrop-filter: blur(8px);
+}
+
 @media (min-width: 768px) {
-    .detail-grid { grid-template-columns: 1fr 320px !important; }
+    body.es-role-citizen .citizen-request-detail-grid {
+        grid-template-columns: 1fr 320px;
+    }
 }
 </style>
 @endpush
@@ -270,59 +624,7 @@
     const chatBox = document.getElementById('chatBox');
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendBtn');
-
-    const renderedMessageIds = new Set(
-        Array.from(chatBox.querySelectorAll('[data-message-id]'))
-            .map(el => String(el.dataset.messageId))
-    );
-
-    function appendMessage(msg) {
-        if (msg.id && renderedMessageIds.has(String(msg.id))) {
-            return;
-        }
-
-        const mine = msg.sender_id === {{ auth()->id() }};
-
-        const emptyState = chatBox.querySelector('[data-empty-chat]');
-        if (emptyState) {
-            emptyState.remove();
-        }
-
-        const div = document.createElement('div');
-        div.className = 'msg ' + (mine ? 'mine' : 'theirs');
-
-        div.innerHTML = `
-            <div class="msg-av ${mine ? 'av-me' : 'av-other'}">
-                ${(msg.sender?.name || '?').charAt(0).toUpperCase()}
-            </div>
-            <div class="msg-bubble">
-                <div style="font-size:.7rem;font-weight:700;margin-bottom:.2rem;color:#6b7280">
-                    ${mine ? 'You' : (msg.sender?.name || 'Unknown')}
-                </div>
-                <p></p>
-                <div class="msg-time">
-                    ${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    ${msg.sender_id === {{ auth()->id() }}
-                        ? (msg.read_at ? ' · Seen' : ' · Sent')
-                        : ''}
-                </div>
-            </div>
-        `;
-
-        div.querySelector('p').textContent = msg.body;
-
-        if (msg.id) {
-            div.dataset.messageId = String(msg.id);
-            renderedMessageIds.add(String(msg.id));
-        }
-
-        if (msg.read_at) {
-            div.dataset.readAt = msg.read_at;
-        }
-
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
+    const myInitial = @json(strtoupper(substr(auth()->user()->name, 0, 1)));
 
     async function sendMsg() {
         const body = chatInput.value.trim();
@@ -337,9 +639,9 @@
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
                 },
-                body: JSON.stringify({ body })
+                body: JSON.stringify({ body }),
             });
 
             const data = await response.json();
@@ -350,7 +652,7 @@
             }
 
             chatInput.value = '';
-            appendMessage(data.message);
+            await loadMessages();
         } catch (error) {
             alert('Something went wrong while sending the message.');
         } finally {
@@ -360,17 +662,56 @@
         }
     }
 
-    async function markIncomingMessagesAsRead() {
+    async function loadMessages() {
         try {
-            await fetch('{{ route('citizen.messages.read', $serviceRequest) }}', {
-                method: 'POST',
+            const res = await fetch('{{ route('citizen.messages.get', $serviceRequest) }}', {
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
                     'Accept': 'application/json'
                 }
             });
-        } catch (error) {
-            console.error('Failed to mark messages as read');
+
+            const data = await res.json();
+
+            chatBox.innerHTML = '';
+
+            if (!data.messages.length) {
+                chatBox.innerHTML = `
+                    <div style="padding:1rem;text-align:center;color:#9ca3af;font-size:.82rem">
+                        No messages yet. Start the conversation.
+                    </div>
+                `;
+                return;
+            }
+
+            data.messages.forEach(msg => {
+                const mine = msg.sender_id === {{ auth()->id() }};
+
+                const div = document.createElement('div');
+                div.className = 'msg ' + (mine ? 'mine' : 'theirs');
+
+                div.innerHTML = `
+                    <div class="msg-av ${mine ? 'av-me' : 'av-other'}">
+                        ${msg.sender.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="msg-bubble">
+                        <div style="font-size:.7rem;font-weight:700;margin-bottom:.2rem;color:#6b7280">
+                            ${mine ? 'You' : msg.sender.name}
+                        </div>
+                        <p></p>
+                        <div class="msg-time">
+                            ${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                    </div>
+                `;
+
+                div.querySelector('p').textContent = msg.body;
+                chatBox.appendChild(div);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (e) {
+            console.error('Error loading messages', e);
         }
     }
 
@@ -383,38 +724,8 @@
         }
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!window.Echo) {
-            console.error('Echo is not loaded');
-            return;
-        }
-
-        window.Echo.private('request.{{ $serviceRequest->id }}')
-            .listen('.message.sent', async (e) => {
-                appendMessage(e);
-
-                if (e.sender_id !== {{ auth()->id() }}) {
-                    await markIncomingMessagesAsRead();
-                }
-            })
-            .listen('.messages.read', (e) => {
-                e.message_ids.forEach((id) => {
-                    const msgEl = chatBox.querySelector(`[data-message-id="${id}"]`);
-                    if (!msgEl) return;
-
-                    msgEl.dataset.readAt = '1';
-
-                    const timeEl = msgEl.querySelector('.msg-time');
-                    if (!timeEl) return;
-
-                    if (msgEl.classList.contains('mine') && !timeEl.textContent.includes('Seen')) {
-                        timeEl.textContent = timeEl.textContent.replace(' · Sent', '') + ' · Seen';
-                    }
-                });
-            });
-    });
-
+    loadMessages();
+    setInterval(loadMessages, 2000);
     chatBox.scrollTop = chatBox.scrollHeight;
 </script>
 @endpush
-@endsection

@@ -2,89 +2,160 @@
 @section('title','Offices')
 @section('page-title','Government Offices')
 
-@section('content')
-<div class="d-flex justify-content-between align-items-center mb-3" style="flex-wrap:wrap;gap:.75rem">
-    <div>
-        <h5 style="font-weight:800;margin:0;font-size:1rem">Manage Offices</h5>
-        <p style="color:#9ca3af;font-size:.78rem;margin:0">{{ $offices->total() }} total</p>
-    </div>
-    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addOfficeModal">
-        <i class="bi bi-plus-lg"></i> Add Office
-    </button>
-</div>
+@push('styles')
+<style>
+    /* ═══ ADMIN OFFICES — PREMIUM GLASS ═══ */
+    .admin-row-main { font-weight: 600; font-size: .84rem; }
+    .admin-row-sub { font-size: .72rem; color: var(--es-muted); }
+    .admin-mobile-item {
+        padding: .9rem 1rem;
+        border-bottom: 1px solid rgba(226,232,240,0.5);
+        transition: background .22s ease, transform .22s ease;
+    }
+    .admin-mobile-item:hover {
+        background: rgba(224,231,255,0.12);
+        transform: translateX(4px);
+    }
+    .admin-empty { text-align: center; padding: 2rem; color: var(--es-muted); }
 
-<div class="card">
+    /* Modals — glass */
+    .admin-modal .modal-dialog { max-width: 480px; }
+    .admin-modal.narrow .modal-dialog { max-width: 440px; }
+    .admin-modal .modal-content {
+        border: 1px solid rgba(79,70,229,0.08) !important;
+        border-radius: .9rem;
+        background: rgba(255,255,255,0.85) !important;
+        backdrop-filter: blur(20px) saturate(1.6);
+        -webkit-backdrop-filter: blur(20px) saturate(1.6);
+        box-shadow: 0 24px 64px rgba(15,23,42,0.18);
+    }
+    .admin-modal .modal-header { border: none; padding: 1.1rem 1.25rem .45rem; }
+    .admin-modal .modal-title { font-weight: 700; color: #566A7F; }
+    .admin-modal .modal-body { padding: .75rem 1.25rem; }
+    .admin-modal .modal-footer { border: none; padding: .75rem 1.25rem 1.1rem; gap: .5rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .admin-mobile-item { transition: none; }
+    }
+</style>
+@endpush
+
+@section('content')
+<x-admin.page-header title="Manage Offices" :subtitle="$offices->total() . ' total'" class="admin-reveal">
+    <x-slot:actions>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addOfficeModal">
+            <i class="bi bi-plus-lg"></i> Add Office
+        </button>
+    </x-slot:actions>
+</x-admin.page-header>
+
+<div class="card admin-reveal admin-busy-target" id="adminOfficesTableCard">
     <div class="card-body" style="padding:0 !important">
-        <div class="d-none d-md-block table-wrap">
-            <table class="table table-hover">
+        <x-admin.table-toolbar
+            title="Office Directory"
+            subtitle="Keep municipal offices updated with location and contact details.">
+            <x-slot:actions>
+                <div class="admin-density-switch">
+                    <button
+                        type="button"
+                        class="admin-density-btn is-active"
+                        data-admin-density-target="#adminOfficesTable"
+                        data-admin-density="comfortable">Comfort</button>
+                    <button
+                        type="button"
+                        class="admin-density-btn"
+                        data-admin-density-target="#adminOfficesTable"
+                        data-admin-density="compact">Compact</button>
+                </div>
+            </x-slot:actions>
+        </x-admin.table-toolbar>
+
+        <div class="admin-chip-filters" data-admin-filter-group>
+            <button type="button" class="admin-chip-filter is-active" data-admin-table-filter data-admin-table-filter-target="#adminOfficesTable" data-admin-filter-field="status" data-admin-filter-value="all">All</button>
+            <button type="button" class="admin-chip-filter" data-admin-table-filter data-admin-table-filter-target="#adminOfficesTable" data-admin-filter-field="status" data-admin-filter-value="active">Active</button>
+            <button type="button" class="admin-chip-filter" data-admin-table-filter data-admin-table-filter-target="#adminOfficesTable" data-admin-filter-field="status" data-admin-filter-value="inactive">Inactive</button>
+        </div>
+
+        <div class="d-none d-md-block admin-table-wrap">
+            <table id="adminOfficesTable" class="table table-hover admin-table-sticky admin-table-interactive" data-admin-table>
                 <thead>
-                    <tr><th>Office Name</th><th>Municipality</th><th>Contact</th><th>Status</th><th>Actions</th></tr>
+                    <tr>
+                        <th data-sort="0" data-sort-type="text">Office Name</th>
+                        <th data-sort="1" data-sort-type="text">Municipality</th>
+                        <th data-sort="2" data-sort-type="text">Contact</th>
+                        <th data-sort="3" data-sort-type="text">Status</th>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @forelse($offices as $office)
-                    <tr>
+                    <tr data-status="{{ $office->is_active ? 'active' : 'inactive' }}">
                         <td>
-                            <div style="font-weight:600">{{ $office->name }}</div>
-                            <div style="font-size:.72rem;color:#9ca3af">{{ $office->address }}</div>
+                            <div class="admin-row-main">{{ $office->name }}</div>
+                            <div class="admin-row-sub">{{ $office->address }}</div>
                         </td>
-                        <td style="color:#6b7280">{{ $office->municipality->name }}</td>
+                        <td class="admin-row-sub">{{ $office->municipality->name }}</td>
                         <td>
-                            <div style="font-size:.78rem">{{ $office->phone ?? '—' }}</div>
-                            <div style="font-size:.72rem;color:#9ca3af">{{ $office->email ?? '' }}</div>
+                            <div style="font-size:.78rem">{{ $office->phone ?? '-' }}</div>
+                            <div class="admin-row-sub">{{ $office->email ?? '' }}</div>
                         </td>
                         <td><span class="sbadge {{ $office->is_active ? 's-approved' : 's-rejected' }}">{{ $office->is_active ? 'Active' : 'Inactive' }}</span></td>
                         <td>
                             <div class="d-flex gap-1">
-                                <button class="btn btn-sm" style="background:#f3f4f6;border:none"
-                                        onclick="editOffice({{ $office->id }}, '{{ addslashes($office->name) }}', {{ $office->municipality_id }}, '{{ $office->is_active ? 1 : 0 }}')">
+                                <button class="btn btn-sm admin-icon-btn"
+                                        onclick='editOffice({{ $office->id }}, @js($office->name), {{ $office->municipality_id }}, {{ $office->is_active ? 1 : 0 }})'>
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <form action="{{ route('admin.offices.destroy', $office) }}" method="POST" onsubmit="return confirm('Delete this office?')">
+                                <form
+                                    action="{{ route('admin.offices.destroy', $office) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Delete this office?')"
+                                    data-admin-busy-target="#adminOfficesTableCard">
                                     @csrf @method('DELETE')
-                                    <button class="btn btn-sm" style="background:#fee2e2;border:none;color:#dc2626"><i class="bi bi-trash"></i></button>
+                                    <button class="btn btn-sm admin-trash-btn"><i class="bi bi-trash"></i></button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" style="text-align:center;padding:2rem;color:#9ca3af">No offices yet.</td></tr>
+                    <tr><td colspan="5" class="admin-empty">No offices yet.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
         <div class="d-md-none">
             @forelse($offices as $office)
-            <div style="padding:.9rem 1rem;border-bottom:1px solid #f3f4f6">
+            <div class="admin-mobile-item">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start">
                     <div style="min-width:0;flex:1">
-                        <div style="font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $office->name }}</div>
-                        <div style="font-size:.74rem;color:#9ca3af">{{ $office->municipality->name }}</div>
-                        <div style="font-size:.73rem;color:#9ca3af;margin-top:2px">{{ $office->phone ?? 'No phone' }}</div>
+                        <div style="font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#566A7F">{{ $office->name }}</div>
+                        <div class="admin-row-sub" style="font-size:.74rem">{{ $office->municipality->name }}</div>
+                        <div class="admin-row-sub" style="font-size:.73rem;margin-top:2px">{{ $office->phone ?? 'No phone' }}</div>
                     </div>
                     <span class="sbadge {{ $office->is_active ? 's-approved' : 's-rejected' }}" style="margin-left:.75rem;flex-shrink:0">{{ $office->is_active ? 'Active' : 'Inactive' }}</span>
                 </div>
             </div>
             @empty
-            <div style="text-align:center;padding:2.5rem;color:#9ca3af"><i class="bi bi-building" style="font-size:2rem;display:block;margin-bottom:.5rem;color:#d1d5db"></i>No offices yet.</div>
+            <div class="admin-empty"><i class="bi bi-building" style="font-size:2rem;display:block;margin-bottom:.5rem;color:#c2cddd"></i>No offices yet.</div>
             @endforelse
         </div>
         @if($offices->hasPages())
-        <div style="padding:.75rem 1rem;border-top:1px solid #f3f4f6">{{ $offices->links() }}</div>
+        <div style="padding:.75rem 1rem;border-top:1px solid var(--es-border-soft)">{{ $offices->links() }}</div>
         @endif
     </div>
 </div>
 
 {{-- Add Office Modal --}}
-<div class="modal fade" id="addOfficeModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:480px">
-        <div class="modal-content" style="border:none;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.15)">
-            <div class="modal-header" style="border:none;padding:1.25rem 1.25rem .5rem">
-                <h6 class="modal-title" style="font-weight:800">Add Government Office</h6>
+<div class="modal fade admin-modal" id="addOfficeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Add Government Office</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('admin.offices.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="modal-body" style="padding:.75rem 1.25rem">
+                <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Municipality *</label>
                         <select name="municipality_id" class="form-select" required>
@@ -105,8 +176,8 @@
                         <div><label class="form-label">Email</label><input type="email" name="email" class="form-control"></div>
                     </div>
                 </div>
-                <div class="modal-footer" style="border:none;padding:.75rem 1.25rem 1.25rem;gap:.5rem">
-                    <button type="button" class="btn btn-sm" style="background:#f3f4f6;border:none;color:#374151" data-bs-dismiss="modal">Cancel</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm admin-plain-btn" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary btn-sm">Create Office</button>
                 </div>
             </form>
@@ -115,16 +186,16 @@
 </div>
 
 {{-- Edit Modal --}}
-<div class="modal fade" id="editOfficeModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:440px">
-        <div class="modal-content" style="border:none;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.15)">
-            <div class="modal-header" style="border:none;padding:1.25rem 1.25rem .5rem">
-                <h6 class="modal-title" style="font-weight:800">Edit Office</h6>
+<div class="modal fade admin-modal narrow" id="editOfficeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Edit Office</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="editOfficeForm" method="POST">
                 @csrf @method('PUT')
-                <div class="modal-body" style="padding:.75rem 1.25rem">
+                <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Municipality *</label>
                         <select name="municipality_id" id="editOfficeMuni" class="form-select" required>
@@ -140,8 +211,8 @@
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer" style="border:none;padding:.75rem 1.25rem 1.25rem;gap:.5rem">
-                    <button type="button" class="btn btn-sm" style="background:#f3f4f6;border:none;color:#374151" data-bs-dismiss="modal">Cancel</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm admin-plain-btn" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
                 </div>
             </form>
@@ -158,6 +229,19 @@ function editOffice(id, name, muniId, active) {
     document.getElementById('editOfficeStatus').value= active;
     new bootstrap.Modal(document.getElementById('editOfficeModal')).show();
 }
+
+(function () {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('quick') !== 'add') return;
+    const quickModalEl = document.getElementById('addOfficeModal');
+    if (!quickModalEl || typeof bootstrap === 'undefined') return;
+
+    bootstrap.Modal.getOrCreateInstance(quickModalEl).show();
+    url.searchParams.delete('quick');
+    const nextQuery = url.searchParams.toString();
+    history.replaceState({}, '', `${url.pathname}${nextQuery ? `?${nextQuery}` : ''}${url.hash}`);
+})();
 </script>
 @endpush
 @endsection
+

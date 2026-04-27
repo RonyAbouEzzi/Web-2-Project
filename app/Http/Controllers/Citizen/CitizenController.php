@@ -6,9 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Events\{AppointmentReminderBroadcast, NewRequestSubmitted, RequestDocumentUploaded};
 use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceRequest};
 use App\Notifications\AppointmentReminder;
+use App\Notifications\PhoneVerificationNotification;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
 use App\Services\{QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Auth, Hash, Storage};
+use Illuminate\Support\Facades\{Auth, DB, Hash, Storage};
+use Illuminate\Support\Str;
 use App\Events\MessageSent;
 use App\Events\MessagesRead;
 
@@ -17,9 +21,17 @@ class CitizenController extends Controller
     // ── Dashboard ─────────────────────────────────────────────────
     public function dashboard()
     {
-        $user     = Auth::user();
+        $user = Auth::user();
         $requests = $user->serviceRequests()->with(['service', 'office'])->latest()->paginate(10);
-        return view('citizen.dashboard', compact('requests'));
+        $upcomingAppointments = $user->appointments()
+            ->with('office')
+            ->whereDate('appointment_date', '>=', now()->toDateString())
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time')
+            ->take(5)
+            ->get();
+
+        return view('citizen.dashboard', compact('requests', 'upcomingAppointments'));
     }
 
     // ── Profile ───────────────────────────────────────────────────
@@ -27,40 +39,122 @@ class CitizenController extends Controller
     {
         $user = Auth::user();
         $requests = $user->serviceRequests()->with(['service', 'office'])->latest()->take(5)->get();
-        return view('citizen.profile', compact('user', 'requests'));
+        $paidRequests = $user->serviceRequests()
+            ->with(['service', 'office'])
+            ->where('payment_status', 'paid')
+            ->latest('updated_at')
+            ->take(5)
+            ->get();
+
+        return view('citizen.profile', compact('user', 'requests', 'paidRequests'));
     }
 
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
         $data = $request->validate([
-            'name'         => 'required|string|max:100',
-            'phone'        => 'nullable|string|max:20',
-            'national_id'  => 'required|string|max:20',
-            'national_id_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'password'     => 'nullable|min:8|confirmed',
+            'password' => 'required|min:8|confirmed',
         ]);
 
-        $user->name = $data['name'];
-        $user->phone = $data['phone'] ?? $user->phone;
-        $user->national_id = $data['national_id'];
-
-        if ($request->hasFile('national_id_document')) {
-            $path = $request->file('national_id_document')->store('id_documents', 'private');
-
-            if (filled($user->id_document)) {
-                Storage::disk('private')->delete($user->id_document);
-            }
-
-            $user->id_document = $path;
-        }
-
-        if (!empty($data['password'])) {
-            $user->password = Hash::make($data['password']);
-        }
+        $user->password = Hash::make($data['password']);
         $user->save();
 
-        return back()->with('success', 'Profile updated successfully.');
+        return back()->with('success', 'Password updated successfully.');
+    }
+
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        $user = Auth::user();
+
+        // Delete old avatar only if it's a local upload — OAuth avatars are
+        // full URLs (e.g. https://lh3.googleusercontent.com/...) which the
+        // public disk cannot resolve.
+        if ($user->avatar && !Str::startsWith($user->avatar, ['http://', 'https://'])) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->avatar = $path;
+        $user->save();
+
+        return back()->with('success', 'Profile photo updated!');
+    }
+
+    public function firebaseVerifyPhone(Request $request)
+    {
+        $data = $request->validate(['phone' => 'required|string|max:20']);
+
+        $user = Auth::user();
+        $user->phone             = $data['phone'];
+        $user->phone_verified_at = now();
+        $user->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function sendPhoneOtp(Request $request)
+    {
+        $data = $request->validate(['phone' => 'required|string|max:20']);
+        $phone = $data['phone'];
+
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        Cache::put('phone_otp_' . Auth::id(), [
+            'otp'   => $otp,
+            'phone' => $phone,
+        ], now()->addMinutes(5));
+
+        Notification::route('sms', $phone)
+            ->notify(new PhoneVerificationNotification($otp));
+
+        return back()->with('otp_sent', true);
+    }
+
+    public function verifyPhoneOtp(Request $request)
+    {
+        $data   = $request->validate(['otp' => 'required|string|size:6']);
+        $cached = Cache::get('phone_otp_' . Auth::id());
+
+        if (!$cached || $cached['otp'] !== $data['otp']) {
+            return back()->withErrors(['otp' => 'Invalid or expired code. Please try again.'])->with('otp_sent', true);
+        }
+
+        $user = Auth::user();
+        $user->phone            = $cached['phone'];
+        $user->phone_verified_at = now();
+        $user->save();
+
+        Cache::forget('phone_otp_' . Auth::id());
+
+        return back()->with('success', 'Phone number verified successfully!');
+    }
+
+    // ── My Appointments ──────────────────────────────────────────
+    public function myAppointments()
+    {
+        $appointments = Auth::user()->appointments()
+            ->with(['office', 'request.service'])
+            ->orderByRaw("CASE WHEN appointment_date >= CURRENT_DATE THEN 0 ELSE 1 END")
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time')
+            ->paginate(15);
+
+        return view('citizen.appointments.index', compact('appointments'));
+    }
+
+    // ── My Payments ──────────────────────────────────────────────
+    public function myPayments()
+    {
+        $requests = Auth::user()->serviceRequests()
+            ->with(['service', 'office'])
+            ->latest()
+            ->paginate(15);
+
+        return view('citizen.payments.index', compact('requests'));
     }
 
     // ── Browse Services ───────────────────────────────────────────
@@ -113,7 +207,19 @@ class CitizenController extends Controller
     public function showService(Service $service)
     {
         $service->load('office');
-        return view('citizen.services.show', compact('service'));
+
+        $convertedPrices = [];
+        $baseCurrency = $service->currency ?? 'USD';
+        $targets = array_diff(['USD', 'LBP', 'EUR'], [$baseCurrency]);
+        $paymentService = app(PaymentService::class);
+
+        foreach ($targets as $currency) {
+            $convertedPrices[$currency] = $paymentService->convertCurrency(
+                $service->price, $baseCurrency, $currency
+            );
+        }
+
+        return view('citizen.services.show', compact('service', 'convertedPrices'));
     }
 
     public function submitRequest(Request $request, Service $service)
@@ -124,28 +230,33 @@ class CitizenController extends Controller
             'documents.*'   => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
 
-        $serviceRequest = ServiceRequest::create([
-            'reference_number' => ServiceRequest::generateReference(),
-            'citizen_id'       => Auth::id(),
-            'service_id'       => $service->id,
-            'office_id'        => $service->office_id,
-            'notes'            => $request->notes,
-            'amount_paid'      => $service->price,
-        ]);
-
-        foreach ($request->file('documents') as $file) {
-            $path = $file->store('request_documents/' . $serviceRequest->id, 'private');
-            $document = $serviceRequest->documents()->create([
-                'file_path'     => $path,
-                'original_name' => $file->getClientOriginalName(),
-                'uploaded_by'   => 'citizen',
+        $serviceRequest = DB::transaction(function () use ($request, $service) {
+            $serviceRequest = ServiceRequest::create([
+                'reference_number' => ServiceRequest::generateReference(),
+                'citizen_id'       => Auth::id(),
+                'service_id'       => $service->id,
+                'office_id'        => $service->office_id,
+                'notes'            => $request->notes,
+                'amount_paid'      => $service->price,
             ]);
 
-            event(new RequestDocumentUploaded($serviceRequest, $document));
-        }
+            foreach ($request->file('documents') as $file) {
+                $path = $file->store('request_documents/' . $serviceRequest->id, 'private');
+                $document = $serviceRequest->documents()->create([
+                    'file_path'     => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'uploaded_by'   => 'citizen',
+                ]);
 
-        $qrPath = app(QrCodeService::class)->generate($serviceRequest);
-        $serviceRequest->update(['qr_code' => $qrPath]);
+                event(new RequestDocumentUploaded($serviceRequest, $document));
+            }
+
+            $qrPath = app(QrCodeService::class)->generate($serviceRequest);
+            $serviceRequest->update(['qr_code' => $qrPath]);
+
+            return $serviceRequest;
+        });
+
         event(new NewRequestSubmitted($serviceRequest));
 
         return redirect()->route('citizen.payment', $serviceRequest)
@@ -167,14 +278,78 @@ class CitizenController extends Controller
 
         $result = app(PaymentService::class)->process($serviceRequest, $data['payment_method'], $request->all());
 
+        if (!$result['success']) {
+            return back()->withErrors(['payment' => $result['message']]);
+        }
+
+        // Card: redirect to Stripe Checkout — payment confirmed on return
+        if ($data['payment_method'] === 'card') {
+            $serviceRequest->update([
+                'payment_method' => 'card',
+                'transaction_id' => $result['session_id'],
+            ]);
+            return redirect()->away($result['redirect_url']);
+        }
+
+        // Crypto: show wallet address page for manual confirmation
+        $serviceRequest->update([
+            'payment_method' => 'crypto',
+            'transaction_id' => $result['transaction_id'],
+        ]);
+
+        return view('citizen.payment-crypto', [
+            'serviceRequest'  => $serviceRequest,
+            'wallet_address'  => $result['wallet_address'],
+            'crypto_amount'   => $result['crypto_amount'],
+            'crypto_currency' => $result['crypto_currency'],
+        ]);
+    }
+
+    public function paymentSuccess(Request $request, ServiceRequest $serviceRequest)
+    {
+        abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
+
+        $sessionId = $request->query('session_id');
+        $verified  = $sessionId
+            ? app(PaymentService::class)->verifyStripeSession($sessionId, $serviceRequest)
+            : ['success' => false, 'message' => 'No session ID provided.'];
+
+        if ($verified['success']) {
+            $serviceRequest->update([
+                'payment_status' => 'paid',
+                'transaction_id' => $verified['transaction_id'],
+            ]);
+            return redirect()->route('citizen.requests.show', $serviceRequest)
+                ->with('success', 'Payment successful! Your request is now being processed.');
+        }
+
+        return redirect()->route('citizen.payment', $serviceRequest)
+            ->withErrors(['payment' => $verified['message']]);
+    }
+
+    public function paymentCancel(ServiceRequest $serviceRequest)
+    {
+        abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
+
+        return redirect()->route('citizen.payment', $serviceRequest)
+            ->with('warning', 'Payment was cancelled. You can try again.');
+    }
+
+    public function confirmCryptoPayment(Request $request, ServiceRequest $serviceRequest)
+    {
+        abort_unless($serviceRequest->citizen_id === Auth::id(), 403);
+
+        $data = $request->validate(['tx_hash' => 'required|string|max:200']);
+
+        $result = app(PaymentService::class)->confirmCrypto($serviceRequest, $data['tx_hash']);
+
         if ($result['success']) {
             $serviceRequest->update([
                 'payment_status' => 'paid',
-                'payment_method' => $data['payment_method'],
                 'transaction_id' => $result['transaction_id'],
             ]);
             return redirect()->route('citizen.requests.show', $serviceRequest)
-                            ->with('success', 'Payment successful! Your request is now being processed.');
+                ->with('success', 'Crypto payment confirmed! Your request is now being processed.');
         }
 
         return back()->withErrors(['payment' => $result['message']]);
@@ -189,7 +364,24 @@ class CitizenController extends Controller
             $query->where('status', $status);
         }
 
+        if ($paymentStatus = $request->payment_status) {
+            if ($paymentStatus === 'unpaid') {
+                $query->where('payment_status', '!=', 'paid');
+            } else {
+                $query->where('payment_status', $paymentStatus);
+            }
+        }
+
+        if ($search = trim((string) $request->search)) {
+            $query->where(function ($builder) use ($search) {
+                $builder->where('reference_number', 'like', "%{$search}%")
+                    ->orWhereHas('service', fn ($serviceQuery) => $serviceQuery->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('office', fn ($officeQuery) => $officeQuery->where('name', 'like', "%{$search}%"));
+            });
+        }
+
         $requests = $query->paginate(15);
+        $requests->appends($request->query());
         return view('citizen.requests.index', compact('requests'));
     }
 

@@ -135,11 +135,15 @@ class OfficeController extends Controller
 
         if ($request->status) $query->where('status', $request->status);
         if ($request->search) {
-            $query->where('reference_number', 'like', "%{$request->search}%")
-                ->orWhereHas('citizen', fn ($q) => $q->where('name', 'like', "%{$request->search}%"));
+            $search = trim((string) $request->search);
+            $query->where(function ($builder) use ($search) {
+                $builder->where('reference_number', 'like', "%{$search}%")
+                    ->orWhereHas('citizen', fn ($citizenQuery) => $citizenQuery->where('name', 'like', "%{$search}%"));
+            });
         }
 
         $requests = $query->latest()->paginate(20);
+        $requests->appends($request->query());
         return view('office.requests.index', compact('requests'));
     }
 

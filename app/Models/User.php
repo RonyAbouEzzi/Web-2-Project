@@ -7,13 +7,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'phone', 'national_id',
+        'name', 'email', 'password', 'role', 'phone', 'phone_verified_at', 'national_id',
         'id_document',          // column in migration
         'is_active',
         'two_factor_secret',    // column in migration
@@ -94,5 +96,18 @@ class User extends Authenticatable
     public function routeNotificationForSms(): ?string
     {
         return $this->phone;
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (blank($this->avatar)) {
+            return null;
+        }
+
+        if (Str::startsWith($this->avatar, ['http://', 'https://'])) {
+            return $this->avatar;
+        }
+
+        return Storage::url($this->avatar);
     }
 }

@@ -1,132 +1,194 @@
 @extends('layouts.app')
-@section('title','My Profile')
-@section('page-title','My Profile')
+@section('title', 'My Profile')
+@section('page-title', 'My Profile')
 
 @section('content')
-
 @php
     $missingFields = $user->missingCitizenProfileFields();
+    $allRequests = $user->serviceRequests;
+    $totalRequests = $allRequests->count();
+    $completedRequests = $allRequests->where('status', 'completed')->count();
+    $pendingRequests = $allRequests->whereIn('status', ['pending', 'in_review', 'missing_documents', 'approved'])->count();
+    $paidRequests = $paidRequests
+        ?? $user->serviceRequests()->with(['service', 'office'])->where('payment_status', 'paid')->latest('updated_at')->take(5)->get();
 @endphp
 
-<div style="display:grid;grid-template-columns:1fr;gap:1.25rem" class="profile-grid">
-
+<div class="citizen-profile-grid">
     @if(!empty($missingFields))
-    <div class="card" style="border-color:#F59E0B;background:#FFFBEB">
-        <div class="card-body" style="display:flex;align-items:flex-start;gap:.75rem">
-            <i class="bi bi-exclamation-triangle-fill" style="color:#B45309;font-size:1rem;margin-top:.1rem"></i>
-            <div>
-                <div style="font-size:.88rem;font-weight:700;color:#92400E;margin-bottom:.18rem">Complete your profile to submit requests</div>
-                <div style="font-size:.79rem;color:#B45309">
-                    Missing:
-                    {{ implode(', ', $missingFields) }}.
-                    Fill the fields below, then save.
+        <div class="card citizen-profile-alert citizen-reveal" data-citizen-reveal>
+            <div class="card-body">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>
+                    <div class="citizen-profile-alert-title">Complete your profile to submit requests</div>
+                    <div class="citizen-profile-alert-copy">
+                        Missing: {{ implode(', ', $missingFields) }}. Fill the fields below, then save.
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 
-    {{-- Profile Header Card --}}
-    <div class="card">
-        <div class="card-body" style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap">
-            <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#60A5FA);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-disp);font-size:1.65rem;font-weight:800;flex-shrink:0;box-shadow:0 8px 24px rgba(26,86,219,.3);border:3px solid #fff;outline:3px solid var(--blue-100)">
-                {{ strtoupper(substr($user->name,0,1)) }}
+    <div class="card citizen-profile-head citizen-reveal" data-citizen-reveal>
+        <div class="card-body">
+            <div class="citizen-profile-avatar-wrap">
+                @if($user->avatar_url)
+                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="citizen-profile-avatar-img" referrerpolicy="no-referrer">
+                @else
+                    <div class="citizen-profile-avatar">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </div>
+                @endif
+                <label class="citizen-avatar-edit" for="avatar-input" title="Change photo">
+                    <i class="bi bi-camera-fill"></i>
+                </label>
+                <form id="avatar-form" action="{{ route('citizen.profile.avatar') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="file" id="avatar-input" name="avatar" accept="image/jpeg,image/png,image/webp" hidden>
+                </form>
             </div>
-            <div style="flex:1;min-width:0">
-                <h2 style="font-family:var(--font-disp);font-size:1.15rem;font-weight:800;color:var(--ink-900);margin:0 0 .15rem;letter-spacing:-.02em">{{ $user->name }}</h2>
-                <div style="font-size:.8rem;color:var(--ink-400);margin-bottom:.5rem">{{ $user->email }}</div>
-                <div style="display:flex;flex-wrap:wrap;gap:.4rem">
-                    <span class="sbadge s-active"><i class="bi bi-person-check" style="margin-right:.2rem"></i> Citizen Account</span>
-                    @if($user->phone)<span style="background:var(--ink-100);color:var(--ink-600);padding:.22rem .65rem;border-radius:99px;font-size:.69rem;font-weight:600"><i class="bi bi-phone me-1"></i>{{ $user->phone }}</span>@endif
-                    <span style="background:var(--ink-100);color:var(--ink-600);padding:.22rem .65rem;border-radius:99px;font-size:.69rem;font-weight:600"><i class="bi bi-calendar3 me-1"></i>Joined {{ $user->created_at->format('M Y') }}</span>
+            <div class="citizen-profile-main">
+                <h2 class="citizen-profile-name">{{ $user->name }}</h2>
+                <div class="citizen-profile-email">{{ $user->email }}</div>
+                <div class="citizen-profile-badges">
+                    <span class="citizen-badge is-primary"><i class="bi bi-person-check me-1"></i>Citizen Account</span>
+                    @if($user->phone)
+                        <span class="citizen-badge"><i class="bi bi-phone me-1"></i>{{ $user->phone }}</span>
+                    @endif
+                    <span class="citizen-badge"><i class="bi bi-calendar3 me-1"></i>Joined {{ $user->created_at->format('M Y') }}</span>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Quick Stats --}}
-    @php
-        $totalRequests = $user->serviceRequests()->count();
-        $completedRequests = $user->serviceRequests()->where('status','completed')->count();
-        $pendingRequests = $user->serviceRequests()->whereIn('status',['pending','in_review'])->count();
-    @endphp
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem" class="stats-mini">
-        <div class="stat-card" style="--stat-color:var(--blue-50)">
-            <div class="stat-icon" style="background:var(--blue-50);color:var(--primary)"><i class="bi bi-file-text"></i></div>
-            <div class="stat-val">{{ $totalRequests }}</div>
-            <div class="stat-lbl">Total Requests</div>
+    <div class="citizen-stats-mini">
+        <div class="card citizen-mini-card citizen-reveal" data-citizen-reveal>
+            <div class="card-body">
+                <div class="citizen-mini-icon is-info"><i class="bi bi-file-text"></i></div>
+                <div class="citizen-mini-value" data-citizen-counter="{{ $totalRequests }}">{{ $totalRequests }}</div>
+                <div class="citizen-mini-label">Total Requests</div>
+            </div>
         </div>
-        <div class="stat-card" style="--stat-color:var(--emerald-lt)">
-            <div class="stat-icon" style="background:var(--emerald-lt);color:var(--emerald)"><i class="bi bi-check-circle"></i></div>
-            <div class="stat-val">{{ $completedRequests }}</div>
-            <div class="stat-lbl">Completed</div>
+        <div class="card citizen-mini-card citizen-reveal" data-citizen-reveal>
+            <div class="card-body">
+                <div class="citizen-mini-icon is-success"><i class="bi bi-check-circle"></i></div>
+                <div class="citizen-mini-value" data-citizen-counter="{{ $completedRequests }}">{{ $completedRequests }}</div>
+                <div class="citizen-mini-label">Completed</div>
+            </div>
         </div>
-        <div class="stat-card" style="--stat-color:var(--amber-lt)">
-            <div class="stat-icon" style="background:var(--amber-lt);color:var(--amber)"><i class="bi bi-hourglass-split"></i></div>
-            <div class="stat-val">{{ $pendingRequests }}</div>
-            <div class="stat-lbl">In Progress</div>
+        <div class="card citizen-mini-card citizen-reveal" data-citizen-reveal>
+            <div class="card-body">
+                <div class="citizen-mini-icon is-amber"><i class="bi bi-hourglass-split"></i></div>
+                <div class="citizen-mini-value" data-citizen-counter="{{ $pendingRequests }}">{{ $pendingRequests }}</div>
+                <div class="citizen-mini-label">In Progress</div>
+            </div>
         </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr;gap:1.25rem" class="profile-cols">
-
-        {{-- Edit Profile Form --}}
-        <div class="card">
+    <div class="citizen-profile-cols">
+        <div class="card citizen-reveal" data-citizen-reveal>
             <div class="card-header">
-                <span class="card-title"><i class="bi bi-person-gear me-2" style="color:var(--primary)"></i>Account Information</span>
+                <span class="card-title"><i class="bi bi-person-gear me-2 text-primary"></i>Account Information</span>
             </div>
             <div class="card-body">
                 <form action="{{ route('citizen.profile.update') }}" method="POST" enctype="multipart/form-data" novalidate>
-                    @csrf @method('PUT')
-                    <div style="display:grid;grid-template-columns:1fr;gap:1rem" class="form-grid">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="citizen-form-grid">
                         <div>
                             <label class="form-label">Full Name</label>
-                            <div class="input-icon-wrap">
-                                <i class="bi bi-person ii"></i>
-                                <input type="text" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                            <div class="citizen-input-wrap">
+                                <i class="bi bi-person citizen-input-icon"></i>
+                                <input type="text" class="form-control citizen-disabled-input" value="{{ $user->name }}" disabled>
                             </div>
+                            <div class="form-text">Name cannot be changed. Contact support if needed.</div>
                         </div>
                         <div>
                             <label class="form-label">Email Address</label>
-                            <div class="input-icon-wrap">
-                                <i class="bi bi-envelope ii"></i>
-                                <input type="email" class="form-control" value="{{ $user->email }}" disabled
-                                       style="background:var(--ink-50);cursor:not-allowed;opacity:.7">
+                            <div class="citizen-input-wrap">
+                                <i class="bi bi-envelope citizen-input-icon"></i>
+                                <input type="email" class="form-control citizen-disabled-input" value="{{ $user->email }}" disabled>
                             </div>
                             <div class="form-text">Email cannot be changed. Contact support if needed.</div>
                         </div>
                         <div>
-                            <label class="form-label">Phone Number</label>
-                            <div class="input-icon-wrap">
-                                <i class="bi bi-phone ii"></i>
-                                <input type="tel" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="+961 xx xxx xxx">
-                            </div>
-                        </div>
-                        <div>
                             <label class="form-label">National ID Number</label>
-                            <div class="input-icon-wrap">
-                                <i class="bi bi-credit-card-2-front ii"></i>
-                                <input type="text" id="national_id" name="national_id" class="form-control" value="{{ old('national_id', $user->national_id) }}" placeholder="LB-XXXXXXXXX" required>
+                            <div class="citizen-input-wrap">
+                                <i class="bi bi-credit-card-2-front citizen-input-icon"></i>
+                                <input type="text" class="form-control citizen-disabled-input citizen-mono" value="{{ $user->national_id ?? 'Not set' }}" disabled>
                             </div>
-                            <div class="form-text">Required to complete your account verification.</div>
+                            <div class="form-text">National ID cannot be changed. Contact support if needed.</div>
                         </div>
                         <div>
-                            <label class="form-label">National ID Document <span style="font-weight:400;color:var(--ink-400)">(photo or scan)</span></label>
-                            <div class="upload-zone" id="idUploadZone" onclick="document.getElementById('national_id_doc').click()">
-                                <div class="upload-icon"><i class="bi bi-cloud-upload"></i></div>
-                                <div class="upload-title">Click to upload your ID document</div>
-                                <div class="upload-sub">JPG, PNG or PDF · Max 5MB</div>
-                                <input type="file" id="national_id_doc" name="national_id_document" accept=".jpg,.jpeg,.png,.pdf">
-                            </div>
-                            <div class="upload-preview" id="uploadPreview">
-                                <i class="bi bi-file-earmark-check"></i>
-                                <span id="uploadName">File selected</span>
-                            </div>
-                            <div id="ocrStatus" style="display:none;margin-top:.55rem;font-size:.75rem;border-radius:8px;padding:.45rem .6rem;"></div>
+                            <label class="form-label">National ID Document</label>
+                            @if($user->id_document)
+                                <div class="citizen-id-verified">
+                                    <i class="bi bi-patch-check-fill"></i>
+                                    <span>ID document on file — verified at registration</span>
+                                </div>
+                            @else
+                                <div class="citizen-id-missing">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    <span>No ID document uploaded. Contact support.</span>
+                                </div>
+                            @endif
                         </div>
-                        <div style="border-top:1px solid var(--ink-100);padding-top:1rem">
-                            <label class="form-label" style="font-size:.82rem;color:var(--ink-500);font-weight:500">Change Password <span style="font-weight:400">(leave blank to keep current)</span></label>
-                            <div style="display:grid;grid-template-columns:1fr;gap:.65rem" class="pw-grid">
+                        {{-- Phone Verification (Firebase) --}}
+                        <div>
+                            <label class="form-label d-flex align-items-center gap-2">
+                                Phone Number
+                                @if($user->phone_verified_at)
+                                    <span class="citizen-badge is-success" style="font-size:.65rem"><i class="bi bi-patch-check-fill me-1"></i>Verified</span>
+                                @elseif($user->phone)
+                                    <span class="citizen-badge" style="font-size:.65rem;color:#B45309;background:#FFFBEB;border-color:#FDE68A"><i class="bi bi-exclamation-circle me-1"></i>Not verified</span>
+                                @endif
+                            </label>
+
+                            {{-- Step 1: Enter phone + Send Code --}}
+                            <div id="fb-step-1">
+                                <div class="d-flex gap-2">
+                                    <div class="citizen-input-wrap flex-grow-1">
+                                        <i class="bi bi-phone citizen-input-icon"></i>
+                                        <input type="tel" id="fb-phone-input" class="form-control"
+                                               value="{{ $user->phone }}" placeholder="+96170551180">
+                                    </div>
+                                    <button type="button" id="fb-send-btn" class="btn btn-outline-primary btn-sm text-nowrap">
+                                        <i class="bi bi-send me-1"></i>Send Code
+                                    </button>
+                                </div>
+                                <div class="form-text">No spaces — e.g. +96170551180</div>
+                                <div id="recaptcha-container"></div>
+                                <div id="fb-send-error" class="text-danger mt-1" style="font-size:.75rem;display:none"></div>
+                            </div>
+
+                            {{-- Step 2: Enter OTP --}}
+                            <div id="fb-step-2" class="citizen-otp-box d-none">
+                                <div class="citizen-otp-info">
+                                    <i class="bi bi-phone-vibrate"></i>
+                                    <span>Code sent! Enter the 6-digit code from your SMS.</span>
+                                </div>
+                                <div class="d-flex gap-2 mt-2">
+                                    <input type="text" id="fb-otp-input" class="form-control citizen-otp-input"
+                                           maxlength="6" placeholder="_ _ _ _ _ _" autocomplete="one-time-code" inputmode="numeric">
+                                    <button type="button" id="fb-verify-btn" class="btn btn-success btn-sm text-nowrap">
+                                        <i class="bi bi-check2 me-1"></i>Verify
+                                    </button>
+                                </div>
+                                <div id="fb-otp-error" class="text-danger mt-1" style="font-size:.75rem;display:none"></div>
+                                <button type="button" id="fb-restart-btn" style="font-size:.73rem;color:#64748B;background:none;border:none;padding:0;margin-top:.3rem;cursor:pointer">
+                                    Wrong number? Start over
+                                </button>
+                            </div>
+
+                            {{-- Step 3: Success flash --}}
+                            <div id="fb-step-3" class="citizen-id-verified d-none">
+                                <i class="bi bi-patch-check-fill"></i>
+                                <span>Phone verified! Refreshing...</span>
+                            </div>
+                        </div>
+                        <div class="citizen-password-zone">
+                            <label class="form-label citizen-password-label">Change Password <span class="fw-normal">(leave blank to keep current)</span></label>
+                            <div class="citizen-password-grid">
                                 <div>
                                     <label class="form-label">New Password</label>
                                     <input type="password" name="password" class="form-control" placeholder="At least 8 characters" autocomplete="new-password">
@@ -138,134 +200,660 @@
                             </div>
                         </div>
                     </div>
-                    <div style="margin-top:1.25rem">
+
+                    <div class="mt-4">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle"></i> Save Changes
+                            <i class="bi bi-check-circle me-1"></i> Save Changes
                         </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        {{-- ID Info Card --}}
-        <div class="card">
+        <div class="card citizen-reveal" data-citizen-reveal>
             <div class="card-header">
-                <span class="card-title"><i class="bi bi-card-text me-2" style="color:var(--primary)"></i>Identity Information</span>
+                <span class="card-title"><i class="bi bi-card-text me-2 text-primary"></i>Identity Information</span>
             </div>
             <div class="card-body">
-                <div class="info-row">
-                    <span class="ir-label">National ID</span>
-                    <span class="ir-value font-mono" style="font-size:.82rem;letter-spacing:.04em">{{ $user->national_id ?? '—' }}</span>
+                <div class="citizen-info-row">
+                    <span class="citizen-info-label">National ID</span>
+                    <span class="citizen-info-value citizen-mono">{{ $user->national_id ?? '-' }}</span>
                 </div>
-                <div class="info-row">
-                    <span class="ir-label">Account Type</span>
-                    <span class="ir-value">Citizen</span>
+                <div class="citizen-info-row">
+                    <span class="citizen-info-label">Account Type</span>
+                    <span class="citizen-info-value">Citizen</span>
                 </div>
-                <div class="info-row">
-                    <span class="ir-label">Account Status</span>
-                    <span class="sbadge s-{{ $user->is_active ? 'active' : 'inactive' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
+                <div class="citizen-info-row">
+                    <span class="citizen-info-label">Account Status</span>
+                    <span class="citizen-badge {{ $user->is_active ? 'is-success' : 'is-muted' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
                 </div>
-                <div class="info-row">
-                    <span class="ir-label">Member Since</span>
-                    <span class="ir-value">{{ $user->created_at->format('F d, Y') }}</span>
+                <div class="citizen-info-row">
+                    <span class="citizen-info-label">Member Since</span>
+                    <span class="citizen-info-value">{{ $user->created_at->format('F d, Y') }}</span>
                 </div>
                 @if($user->id_document)
-                <div class="info-row">
-                    <span class="ir-label">ID Document</span>
-                    <span class="sbadge s-approved"><i class="bi bi-check2" style="margin-right:.2rem"></i>Uploaded</span>
-                </div>
+                    <div class="citizen-info-row">
+                        <span class="citizen-info-label">ID Document</span>
+                        <span class="citizen-badge is-success"><i class="bi bi-check2 me-1"></i>Uploaded</span>
+                    </div>
                 @endif
             </div>
         </div>
 
-        {{-- Recent Activity --}}
-        <div class="card">
+        <div class="card citizen-reveal" data-citizen-reveal>
             <div class="card-header">
-                <span class="card-title"><i class="bi bi-clock-history me-2" style="color:var(--primary)"></i>Recent Activity</span>
-                <a href="{{ route('citizen.requests') }}" class="btn btn-sm btn-ghost">View All</a>
+                <span class="card-title"><i class="bi bi-credit-card me-2 text-primary"></i>Payment History</span>
             </div>
-            <div class="card-body p0">
-                @forelse($requests as $req)
-                <a href="{{ route('citizen.requests.show', $req) }}"
-                   style="display:flex;align-items:center;gap:.85rem;padding:.85rem 1.2rem;border-bottom:1px solid var(--ink-100);text-decoration:none;color:inherit;transition:background .12s"
-                   onmouseover="this.style.background='var(--ink-50)'" onmouseout="this.style.background='transparent'">
-                    <div style="width:36px;height:36px;border-radius:9px;background:var(--primary-lt);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0">
-                        <i class="bi bi-file-text"></i>
-                    </div>
-                    <div style="flex:1;min-width:0">
-                        <div style="font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $req->service->name }}</div>
-                        <div style="font-size:.71rem;color:var(--ink-400)">{{ $req->office->name }} · {{ $req->created_at->diffForHumans() }}</div>
-                    </div>
-                    <span class="sbadge s-{{ $req->status }}" style="flex-shrink:0">{{ ucfirst(str_replace('_',' ',$req->status)) }}</span>
-                </a>
+            <div class="card-body p-0">
+                @forelse($paidRequests as $pr)
+                    <a href="{{ route('citizen.requests.show', $pr) }}" class="citizen-activity-link">
+                        <div class="citizen-activity-icon is-success">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="citizen-activity-main">
+                            <div class="citizen-activity-title">{{ $pr->service->name }}</div>
+                            <div class="citizen-activity-sub">{{ $pr->office->name }} &middot; {{ ucfirst($pr->payment_method ?? 'card') }} &middot; {{ $pr->updated_at->format('M d, Y') }}</div>
+                        </div>
+                        <div class="citizen-activity-amount">${{ number_format($pr->amount_paid, 2) }}</div>
+                    </a>
                 @empty
-                <div class="empty-state" style="padding:2rem 1rem">
-                    <div class="empty-icon"><i class="bi bi-clock-history"></i></div>
-                    <p style="font-size:.82rem;color:var(--ink-400)">No recent activity.</p>
-                </div>
+                    <div class="citizen-panel-empty">
+                        <i class="bi bi-credit-card"></i>
+                        <p>No payments yet.</p>
+                    </div>
                 @endforelse
             </div>
         </div>
 
+        <div class="card citizen-reveal" data-citizen-reveal>
+            <div class="card-header d-flex align-items-center justify-content-between gap-2">
+                <span class="card-title"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Activity</span>
+                <a href="{{ route('citizen.requests') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @forelse($requests as $req)
+                    <a href="{{ route('citizen.requests.show', $req) }}" class="citizen-activity-link">
+                        <div class="citizen-activity-icon is-primary">
+                            <i class="bi bi-file-text"></i>
+                        </div>
+                        <div class="citizen-activity-main">
+                            <div class="citizen-activity-title">{{ $req->service->name }}</div>
+                            <div class="citizen-activity-sub">{{ $req->office->name }} &middot; {{ $req->created_at->diffForHumans() }}</div>
+                        </div>
+                        <x-status-pill :status="$req->status" />
+                    </a>
+                @empty
+                    <div class="citizen-panel-empty">
+                        <i class="bi bi-clock-history"></i>
+                        <p>No recent activity.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
     </div>
 </div>
 
 @push('styles')
 <style>
-.upload-zone {
-    border: 2px dashed var(--ink-200);
-    border-radius: 10px;
+/* ═══════════════════════════════════════════════════════
+   CITIZEN PROFILE — PREMIUM STYLES
+   ═══════════════════════════════════════════════════════ */
+
+body.es-role-citizen .citizen-profile-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+body.es-role-citizen .citizen-profile-alert {
+    border-color: rgba(252,211,77,0.5);
+    background: rgba(255,251,235,0.7);
+    backdrop-filter: blur(8px);
+}
+
+body.es-role-citizen .citizen-profile-alert .card-body {
+    display: flex;
+    align-items: flex-start;
+    gap: .68rem;
+}
+
+body.es-role-citizen .citizen-profile-alert i {
+    color: #B45309;
+    font-size: 1rem;
+    margin-top: .05rem;
+}
+
+body.es-role-citizen .citizen-profile-alert-title {
+    font-size: .9rem;
+    font-weight: 700;
+    color: #92400E;
+    margin-bottom: .18rem;
+}
+
+body.es-role-citizen .citizen-profile-alert-copy {
+    font-size: .79rem;
+    color: #9A3412;
+}
+
+body.es-role-citizen .citizen-profile-head .card-body {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    padding: 1.5rem;
+}
+
+/* ── Avatar with animated gradient ring ── */
+body.es-role-citizen .citizen-profile-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+body.es-role-citizen .citizen-profile-avatar-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 999px;
+    background: conic-gradient(from 0deg, #0EA5E9, #6366F1, #8B5CF6, #EC4899, #F97316, #0EA5E9);
+    animation: citizenAvatarSpin 4s linear infinite;
+    z-index: 0;
+}
+
+@keyframes citizenAvatarSpin {
+    to { transform: rotate(360deg); }
+}
+
+body.es-role-citizen .citizen-profile-avatar {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%);
+    border: 3px solid #fff;
+    box-shadow: 0 12px 28px rgba(14,165,233,0.25);
+    position: relative;
+    z-index: 1;
+}
+
+body.es-role-citizen .citizen-profile-avatar-img {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 12px 28px rgba(14,165,233,0.25);
+    position: relative;
+    z-index: 1;
+}
+
+body.es-role-citizen .citizen-avatar-edit {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0EA5E9, #6366F1);
+    color: #fff;
+    font-size: .7rem;
+    cursor: pointer;
+    border: 2.5px solid #fff;
+    box-shadow: 0 3px 10px rgba(14,165,233,0.3);
+    transition: all .25s cubic-bezier(.4,0,.2,1);
+    z-index: 2;
+}
+
+body.es-role-citizen .citizen-avatar-edit:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 16px rgba(14,165,233,0.4);
+}
+
+body.es-role-citizen .citizen-profile-main {
+    flex: 1;
+    min-width: 0;
+}
+
+body.es-role-citizen .citizen-profile-name {
+    margin: 0 0 .15rem;
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #0F172A 0%, #0EA5E9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.es-role-citizen .citizen-profile-email {
+    font-size: .84rem;
+    color: #64748B;
+    margin-bottom: .65rem;
+}
+
+body.es-role-citizen .citizen-profile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+}
+
+body.es-role-citizen .citizen-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .25rem .65rem;
+    border-radius: 999px;
+    font-size: .69rem;
+    font-weight: 600;
+    color: #475569;
+    background: rgba(238,242,255,0.6);
+    border: 1px solid rgba(226,232,240,0.6);
+    backdrop-filter: blur(4px);
+}
+
+body.es-role-citizen .citizen-badge.is-primary {
+    color: #0284C7;
+    background: rgba(224,242,254,0.5);
+    border-color: rgba(14,165,233,0.2);
+}
+
+body.es-role-citizen .citizen-badge.is-success {
+    color: #047857;
+    background: rgba(236,253,245,0.5);
+    border-color: rgba(16,185,129,0.2);
+}
+
+body.es-role-citizen .citizen-badge.is-muted {
+    color: #64748B;
+    background: rgba(241,245,249,0.5);
+    border-color: rgba(226,232,240,0.5);
+}
+
+/* ── Stat cards with gradient icons ── */
+body.es-role-citizen .citizen-stats-mini {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+body.es-role-citizen .citizen-mini-card .card-body {
     padding: 1rem;
     text-align: center;
+}
+
+body.es-role-citizen .citizen-mini-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(14,165,233,0.1);
+}
+
+body.es-role-citizen .citizen-mini-icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: .7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .95rem;
+    margin-bottom: .55rem;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+body.es-role-citizen .citizen-mini-icon.is-info {
+    background: linear-gradient(135deg, #0EA5E9, #0284C7);
+}
+
+body.es-role-citizen .citizen-mini-icon.is-success {
+    background: linear-gradient(135deg, #10B981, #059669);
+}
+
+body.es-role-citizen .citizen-mini-icon.is-amber {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+}
+
+body.es-role-citizen .citizen-mini-value {
+    font-size: 1.8rem;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #0F172A;
+}
+
+body.es-role-citizen .citizen-mini-label {
+    margin-top: .28rem;
+    font-size: .72rem;
+    color: #94A3B8;
+    font-weight: 500;
+}
+
+body.es-role-citizen .citizen-profile-cols {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+body.es-role-citizen .citizen-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .95rem;
+}
+
+body.es-role-citizen .citizen-input-wrap {
+    position: relative;
+}
+
+body.es-role-citizen .citizen-input-icon {
+    position: absolute;
+    left: .78rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94A3B8;
+    font-size: .83rem;
+    pointer-events: none;
+    transition: color .2s ease;
+}
+
+body.es-role-citizen .citizen-input-wrap:focus-within .citizen-input-icon {
+    color: #0EA5E9;
+}
+
+body.es-role-citizen .citizen-input-wrap .form-control {
+    padding-left: 2.2rem;
+}
+
+body.es-role-citizen .citizen-disabled-input {
+    background: rgba(248,250,252,0.7) !important;
+    cursor: not-allowed;
+    opacity: .75;
+}
+
+body.es-role-citizen .citizen-upload-zone {
+    border: 1.5px dashed rgba(191,219,254,0.8);
+    border-radius: .85rem;
+    padding: 1.1rem;
+    text-align: center;
     cursor: pointer;
-    transition: all .18s;
-    background: var(--white);
+    background: rgba(248,250,255,0.5);
+    backdrop-filter: blur(4px);
+    transition: all .25s cubic-bezier(.4,0,.2,1);
 }
-.upload-zone:hover,
-.upload-zone.drag {
-    border-color: var(--primary);
-    background: var(--primary-lt);
+
+body.es-role-citizen .citizen-upload-zone:hover,
+body.es-role-citizen .citizen-upload-zone.drag {
+    border-color: #60A5FA;
+    background: rgba(239,246,255,0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(14,165,233,0.08);
 }
-.upload-zone input { display: none; }
-.upload-icon {
-    font-size: 1.4rem;
-    color: var(--ink-300);
-    margin-bottom: .35rem;
+
+body.es-role-citizen .citizen-upload-zone input {
+    display: none;
 }
-.upload-title {
-    font-size: .79rem;
-    font-weight: 600;
-    color: var(--ink-700);
+
+body.es-role-citizen .citizen-upload-icon {
+    font-size: 1.35rem;
+    color: #0EA5E9;
+    margin-bottom: .3rem;
 }
-.upload-sub {
-    font-size: .71rem;
-    color: var(--ink-400);
+
+body.es-role-citizen .citizen-upload-title {
+    font-size: .8rem;
+    font-weight: 700;
+    color: #0F172A;
 }
-.upload-preview {
+
+body.es-role-citizen .citizen-upload-sub {
+    font-size: .72rem;
+    color: #64748B;
+}
+
+body.es-role-citizen .citizen-upload-preview {
     display: none;
     align-items: center;
-    gap: .55rem;
+    gap: .5rem;
     margin-top: .55rem;
     padding: .5rem .7rem;
-    border-radius: 8px;
-    background: #ECFDF5;
-    color: #0D7A4E;
+    border-radius: .62rem;
+    border: 1px solid rgba(16,185,129,0.2);
+    background: rgba(236,253,245,0.6);
+    color: #047857;
     font-size: .76rem;
 }
-.upload-preview i { font-size: .95rem; }
-@media (min-width: 640px) {
-    .stats-mini { grid-template-columns: repeat(3, 1fr) !important; }
-    .pw-grid { grid-template-columns: 1fr 1fr !important; }
+
+body.es-role-citizen .citizen-password-zone {
+    border-top: 1px solid rgba(226,232,240,0.5);
+    padding-top: 1rem;
 }
+
+body.es-role-citizen .citizen-password-label {
+    margin-bottom: .55rem;
+    font-size: .82rem;
+    color: #475569;
+}
+
+body.es-role-citizen .citizen-password-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .7rem;
+}
+
+body.es-role-citizen .citizen-otp-box {
+    background: rgba(240,253,244,0.6);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: .7rem;
+    padding: .8rem;
+    backdrop-filter: blur(4px);
+}
+
+body.es-role-citizen .citizen-otp-info {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .78rem;
+    color: #047857;
+    font-weight: 600;
+}
+
+body.es-role-citizen .citizen-otp-input {
+    font-size: 1.2rem;
+    letter-spacing: .3em;
+    font-weight: 700;
+    text-align: center;
+    max-width: 160px;
+}
+
+body.es-role-citizen .citizen-id-verified,
+body.es-role-citizen .citizen-id-missing {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .65rem .9rem;
+    border-radius: .7rem;
+    font-size: .8rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
+body.es-role-citizen .citizen-id-verified {
+    background: rgba(236,253,245,0.6);
+    border: 1px solid rgba(16,185,129,0.2);
+    color: #047857;
+}
+
+body.es-role-citizen .citizen-id-missing {
+    background: rgba(255,247,237,0.6);
+    border: 1px solid rgba(234,88,12,0.15);
+    color: #9A3412;
+}
+
+body.es-role-citizen .citizen-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: .55rem 0;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
+}
+
+body.es-role-citizen .citizen-info-row:last-child {
+    border-bottom: 0;
+}
+
+body.es-role-citizen .citizen-info-label {
+    font-size: .77rem;
+    color: #94A3B8;
+}
+
+body.es-role-citizen .citizen-info-value {
+    font-size: .8rem;
+    color: #0F172A;
+    font-weight: 600;
+}
+
+body.es-role-citizen .citizen-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    letter-spacing: .04em;
+}
+
+/* ── Activity links ── */
+body.es-role-citizen .citizen-activity-link {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .82rem 1rem;
+    border-bottom: 1px solid rgba(226,232,240,0.5);
+    text-decoration: none;
+    color: inherit;
+    transition: all .22s cubic-bezier(.4,0,.2,1);
+}
+
+body.es-role-citizen .citizen-activity-link:last-child {
+    border-bottom: 0;
+}
+
+body.es-role-citizen .citizen-activity-link:hover {
+    background: rgba(224,242,254,0.25);
+    color: inherit;
+    transform: translateX(3px);
+}
+
+body.es-role-citizen .citizen-activity-icon {
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: .7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+}
+
+body.es-role-citizen .citizen-activity-icon.is-success {
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+    color: #047857;
+    border: 1px solid rgba(16,185,129,0.15);
+}
+
+body.es-role-citizen .citizen-activity-icon.is-primary {
+    background: linear-gradient(135deg, #E0F2FE, #BAE6FD);
+    color: #0369A1;
+    border: 1px solid rgba(14,165,233,0.15);
+}
+
+body.es-role-citizen .citizen-activity-main {
+    flex: 1;
+    min-width: 0;
+}
+
+body.es-role-citizen .citizen-activity-title {
+    font-size: .82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.es-role-citizen .citizen-activity-sub {
+    margin-top: .15rem;
+    font-size: .72rem;
+    color: #94A3B8;
+}
+
+body.es-role-citizen .citizen-activity-amount {
+    font-size: .88rem;
+    font-weight: 800;
+    color: #059669;
+    flex-shrink: 0;
+}
+
+body.es-role-citizen .citizen-panel-empty {
+    padding: 2.2rem 1rem;
+    text-align: center;
+    color: #94A3B8;
+}
+
+body.es-role-citizen .citizen-panel-empty i {
+    font-size: 2rem;
+    color: #CBD5E1;
+    display: block;
+    margin-bottom: .5rem;
+}
+
+body.es-role-citizen .citizen-panel-empty p {
+    margin: 0;
+    font-size: .82rem;
+}
+
+@media (min-width: 640px) {
+    body.es-role-citizen .citizen-password-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 @media (min-width: 992px) {
-    .profile-cols { grid-template-columns: 1fr 1fr !important; }
-    .profile-cols .card:last-child { grid-column: 1 / -1; }
+    body.es-role-citizen .citizen-profile-cols {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    body.es-role-citizen .citizen-profile-cols .card:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 767.98px) {
+    body.es-role-citizen .citizen-stats-mini {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.es-role-citizen .citizen-profile-avatar-wrap::before {
+        animation: none !important;
+    }
 }
 </style>
 @endpush
 
 @push('scripts')
 <script>
+// Avatar auto-upload
+const avatarInput = document.getElementById('avatar-input');
+if (avatarInput) {
+    avatarInput.addEventListener('change', () => {
+        if (avatarInput.files.length) {
+            document.getElementById('avatar-form').submit();
+        }
+    });
+}
+
 const zone = document.getElementById('idUploadZone');
 const input = document.getElementById('national_id_doc');
 const preview = document.getElementById('uploadPreview');
@@ -367,4 +955,138 @@ zone?.addEventListener('drop', (event) => {
 });
 </script>
 @endpush
+
+@push('scripts')
+{{-- Firebase Phone Auth --}}
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+if (!firebase.apps.length) {
+firebase.initializeApp({
+    apiKey:            "AIzaSyAWvJLrqHqRwIN84xDEePsNf9u329foFZ0",
+    authDomain:        "cedargov-f6962.firebaseapp.com",
+    projectId:         "cedargov-f6962",
+    storageBucket:     "cedargov-f6962.firebasestorage.app",
+    messagingSenderId: "777539421796",
+    appId:             "1:777539421796:web:e19b77c25439d338314171",
+});
+}
+
+const fbAuth       = firebase.auth();
+fbAuth.useDeviceLanguage();
+const fbStep1      = document.getElementById('fb-step-1');
+const fbStep2      = document.getElementById('fb-step-2');
+const fbStep3      = document.getElementById('fb-step-3');
+const fbSendBtn    = document.getElementById('fb-send-btn');
+const fbVerifyBtn  = document.getElementById('fb-verify-btn');
+const fbRestartBtn = document.getElementById('fb-restart-btn');
+const fbPhoneInput = document.getElementById('fb-phone-input');
+const fbOtpInput   = document.getElementById('fb-otp-input');
+const fbSendErr    = document.getElementById('fb-send-error');
+const fbOtpErr     = document.getElementById('fb-otp-error');
+
+let recaptchaVerifier = null;
+let recaptchaWidgetId = null;
+let confirmationResult = null;
+
+function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+function hideErr(el)       { el.style.display = 'none'; }
+function resetRecaptchaToken() {
+    if (window.grecaptcha && recaptchaWidgetId !== null) {
+        window.grecaptcha.reset(recaptchaWidgetId);
+    }
+}
+
+async function ensureRecaptchaVerifier() {
+    if (recaptchaVerifier) {
+        resetRecaptchaToken();
+        return recaptchaVerifier;
+    }
+
+    const container = document.getElementById('recaptcha-container');
+    if (!container) {
+        throw new Error('reCAPTCHA container not found on page.');
+    }
+
+    recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+        callback: () => {},
+        'expired-callback': () => resetRecaptchaToken(),
+    });
+
+    recaptchaWidgetId = await recaptchaVerifier.render();
+    return recaptchaVerifier;
+}
+
+fbSendBtn?.addEventListener('click', async () => {
+    hideErr(fbSendErr);
+    const phone = (fbPhoneInput?.value ?? '').trim().replace(/\s+/g, '');
+    if (!phone) { showErr(fbSendErr, 'Please enter your phone number.'); return; }
+
+    fbSendBtn.disabled = true;
+    fbSendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending...';
+
+    try {
+        const appVerifier = await ensureRecaptchaVerifier();
+        confirmationResult = await fbAuth.signInWithPhoneNumber(phone, appVerifier);
+        fbStep1.classList.add('d-none');
+        fbStep2.classList.remove('d-none');
+    } catch (err) {
+        fbSendBtn.disabled = false;
+        fbSendBtn.innerHTML = '<i class="bi bi-send me-1"></i>Send Code';
+        resetRecaptchaToken();
+
+        if (err?.code === 'auth/invalid-app-credential') {
+            showErr(fbSendErr, 'Firebase rejected reCAPTCHA token. Open the app with the exact authorized host (localhost or 127.0.0.1), then retry.');
+            return;
+        }
+
+        showErr(fbSendErr, err?.message ?? 'Failed. Use format: +96170551180');
+    }
+});
+
+fbVerifyBtn?.addEventListener('click', async () => {
+    hideErr(fbOtpErr);
+    const code = (fbOtpInput?.value ?? '').trim();
+    if (code.length !== 6) { showErr(fbOtpErr, 'Enter the 6-digit code.'); return; }
+
+    fbVerifyBtn.disabled = true;
+    fbVerifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Verifying...';
+
+    try {
+        const result = await confirmationResult.confirm(code);
+        const phone  = result.user.phoneNumber;
+
+        const resp = await fetch('{{ route("citizen.profile.phone.firebase") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN':  '{{ csrf_token() }}',
+                'Accept':        'application/json',
+            },
+            body: JSON.stringify({ phone }),
+        });
+
+        if (resp.ok) {
+            fbStep2.classList.add('d-none');
+            fbStep3.classList.remove('d-none');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            throw new Error('Server error saving phone.');
+        }
+    } catch (err) {
+        fbVerifyBtn.disabled = false;
+        fbVerifyBtn.innerHTML = '<i class="bi bi-check2 me-1"></i>Verify';
+        showErr(fbOtpErr, 'Invalid code. Please try again.');
+    }
+});
+
+fbRestartBtn?.addEventListener('click', () => {
+    fbStep2.classList.add('d-none');
+    fbStep1.classList.remove('d-none');
+    if (fbOtpInput) fbOtpInput.value = '';
+});
+</script>
+@endpush
+
 @endsection

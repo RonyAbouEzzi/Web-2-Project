@@ -126,6 +126,8 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
     // Profile
     Route::get('/profile',  [CitizenController::class, 'profile'])->name('profile');
     Route::put('/profile',  [CitizenController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/avatar', [CitizenController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::post('/profile/phone/firebase-verify', [CitizenController::class, 'firebaseVerifyPhone'])->name('profile.phone.firebase');
     Route::post('/profile/id-extract', [AuthController::class, 'extractNationalIdDocument'])->name('profile.id-extract');
 
     // Browse
@@ -140,6 +142,10 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
         // Payment
         Route::get('/requests/{serviceRequest}/payment',  [CitizenController::class, 'showPayment'])->name('payment');
         Route::post('/requests/{serviceRequest}/payment', [CitizenController::class, 'processPayment'])->name('payment.process');
+        Route::get('/requests/{serviceRequest}/payment/success',  [CitizenController::class, 'paymentSuccess'])->name('payment.success');
+        Route::get('/requests/{serviceRequest}/payment/cancel',   [CitizenController::class, 'paymentCancel'])->name('payment.cancel');
+
+        Route::post('/requests/{serviceRequest}/payment/crypto',  [CitizenController::class, 'confirmCryptoPayment'])->name('payment.crypto.confirm');
 
         // Appointments
         Route::post('/appointments', [CitizenController::class, 'bookAppointment'])->name('appointments.book');
@@ -152,6 +158,10 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
     // My requests
     Route::get('/requests',                   [CitizenController::class, 'myRequests'])->name('requests');
     Route::get('/requests/{serviceRequest}',  [CitizenController::class, 'showRequest'])->name('requests.show');
+
+    // Appointments & Payments (dedicated pages)
+    Route::get('/appointments', [CitizenController::class, 'myAppointments'])->name('appointments');
+    Route::get('/payments',     [CitizenController::class, 'myPayments'])->name('payments');
 
     // Messages
     Route::post('/requests/{serviceRequest}/messages', [CitizenController::class, 'sendMessage'])->name('messages.send');

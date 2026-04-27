@@ -17,7 +17,7 @@ class RequestStatusUpdated extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database' , 'broadcast'];
+        return ['mail', 'database', 'broadcast'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -25,14 +25,20 @@ class RequestStatusUpdated extends Notification implements ShouldQueue
         $req    = $this->serviceRequest;
         $status = ucfirst(str_replace('_', ' ', $req->status));
 
-        return (new MailMessage)
-            ->subject("Request #{$req->reference_number} — Status Updated")
-            ->greeting("Hello {$notifiable->name},")
-            ->line("Your service request **{$req->reference_number}** has been updated.")
-            ->line("**New Status:** {$status}")
-            ->when($req->office_notes, fn ($m) => $m->line("**Office Note:** {$req->office_notes}"))
-            ->action('View Request', route('citizen.requests.show', $req))
-            ->line('Thank you for using our e-services platform.');
+        $mail = (new MailMessage)
+            ->subject("CedarGov — Request {$req->reference_number} Updated to {$status}")
+            ->greeting("Hello, {$notifiable->name}")
+            ->line("Your service request **{$req->reference_number}** has a new status update:")
+            ->line("**New Status:** {$status}");
+
+        if ($req->office_notes) {
+            $mail->line("**Office Note:** {$req->office_notes}");
+        }
+
+        return $mail
+            ->action('View My Request', route('citizen.requests.show', $req))
+            ->line('You can track all your requests from your CedarGov dashboard.')
+            ->salutation('— The CedarGov Team');
     }
 
     public function toArray(object $notifiable): array
