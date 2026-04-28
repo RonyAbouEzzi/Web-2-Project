@@ -8,6 +8,12 @@
     $allRequests = $user->serviceRequests;
     $totalRequests = $allRequests->count();
     $completedRequests = $allRequests->where('status', 'completed')->count();
+
+    // WhatsApp sandbox opt-in deep link + QR (lets user scan from another device)
+    $waJoinCode    = 'join percent-weight';
+    $waSandboxNum  = '14155238886';
+    $waOptInUrl    = 'https://wa.me/' . $waSandboxNum . '?text=' . rawurlencode($waJoinCode);
+    $waOptInQrSvg  = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(160)->margin(0)->generate($waOptInUrl);
     $pendingRequests = $allRequests->whereIn('status', ['pending', 'in_review', 'missing_documents', 'approved'])->count();
     $paidRequests = $paidRequests
         ?? $user->serviceRequests()->with(['service', 'office'])->where('payment_status', 'paid')->latest('updated_at')->take(5)->get();
@@ -133,7 +139,7 @@
                                 </div>
                             @endif
                         </div>
-                        {{-- Phone Verification (Firebase) --}}
+                        {{-- Phone Verification (Twilio WhatsApp OTP) --}}
                         <div>
                             <label class="form-label d-flex align-items-center gap-2">
                                 Phone Number
@@ -152,20 +158,49 @@
                                         <input type="tel" id="fb-phone-input" class="form-control"
                                                value="{{ $user->phone }}" placeholder="+96170551180">
                                     </div>
-                                    <button type="button" id="fb-send-btn" class="btn btn-outline-primary btn-sm text-nowrap">
-                                        <i class="bi bi-send me-1"></i>Send Code
+                                <button type="button" id="fb-send-btn" class="btn btn-outline-primary btn-sm text-nowrap">
+                                        <i class="bi bi-whatsapp me-1"></i>Send via WhatsApp
                                     </button>
                                 </div>
-                                <div class="form-text">No spaces — e.g. +96170551180</div>
-                                <div id="recaptcha-container"></div>
+                                <div class="form-text mb-2">
+                                    Include country code, no spaces — e.g. <code>+961XXXXXXXX</code>.
+                                </div>
+
+                                <details class="citizen-wa-optin">
+                                    <summary>
+                                        <i class="bi bi-info-circle me-1"></i>First-time setup — opt in to WhatsApp
+                                    </summary>
+                                    <div class="citizen-wa-optin-body">
+                                        <div class="citizen-wa-optin-qr">
+                                            {!! $waOptInQrSvg !!}
+                                            <div class="citizen-wa-optin-qr-cap">Scan with phone camera</div>
+                                        </div>
+                                        <div class="citizen-wa-optin-info">
+                                            <p class="mb-2">
+                                                Before your first verification, opt in to our WhatsApp sandbox so messages can reach you.
+                                            </p>
+                                            <ol class="mb-2 ps-3" style="font-size:.78rem">
+                                                <li>Scan the QR with your phone (or tap the button below on mobile)</li>
+                                                <li>WhatsApp opens with the message pre-filled</li>
+                                                <li>Hit <strong>Send</strong> &mdash; you'll get a confirmation reply</li>
+                                            </ol>
+                                            <a href="{{ $waOptInUrl }}" target="_blank" rel="noopener" class="btn btn-sm btn-success">
+                                                <i class="bi bi-whatsapp me-1"></i>Open WhatsApp
+                                            </a>
+                                            <div class="citizen-wa-optin-manual">
+                                                Or manually send <code>join percent-weight</code> to <code>+1 415 523 8886</code>.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
                                 <div id="fb-send-error" class="text-danger mt-1" style="font-size:.75rem;display:none"></div>
                             </div>
 
                             {{-- Step 2: Enter OTP --}}
                             <div id="fb-step-2" class="citizen-otp-box d-none">
                                 <div class="citizen-otp-info">
-                                    <i class="bi bi-phone-vibrate"></i>
-                                    <span>Code sent! Enter the 6-digit code from your SMS.</span>
+                                    <i class="bi bi-whatsapp"></i>
+                                    <span>Code sent on WhatsApp! Enter the 6-digit code below.</span>
                                 </div>
                                 <div class="d-flex gap-2 mt-2">
                                     <input type="text" id="fb-otp-input" class="form-control citizen-otp-input"
@@ -653,6 +688,89 @@ body.es-role-citizen .citizen-otp-box {
     backdrop-filter: blur(4px);
 }
 
+/* WhatsApp opt-in helper (collapsible) */
+body.es-role-citizen .citizen-wa-optin {
+    border: 1px solid rgba(37,211,102,0.25);
+    background: rgba(240,253,244,0.5);
+    border-radius: .7rem;
+    padding: 0;
+    margin-top: .35rem;
+    overflow: hidden;
+}
+body.es-role-citizen .citizen-wa-optin > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: .55rem .8rem;
+    font-size: .76rem;
+    font-weight: 600;
+    color: #047857;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    transition: background .15s;
+}
+body.es-role-citizen .citizen-wa-optin > summary::-webkit-details-marker { display: none; }
+body.es-role-citizen .citizen-wa-optin > summary::after {
+    content: '\F282'; /* bi-chevron-down */
+    font-family: 'bootstrap-icons';
+    margin-left: auto;
+    transition: transform .2s;
+    font-size: .8rem;
+}
+body.es-role-citizen .citizen-wa-optin[open] > summary::after { transform: rotate(180deg); }
+body.es-role-citizen .citizen-wa-optin > summary:hover { background: rgba(37,211,102,0.08); }
+body.es-role-citizen .citizen-wa-optin-body {
+    display: flex;
+    gap: 1rem;
+    padding: .85rem .8rem .9rem;
+    border-top: 1px solid rgba(37,211,102,0.15);
+    align-items: flex-start;
+}
+body.es-role-citizen .citizen-wa-optin-qr {
+    flex-shrink: 0;
+    text-align: center;
+}
+body.es-role-citizen .citizen-wa-optin-qr svg {
+    width: 110px;
+    height: 110px;
+    background: #fff;
+    padding: 6px;
+    border-radius: .5rem;
+    border: 1px solid rgba(15,23,42,0.06);
+}
+body.es-role-citizen .citizen-wa-optin-qr-cap {
+    margin-top: .3rem;
+    font-size: .65rem;
+    color: #64748B;
+}
+body.es-role-citizen .citizen-wa-optin-info {
+    flex: 1;
+    min-width: 0;
+    font-size: .8rem;
+    color: #334155;
+}
+body.es-role-citizen .citizen-wa-optin-info code {
+    background: rgba(15,23,42,0.06);
+    padding: .05rem .3rem;
+    border-radius: .25rem;
+    font-size: .72rem;
+    color: #0F172A;
+}
+body.es-role-citizen .citizen-wa-optin-manual {
+    margin-top: .55rem;
+    font-size: .7rem;
+    color: #64748B;
+}
+@media (max-width: 575.98px) {
+    body.es-role-citizen .citizen-wa-optin-body {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    body.es-role-citizen .citizen-wa-optin-qr {
+        align-self: center;
+    }
+}
+
 body.es-role-citizen .citizen-otp-info {
     display: flex;
     align-items: center;
@@ -957,135 +1075,104 @@ zone?.addEventListener('drop', (event) => {
 @endpush
 
 @push('scripts')
-{{-- Firebase Phone Auth --}}
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+{{-- Phone verification via Twilio SMS OTP --}}
 <script>
-if (!firebase.apps.length) {
-firebase.initializeApp({
-    apiKey:            "AIzaSyAWvJLrqHqRwIN84xDEePsNf9u329foFZ0",
-    authDomain:        "cedargov-f6962.firebaseapp.com",
-    projectId:         "cedargov-f6962",
-    storageBucket:     "cedargov-f6962.firebasestorage.app",
-    messagingSenderId: "777539421796",
-    appId:             "1:777539421796:web:e19b77c25439d338314171",
-});
-}
+(function () {
+    const SEND_URL   = '{{ route("citizen.profile.phone.send") }}';
+    const VERIFY_URL = '{{ route("citizen.profile.phone.verify") }}';
+    const CSRF       = '{{ csrf_token() }}';
 
-const fbAuth       = firebase.auth();
-fbAuth.useDeviceLanguage();
-const fbStep1      = document.getElementById('fb-step-1');
-const fbStep2      = document.getElementById('fb-step-2');
-const fbStep3      = document.getElementById('fb-step-3');
-const fbSendBtn    = document.getElementById('fb-send-btn');
-const fbVerifyBtn  = document.getElementById('fb-verify-btn');
-const fbRestartBtn = document.getElementById('fb-restart-btn');
-const fbPhoneInput = document.getElementById('fb-phone-input');
-const fbOtpInput   = document.getElementById('fb-otp-input');
-const fbSendErr    = document.getElementById('fb-send-error');
-const fbOtpErr     = document.getElementById('fb-otp-error');
+    const step1   = document.getElementById('fb-step-1');
+    const step2   = document.getElementById('fb-step-2');
+    const step3   = document.getElementById('fb-step-3');
+    const sendBtn = document.getElementById('fb-send-btn');
+    const verBtn  = document.getElementById('fb-verify-btn');
+    const restart = document.getElementById('fb-restart-btn');
+    const phoneIn = document.getElementById('fb-phone-input');
+    const otpIn   = document.getElementById('fb-otp-input');
+    const sendErr = document.getElementById('fb-send-error');
+    const otpErr  = document.getElementById('fb-otp-error');
 
-let recaptchaVerifier = null;
-let recaptchaWidgetId = null;
-let confirmationResult = null;
+    if (!sendBtn || !verBtn) return;
 
-function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
-function hideErr(el)       { el.style.display = 'none'; }
-function resetRecaptchaToken() {
-    if (window.grecaptcha && recaptchaWidgetId !== null) {
-        window.grecaptcha.reset(recaptchaWidgetId);
-    }
-}
+    const showErr = (el, msg) => { el.textContent = msg; el.style.display = 'block'; };
+    const hideErr = (el) => { el.style.display = 'none'; };
+    const setBtn  = (btn, html, disabled) => { btn.disabled = disabled; btn.innerHTML = html; };
 
-async function ensureRecaptchaVerifier() {
-    if (recaptchaVerifier) {
-        resetRecaptchaToken();
-        return recaptchaVerifier;
-    }
+    sendBtn.addEventListener('click', async () => {
+        hideErr(sendErr);
+        const phone = (phoneIn?.value ?? '').trim().replace(/\s+/g, '');
+        if (!phone) { showErr(sendErr, 'Please enter your phone number.'); return; }
 
-    const container = document.getElementById('recaptcha-container');
-    if (!container) {
-        throw new Error('reCAPTCHA container not found on page.');
-    }
+        setBtn(sendBtn, '<span class="spinner-border spinner-border-sm me-1"></span>Sending...', true);
 
-    recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',
-        callback: () => {},
-        'expired-callback': () => resetRecaptchaToken(),
+        try {
+            const resp = await fetch(SEND_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ phone }),
+            });
+
+            if (!resp.ok) {
+                const data = await resp.json().catch(() => ({}));
+                const msg = data?.errors?.phone?.[0] || data?.message || 'Could not send code. Check the number format and try again.';
+                throw new Error(msg);
+            }
+
+            step1.classList.add('d-none');
+            step2.classList.remove('d-none');
+            otpIn?.focus();
+            window.showToast?.('Verification code sent via WhatsApp.', 'success');
+        } catch (err) {
+            setBtn(sendBtn, '<i class="bi bi-send me-1"></i>Send Code', false);
+            showErr(sendErr, err.message || 'Failed to send. Use format: +96171150300');
+        }
     });
 
-    recaptchaWidgetId = await recaptchaVerifier.render();
-    return recaptchaVerifier;
-}
+    verBtn.addEventListener('click', async () => {
+        hideErr(otpErr);
+        const code = (otpIn?.value ?? '').trim();
+        if (code.length !== 6) { showErr(otpErr, 'Enter the 6-digit code.'); return; }
 
-fbSendBtn?.addEventListener('click', async () => {
-    hideErr(fbSendErr);
-    const phone = (fbPhoneInput?.value ?? '').trim().replace(/\s+/g, '');
-    if (!phone) { showErr(fbSendErr, 'Please enter your phone number.'); return; }
+        setBtn(verBtn, '<span class="spinner-border spinner-border-sm me-1"></span>Verifying...', true);
 
-    fbSendBtn.disabled = true;
-    fbSendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending...';
+        try {
+            const resp = await fetch(VERIFY_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ otp: code }),
+            });
 
-    try {
-        const appVerifier = await ensureRecaptchaVerifier();
-        confirmationResult = await fbAuth.signInWithPhoneNumber(phone, appVerifier);
-        fbStep1.classList.add('d-none');
-        fbStep2.classList.remove('d-none');
-    } catch (err) {
-        fbSendBtn.disabled = false;
-        fbSendBtn.innerHTML = '<i class="bi bi-send me-1"></i>Send Code';
-        resetRecaptchaToken();
+            if (!resp.ok) {
+                const data = await resp.json().catch(() => ({}));
+                const msg = data?.errors?.otp?.[0] || 'Invalid or expired code. Please try again.';
+                throw new Error(msg);
+            }
 
-        if (err?.code === 'auth/invalid-app-credential') {
-            showErr(fbSendErr, 'Firebase rejected reCAPTCHA token. Open the app with the exact authorized host (localhost or 127.0.0.1), then retry.');
-            return;
+            step2.classList.add('d-none');
+            step3.classList.remove('d-none');
+            setTimeout(() => window.location.reload(), 1200);
+        } catch (err) {
+            setBtn(verBtn, '<i class="bi bi-check2 me-1"></i>Verify', false);
+            showErr(otpErr, err.message || 'Invalid code. Please try again.');
         }
+    });
 
-        showErr(fbSendErr, err?.message ?? 'Failed. Use format: +96170551180');
-    }
-});
-
-fbVerifyBtn?.addEventListener('click', async () => {
-    hideErr(fbOtpErr);
-    const code = (fbOtpInput?.value ?? '').trim();
-    if (code.length !== 6) { showErr(fbOtpErr, 'Enter the 6-digit code.'); return; }
-
-    fbVerifyBtn.disabled = true;
-    fbVerifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Verifying...';
-
-    try {
-        const result = await confirmationResult.confirm(code);
-        const phone  = result.user.phoneNumber;
-
-        const resp = await fetch('{{ route("citizen.profile.phone.firebase") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN':  '{{ csrf_token() }}',
-                'Accept':        'application/json',
-            },
-            body: JSON.stringify({ phone }),
-        });
-
-        if (resp.ok) {
-            fbStep2.classList.add('d-none');
-            fbStep3.classList.remove('d-none');
-            setTimeout(() => window.location.reload(), 1500);
-        } else {
-            throw new Error('Server error saving phone.');
-        }
-    } catch (err) {
-        fbVerifyBtn.disabled = false;
-        fbVerifyBtn.innerHTML = '<i class="bi bi-check2 me-1"></i>Verify';
-        showErr(fbOtpErr, 'Invalid code. Please try again.');
-    }
-});
-
-fbRestartBtn?.addEventListener('click', () => {
-    fbStep2.classList.add('d-none');
-    fbStep1.classList.remove('d-none');
-    if (fbOtpInput) fbOtpInput.value = '';
-});
+    restart?.addEventListener('click', () => {
+        step2.classList.add('d-none');
+        step1.classList.remove('d-none');
+        if (otpIn) otpIn.value = '';
+        setBtn(sendBtn, '<i class="bi bi-send me-1"></i>Send Code', false);
+    });
+})();
 </script>
 @endpush
 

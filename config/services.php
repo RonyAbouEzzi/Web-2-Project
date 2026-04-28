@@ -88,5 +88,6 @@ return [
         'sid' => env('TWILIO_ACCOUNT_SID'),
         'token' => env('TWILIO_AUTH_TOKEN'),
         'from' => env('TWILIO_FROM'),
+        'channel' => env('TWILIO_CHANNEL', 'sms'),
     ],
 ];

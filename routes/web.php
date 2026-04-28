@@ -128,6 +128,8 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
     Route::put('/profile',  [CitizenController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/avatar', [CitizenController::class, 'updateAvatar'])->name('profile.avatar');
     Route::post('/profile/phone/firebase-verify', [CitizenController::class, 'firebaseVerifyPhone'])->name('profile.phone.firebase');
+    Route::post('/profile/phone/send-otp',   [CitizenController::class, 'sendPhoneOtp'])->name('profile.phone.send');
+    Route::post('/profile/phone/verify-otp', [CitizenController::class, 'verifyPhoneOtp'])->name('profile.phone.verify');
     Route::post('/profile/id-extract', [AuthController::class, 'extractNationalIdDocument'])->name('profile.id-extract');
 
     // Browse

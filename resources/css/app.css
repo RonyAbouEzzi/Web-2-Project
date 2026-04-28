@@ -592,6 +592,99 @@ a:hover { color: var(--es-primary-dk); }
   backdrop-filter: blur(2px);
 }
 
+/* ── Empty State ─────────────────────────────────────────── */
+.es-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.25rem;
+  color: var(--es-muted);
+}
+.es-empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--es-bg);
+  border: 1px solid var(--es-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.875rem;
+  color: var(--es-subtle);
+  font-size: 1.5rem;
+}
+.es-empty-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--es-text);
+  margin-bottom: 0.25rem;
+}
+.es-empty-copy {
+  font-size: 0.84rem;
+  color: var(--es-muted);
+  max-width: 320px;
+  line-height: 1.55;
+  margin-bottom: 0.875rem;
+}
+.es-empty-action {
+  margin-top: 0.25rem;
+}
+
+/* ── Toasts ──────────────────────────────────────────────── */
+.toast-stack {
+  position: fixed;
+  top: calc(var(--topbar-h) + 0.75rem);
+  right: 1rem;
+  z-index: 1080;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+  max-width: calc(100vw - 2rem);
+  width: 360px;
+}
+.toast-item {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 0.875rem;
+  background: var(--es-text);
+  color: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(28,25,23,0.18), 0 2px 8px rgba(28,25,23,0.08);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  animation: toast-in 0.22s cubic-bezier(0.4,0,0.2,1) both;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.toast-item.success { background: #064E3B; border-color: rgba(16,185,129,0.35); }
+.toast-item.success i { color: #6EE7B7; }
+.toast-item.error   { background: #7F1D1D; border-color: rgba(244,63,94,0.35); }
+.toast-item.error i { color: #FECACA; }
+.toast-item.warning { background: #78350F; border-color: rgba(245,158,11,0.35); }
+.toast-item.warning i { color: #FCD34D; }
+.toast-item.info    { background: #0C4A6E; border-color: rgba(14,165,233,0.35); }
+.toast-item.info i  { color: #BAE6FD; }
+.toast-item.out { animation: toast-out 0.18s ease-in both; }
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(20px); }
+}
+@media (max-width: 575.98px) {
+  .toast-stack { left: 1rem; right: 1rem; width: auto; }
+}
+
+/* Lock body scroll while mobile sidebar is open */
+body.es-sidebar-open { overflow: hidden; }
+
 /* ── Status Pills ────────────────────────────────────────── */
 .es-pill {
   display: inline-flex;
