@@ -582,7 +582,7 @@
             flex-shrink: 0;
             box-shadow: 0 3px 10px rgba(15,23,42,0.08);
             transition: all 0.3s var(--ease);
-            position: relative; z-index: 1;
+            position: relative; z-index: 2;
         }
         .lp-step:hover .lp-step-n { background: var(--teal-dark); box-shadow: 0 8px 20px rgba(13,148,136,0.2); transform: scale(1.06); }
 
