@@ -568,6 +568,8 @@
             padding: 1.5rem 0;
             align-items: flex-start;
             transition: transform 0.22s var(--ease);
+            position: relative;
+            z-index: 2;
         }
         .lp-step + .lp-step { border-top: 1px solid #F5F2EF; }
         .lp-step:hover { transform: translateX(6px); }
