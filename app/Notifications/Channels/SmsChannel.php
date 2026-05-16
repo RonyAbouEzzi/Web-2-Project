@@ -45,6 +45,7 @@ class SmsChannel
         $sid = (string) config('services.twilio.sid');
         $token = (string) config('services.twilio.token');
         $from = (string) config('services.twilio.from');
+        $channel = (string) config('services.twilio.channel', 'sms');
 
         if (blank($sid) || blank($token) || blank($from)) {
             Log::warning('SMS driver is Twilio but keys are missing.', [
@@ -52,6 +53,11 @@ class SmsChannel
                 'to' => $to,
             ]);
             return;
+        }
+
+        if ($channel === 'whatsapp') {
+            $to = 'whatsapp:' . $to;
+            $from = str_starts_with($from, 'whatsapp:') ? $from : 'whatsapp:' . $from;
         }
 
         $url = "https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json";

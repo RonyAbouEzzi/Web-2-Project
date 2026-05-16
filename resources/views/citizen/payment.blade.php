@@ -32,12 +32,6 @@
         </div>
     @endif
 
-    @if(session('warning'))
-        <div class="alert alert-warning mb-3">
-            <i class="bi bi-exclamation-circle-fill me-1"></i>{{ session('warning') }}
-        </div>
-    @endif
-
     <div class="card">
         <div class="card-header">
             <span class="card-title">Select Payment Method</span>

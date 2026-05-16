@@ -559,8 +559,7 @@
             position: absolute;
             left: 19px; top: 38px; bottom: 38px;
             width: 2px;
-            background: linear-gradient(180deg, var(--teal) 0%, var(--gold) 100%);
-            opacity: 0.18;
+            background: #E2E8F0;
             border-radius: 2px;
         }
 
@@ -569,6 +568,8 @@
             padding: 1.5rem 0;
             align-items: flex-start;
             transition: transform 0.22s var(--ease);
+            position: relative;
+            z-index: 2;
         }
         .lp-step + .lp-step { border-top: 1px solid #F5F2EF; }
         .lp-step:hover { transform: translateX(6px); }
@@ -576,14 +577,14 @@
         .lp-step-n {
             width: 38px; height: 38px;
             border-radius: 50%;
-            background: var(--ink);
+            background: #CBD5E1;
             color: #fff;
             font-size: 0.8125rem; font-weight: 800;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 5px 14px rgba(26,23,20,0.18);
-            transition: all 0.25s var(--ease);
-            position: relative; z-index: 1;
+            box-shadow: 0 3px 10px rgba(15,23,42,0.08);
+            transition: all 0.3s var(--ease);
+            position: relative; z-index: 2;
         }
         .lp-step:hover .lp-step-n { background: var(--teal-dark); box-shadow: 0 8px 20px rgba(13,148,136,0.2); transform: scale(1.06); }
 
@@ -1150,15 +1151,15 @@
             position: absolute;
             left: 19px; top: 38px; bottom: 38px;
             width: 2px;
-            background: linear-gradient(180deg, var(--teal) 0%, var(--gold) 100%);
+            background: linear-gradient(180deg, var(--teal) 0%, var(--teal-dark) 100%);
             border-radius: 2px;
             transform-origin: top;
             transform: scaleY(var(--line-progress, 0));
             z-index: 1;
         }
         .lp-step.step-reached .lp-step-n {
-            background: var(--teal-dark);
-            box-shadow: 0 5px 18px rgba(13,148,136,0.25);
+            background: var(--teal);
+            box-shadow: 0 5px 18px rgba(13,148,136,0.28);
             transform: scale(1.08);
         }
 

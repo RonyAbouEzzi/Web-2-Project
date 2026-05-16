@@ -1773,11 +1773,23 @@
     $activeCitizenRequests = $user->isCitizen()
         ? $user->serviceRequests()->whereNotIn('status', ['completed', 'rejected'])->count()
         : 0;
+    $adminOpenTickets = $user->isAdmin()
+        ? \App\Models\SupportTicket::where('status', 'open')->count()
+        : 0;
+    $citizenSupportUnread = $user->isCitizen()
+        ? \App\Models\SupportTicketMessage::whereHas('ticket', fn($q) => $q->where('user_id', $user->id))
+            ->where('sender_id', '!=', $user->id)
+            ->whereNull('read_at')
+            ->count()
+        : 0;
     $unreadCount = $user->unreadNotifications()->count();
 @endphp
 
 {{-- Sidebar overlay (mobile) --}}
 <div class="es-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+{{-- Toast stack (global) --}}
+<div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
 <div class="es-wrapper">
 
@@ -1798,11 +1810,12 @@
         {{-- Navigation --}}
         <nav class="es-nav">
 
-        @if(session('success') || session('error') || session('info'))
+        @if(session('success') || session('error') || session('info') || session('warning'))
         <div id="__flash"
             data-success="{{ session('success') }}"
             data-error="{{ session('error') }}"
             data-info="{{ session('info') }}"
+            data-warning="{{ session('warning') }}"
             style="display:none"></div>
         @endif
 
@@ -1833,6 +1846,14 @@
                    class="es-nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
                     <i class="bi bi-bar-chart-line"></i>
                     <span class="es-nav-label">Reports</span>
+                </a>
+                <a href="{{ route('admin.support') }}"
+                   class="es-nav-link {{ request()->routeIs('admin.support*') ? 'active' : '' }}">
+                    <i class="bi bi-life-preserver"></i>
+                    <span class="es-nav-label">Support</span>
+                    @if($adminOpenTickets > 0)
+                        <span class="es-nav-badge">{{ $adminOpenTickets }}</span>
+                    @endif
                 </a>
                 <a href="{{ Route::has('admin.settings') ? route('admin.settings') : route('security.2fa') }}"
                    class="es-nav-link {{ request()->routeIs('admin.settings') || request()->routeIs('security.2fa') ? 'active' : '' }}">
@@ -1912,6 +1933,14 @@
                    class="es-nav-link {{ request()->routeIs('citizen.profile*') ? 'active' : '' }}">
                     <i class="bi bi-person"></i>
                     <span class="es-nav-label">Profile</span>
+                </a>
+                <a href="{{ route('citizen.support') }}"
+                   class="es-nav-link {{ request()->routeIs('citizen.support*') ? 'active' : '' }}">
+                    <i class="bi bi-life-preserver"></i>
+                    <span class="es-nav-label">Support</span>
+                    @if($citizenSupportUnread > 0)
+                        <span class="es-nav-badge">{{ $citizenSupportUnread }}</span>
+                    @endif
                 </a>
             @endif
 
@@ -2067,25 +2096,7 @@
             </nav>
             @endif
 
-            {{-- Flash messages --}}
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-circle me-2"></i>{{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-            @if(session('info'))
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="bi bi-info-circle me-2"></i>{{ session('info') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
+            {{-- Validation errors render inline; success/error/info/warning render as toasts --}}
             @if($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="bi bi-exclamation-triangle me-2"></i>
@@ -2148,6 +2159,10 @@
 </div>
 @endif
 
+@if(auth()->check() && auth()->user()->isCitizen() && filled(config('services.groq.api_key')))
+    @include('partials.chatbot-widget')
+@endif
+
 @endauth
 
 @guest
@@ -2159,14 +2174,92 @@
 
 {{-- Sidebar toggle --}}
 <script>
+const __mqMobile = window.matchMedia('(max-width: 991.98px)');
+
 function toggleSidebar() {
-    document.getElementById('esSidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('open');
+    const open = document.getElementById('esSidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open', open);
+    document.body.classList.toggle('es-sidebar-open', open);
 }
 function closeSidebar() {
     document.getElementById('esSidebar').classList.remove('open');
     document.getElementById('sidebarOverlay').classList.remove('open');
+    document.body.classList.remove('es-sidebar-open');
 }
+__mqMobile.addEventListener('change', e => { if (!e.matches) closeSidebar(); });
+
+/* ── Global UX: toasts, flash messages, sidebar swipe (runs for all roles) ── */
+(function () {
+    /* Toasts */
+    const ts = document.getElementById('toastStack');
+    const icons = {
+        success: 'bi-check-circle-fill',
+        error:   'bi-x-circle-fill',
+        info:    'bi-info-circle-fill',
+        warning: 'bi-exclamation-triangle-fill',
+    };
+    window.showToast = function (msg, type, dur) {
+        if (!msg || !ts) return;
+        type = type || 'info';
+        dur = dur || 4500;
+        const t = document.createElement('div');
+        t.className = `toast-item ${type}`;
+        const icon = document.createElement('i');
+        icon.className = `bi ${icons[type] || icons.info}`;
+        icon.style.cssText = 'font-size:1rem;flex-shrink:0;line-height:1.45';
+        const span = document.createElement('span');
+        span.style.flex = '1';
+        span.textContent = msg;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'Dismiss');
+        btn.style.cssText = 'background:none;border:none;color:rgba(255,255,255,.55);cursor:pointer;font-size:1.1rem;padding:0;line-height:1';
+        btn.innerHTML = '&times;';
+        btn.addEventListener('click', () => window.closeToast(t));
+        t.appendChild(icon); t.appendChild(span); t.appendChild(btn);
+        ts.appendChild(t);
+        setTimeout(() => window.closeToast(t), dur);
+    };
+    window.closeToast = function (el) {
+        if (!el || !el.parentElement) return;
+        el.classList.add('out');
+        el.addEventListener('animationend', () => el.remove(), { once: true });
+    };
+
+    /* Flash messages → toasts */
+    const fd = document.getElementById('__flash');
+    if (fd) {
+        if (fd.dataset.success) setTimeout(() => showToast(fd.dataset.success, 'success'), 200);
+        if (fd.dataset.error)   setTimeout(() => showToast(fd.dataset.error,   'error'),   200);
+        if (fd.dataset.info)    setTimeout(() => showToast(fd.dataset.info,    'info'),    200);
+        if (fd.dataset.warning) setTimeout(() => showToast(fd.dataset.warning, 'warning'), 200);
+    }
+
+    /* Sidebar swipe — mobile only */
+    const sb = document.getElementById('esSidebar');
+    if (sb) {
+        let tx = 0, ty = 0, drag = false;
+        document.addEventListener('touchstart', e => {
+            if (!__mqMobile.matches) return;
+            tx = e.touches[0].clientX; ty = e.touches[0].clientY; drag = false;
+        }, { passive: true });
+        document.addEventListener('touchmove', e => {
+            if (!__mqMobile.matches) return;
+            if (Math.abs(e.touches[0].clientX - tx) > Math.abs(e.touches[0].clientY - ty)) drag = true;
+        }, { passive: true });
+        document.addEventListener('touchend', e => {
+            if (!__mqMobile.matches || !drag) return;
+            const dx = e.changedTouches[0].clientX - tx;
+            if (tx < 28 && dx > 65) toggleSidebar();
+            else if (dx < -55 && sb.classList.contains('open')) closeSidebar();
+        }, { passive: true });
+    }
+
+    /* Escape closes mobile sidebar */
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.body.classList.contains('es-sidebar-open')) closeSidebar();
+    });
+})();
 
 (function () {
     const body = document.body;
@@ -2180,46 +2273,6 @@ function closeSidebar() {
         revealItems.forEach((el, index) => {
             el.style.animationDelay = `${Math.min(index * 45, 220)}ms`;
         });
-    }
-
-    /* Swipe — sidebar toggle on mobile */
-    let tx=0,ty=0,drag=false;
-    const sb=document.querySelector('.layout-menu');
-    function openSb(){sb&&sb.classList.add('open');}
-    function closeSb(){sb&&sb.classList.remove('open');}
-    document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;drag=false},{passive:true});
-    document.addEventListener('touchmove',e=>{if(Math.abs(e.touches[0].clientX-tx)>Math.abs(e.touches[0].clientY-ty))drag=true},{passive:true});
-    document.addEventListener('touchend',e=>{
-        if(!drag)return;
-        const dx=e.changedTouches[0].clientX-tx;
-        if(tx<28&&dx>65)openSb();
-        if(dx<-55&&sb?.classList.contains('open'))closeSb();
-    },{passive:true});
-
-    /* Toasts */
-    const ts=document.getElementById('toastStack');
-    const icons={success:'bi-check-circle-fill',error:'bi-x-circle-fill',info:'bi-info-circle-fill',warning:'bi-exclamation-triangle-fill'};
-    window.showToast=function(msg,type,dur){
-        if(!msg||!ts)return;
-        type=type||'info';dur=dur||4500;
-        const t=document.createElement('div');
-        t.className=`toast-item ${type}`;
-        t.innerHTML=`<i class="bi ${icons[type]||icons.info}" style="font-size:.9rem;flex-shrink:0"></i><span style="flex:1">${msg}</span><button onclick="window.closeToast(this.parentElement)" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:1.1rem;padding:0;line-height:1">&times;</button>`;
-        ts.appendChild(t);
-        setTimeout(()=>window.closeToast(t),dur);
-    };
-    window.closeToast=function(el){
-        if(!el||!el.parentElement)return;
-        el.classList.add('out');
-        el.addEventListener('animationend',()=>el.remove(),{once:true});
-    };
-
-    /* Flash messages */
-    const fd=document.getElementById('__flash');
-    if(fd){
-        if(fd.dataset.success)setTimeout(()=>showToast(fd.dataset.success,'success'),200);
-        if(fd.dataset.error)  setTimeout(()=>showToast(fd.dataset.error,  'error'),  200);
-        if(fd.dataset.info)   setTimeout(()=>showToast(fd.dataset.info,   'info'),   200);
     }
 
     @auth
