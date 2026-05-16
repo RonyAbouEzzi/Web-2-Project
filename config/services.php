@@ -90,4 +90,11 @@ return [
         'from' => env('TWILIO_FROM'),
         'channel' => env('TWILIO_CHANNEL', 'sms'),
     ],
+
+    'groq' => [
+        'api_key' => env('GROQ_API_KEY'),
+        'model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+        'endpoint' => env('GROQ_ENDPOINT', 'https://api.groq.com/openai/v1/chat/completions'),
+        'timeout_seconds' => (int) env('GROQ_TIMEOUT', 15),
+    ],
 ];

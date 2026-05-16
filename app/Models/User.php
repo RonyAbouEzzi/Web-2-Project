@@ -88,6 +88,11 @@ class User extends Authenticatable
         return $this->hasMany(Feedback::class, 'citizen_id');
     }
 
+    public function supportTickets()
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));

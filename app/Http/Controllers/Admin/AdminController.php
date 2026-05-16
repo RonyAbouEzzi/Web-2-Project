@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Municipality, Office, ServiceRequest, User};
+use App\Events\SupportTicketMessageSent;
+use App\Models\{Municipality, Office, ServiceRequest, SupportTicket, SupportTicketMessage, User};
+use App\Notifications\SupportTicketReplyNotification;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -431,5 +435,115 @@ class AdminController extends Controller
         return view('admin.reports', compact(
             'requestsByOffice', 'revenueByOffice', 'requestsByStatus', 'monthlyRequests'
         ));
+    }
+
+    // ── Support Tickets ───────────────────────────────────────────
+    public function supportIndex(Request $request)
+    {
+        $status = $request->input('status');
+        $search = trim((string) $request->input('search', ''));
+
+        $query = SupportTicket::query()->with('user:id,name,email');
+
+        if (in_array($status, ['open', 'answered', 'closed'], true)) {
+            $query->where('status', $status);
+        }
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('subject', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($qq) use ($search) {
+                      $qq->where('name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $tickets = $query
+            ->withCount(['messages as unread_admin' => function ($q) {
+                $q->where('sender_id', '!=', auth()->id())->whereNull('read_at');
+            }])
+            ->orderByRaw("CASE status WHEN 'open' THEN 0 WHEN 'answered' THEN 1 ELSE 2 END")
+            ->latest('updated_at')
+            ->paginate(20)
+            ->withQueryString();
+
+        $counts = [
+            'open'     => SupportTicket::where('status', 'open')->count(),
+            'answered' => SupportTicket::where('status', 'answered')->count(),
+            'closed'   => SupportTicket::where('status', 'closed')->count(),
+        ];
+
+        return view('admin.support.index', compact('tickets', 'counts', 'status', 'search'));
+    }
+
+    public function supportShow(SupportTicket $ticket)
+    {
+        $ticket->load(['messages.sender', 'user']);
+
+        $ticket->messages()
+            ->where('sender_id', '!=', auth()->id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return view('admin.support.show', compact('ticket'));
+    }
+
+    public function supportReply(Request $request, SupportTicket $ticket)
+    {
+        abort_if($ticket->status === 'closed', 403, 'This ticket is closed.');
+
+        $data = $request->validate([
+            'body'       => 'required|string|max:5000',
+            'attachment' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+        ]);
+
+        $attachmentData = [];
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $attachmentData = [
+                'attachment'      => $file->store('support-attachments', 'public'),
+                'attachment_name' => $file->getClientOriginalName(),
+                'attachment_size' => $file->getSize(),
+            ];
+        }
+
+        $newMessage = DB::transaction(function () use ($data, $ticket, $attachmentData) {
+            $msg = SupportTicketMessage::create(array_merge([
+                'support_ticket_id' => $ticket->id,
+                'sender_id' => auth()->id(),
+                'body'      => $data['body'],
+            ], $attachmentData));
+
+            $ticket->update([
+                'status' => 'answered',
+                'last_reply_at' => now(),
+            ]);
+
+            return $msg;
+        });
+
+        broadcast(new SupportTicketMessageSent($newMessage))->toOthers();
+
+        $ticket->user->notify(new SupportTicketReplyNotification(
+            $ticket,
+            Str::limit($data['body'], 140),
+            auth()->user()->name,
+            'admin',
+        ));
+
+        return back()->with('success', 'Reply sent to citizen.');
+    }
+
+    public function supportClose(SupportTicket $ticket)
+    {
+        $ticket->update(['status' => 'closed']);
+        return back()->with('success', 'Ticket closed.');
+    }
+
+    public function supportReopen(SupportTicket $ticket)
+    {
+        $ticket->update(['status' => 'answered']);
+        return back()->with('success', 'Ticket reopened.');
     }
 }

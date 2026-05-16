@@ -82,6 +82,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/users/{user}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle');
 
     Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+
+    // Support tickets
+    Route::get('/support',                            [AdminController::class, 'supportIndex'])->name('support');
+    Route::get('/support/{ticket}',                   [AdminController::class, 'supportShow'])->name('support.show');
+    Route::post('/support/{ticket}/reply',            [AdminController::class, 'supportReply'])->name('support.reply');
+    Route::patch('/support/{ticket}/close',           [AdminController::class, 'supportClose'])->name('support.close');
+    Route::patch('/support/{ticket}/reopen',          [AdminController::class, 'supportReopen'])->name('support.reopen');
 });
 
 // ── Office ────────────────────────────────────────────────────────────────────
@@ -174,4 +181,15 @@ Route::middleware(['auth', 'role:citizen'])->prefix('citizen')->name('citizen.')
     // PDF receipt download
     Route::get('/requests/{serviceRequest}/receipt', [CitizenController::class, 'downloadReceipt'])->name('requests.receipt');
 
+    // AI chatbot — 30 req/min per citizen
+    Route::post('/chatbot', [CitizenController::class, 'chatbotAsk'])
+        ->middleware('throttle:30,1')
+        ->name('chatbot.ask');
+
+    // Support tickets
+    Route::get('/support',                  [CitizenController::class, 'supportIndex'])->name('support');
+    Route::get('/support/create',           [CitizenController::class, 'supportCreate'])->name('support.create');
+    Route::post('/support',                 [CitizenController::class, 'supportStore'])->name('support.store');
+    Route::get('/support/{ticket}',         [CitizenController::class, 'supportShow'])->name('support.show');
+    Route::post('/support/{ticket}/reply',  [CitizenController::class, 'supportReply'])->name('support.reply');
 });

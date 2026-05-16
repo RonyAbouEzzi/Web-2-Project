@@ -1773,6 +1773,15 @@
     $activeCitizenRequests = $user->isCitizen()
         ? $user->serviceRequests()->whereNotIn('status', ['completed', 'rejected'])->count()
         : 0;
+    $adminOpenTickets = $user->isAdmin()
+        ? \App\Models\SupportTicket::where('status', 'open')->count()
+        : 0;
+    $citizenSupportUnread = $user->isCitizen()
+        ? \App\Models\SupportTicketMessage::whereHas('ticket', fn($q) => $q->where('user_id', $user->id))
+            ->where('sender_id', '!=', $user->id)
+            ->whereNull('read_at')
+            ->count()
+        : 0;
     $unreadCount = $user->unreadNotifications()->count();
 @endphp
 
@@ -1837,6 +1846,14 @@
                    class="es-nav-link {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
                     <i class="bi bi-bar-chart-line"></i>
                     <span class="es-nav-label">Reports</span>
+                </a>
+                <a href="{{ route('admin.support') }}"
+                   class="es-nav-link {{ request()->routeIs('admin.support*') ? 'active' : '' }}">
+                    <i class="bi bi-life-preserver"></i>
+                    <span class="es-nav-label">Support</span>
+                    @if($adminOpenTickets > 0)
+                        <span class="es-nav-badge">{{ $adminOpenTickets }}</span>
+                    @endif
                 </a>
                 <a href="{{ Route::has('admin.settings') ? route('admin.settings') : route('security.2fa') }}"
                    class="es-nav-link {{ request()->routeIs('admin.settings') || request()->routeIs('security.2fa') ? 'active' : '' }}">
@@ -1916,6 +1933,14 @@
                    class="es-nav-link {{ request()->routeIs('citizen.profile*') ? 'active' : '' }}">
                     <i class="bi bi-person"></i>
                     <span class="es-nav-label">Profile</span>
+                </a>
+                <a href="{{ route('citizen.support') }}"
+                   class="es-nav-link {{ request()->routeIs('citizen.support*') ? 'active' : '' }}">
+                    <i class="bi bi-life-preserver"></i>
+                    <span class="es-nav-label">Support</span>
+                    @if($citizenSupportUnread > 0)
+                        <span class="es-nav-badge">{{ $citizenSupportUnread }}</span>
+                    @endif
                 </a>
             @endif
 
@@ -2132,6 +2157,10 @@
         </div>
     </div>
 </div>
+@endif
+
+@if(auth()->check() && auth()->user()->isCitizen() && filled(config('services.groq.api_key')))
+    @include('partials.chatbot-widget')
 @endif
 
 @endauth

@@ -4,17 +4,20 @@ namespace App\Http\Controllers\Citizen;
 
 use App\Http\Controllers\Controller;
 use App\Events\{AppointmentReminderBroadcast, NewRequestSubmitted, RequestDocumentUploaded};
-use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceRequest};
+use App\Models\{Appointment, Feedback, Message, Office, Service, ServiceRequest, SupportTicket, SupportTicketMessage, User};
 use App\Notifications\AppointmentReminder;
+use App\Notifications\NewSupportTicketNotification;
 use App\Notifications\PhoneVerificationNotification;
+use App\Notifications\SupportTicketReplyNotification;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
-use App\Services\{QrCodeService, PaymentService, PdfService};
+use App\Services\{ChatbotService, QrCodeService, PaymentService, PdfService};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Auth, DB, Hash, Storage};
 use Illuminate\Support\Str;
 use App\Events\MessageSent;
 use App\Events\MessagesRead;
+use App\Events\SupportTicketMessageSent;
 
 class CitizenController extends Controller
 {
@@ -528,5 +531,150 @@ class CitizenController extends Controller
             'success' => true,
             'message_ids' => $readMessageIds,
         ]);
+    }
+
+    // ── Support Tickets ───────────────────────────────────────────
+    public function supportIndex()
+    {
+        $tickets = Auth::user()->supportTickets()
+            ->withCount(['messages as unread_count' => function ($q) {
+                $q->where('sender_id', '!=', Auth::id())->whereNull('read_at');
+            }])
+            ->latest('updated_at')
+            ->paginate(15);
+
+        return view('citizen.support.index', compact('tickets'));
+    }
+
+    public function supportCreate()
+    {
+        return view('citizen.support.create');
+    }
+
+    public function supportStore(Request $request)
+    {
+        $data = $request->validate([
+            'subject'    => 'required|string|max:200',
+            'body'       => 'required|string|max:5000',
+            'attachment' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+        ]);
+
+        $attachmentData = $this->storeSupportAttachment($request);
+
+        $ticket = DB::transaction(function () use ($data, $attachmentData) {
+            $ticket = SupportTicket::create([
+                'user_id' => Auth::id(),
+                'subject' => $data['subject'],
+                'status'  => 'open',
+                'last_reply_at' => now(),
+            ]);
+
+            SupportTicketMessage::create(array_merge([
+                'support_ticket_id' => $ticket->id,
+                'sender_id' => Auth::id(),
+                'body'      => $data['body'],
+            ], $attachmentData));
+
+            return $ticket;
+        });
+
+        $admins = User::where('role', 'admin')->where('is_active', true)->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new NewSupportTicketNotification(
+                $ticket,
+                Str::limit($data['body'], 140),
+                Auth::user()->name,
+            ));
+        }
+
+        return redirect()->route('citizen.support.show', $ticket)
+            ->with('success', 'Your support ticket has been submitted. An admin will reply soon.');
+    }
+
+    public function supportShow(SupportTicket $ticket)
+    {
+        abort_unless($ticket->user_id === Auth::id(), 403);
+
+        $ticket->load(['messages.sender']);
+
+        $ticket->messages()
+            ->where('sender_id', '!=', Auth::id())
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return view('citizen.support.show', compact('ticket'));
+    }
+
+    public function supportReply(Request $request, SupportTicket $ticket)
+    {
+        abort_unless($ticket->user_id === Auth::id(), 403);
+        abort_if($ticket->status === 'closed', 403, 'This ticket is closed.');
+
+        $data = $request->validate([
+            'body'       => 'required|string|max:5000',
+            'attachment' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt',
+        ]);
+
+        $attachmentData = $this->storeSupportAttachment($request);
+
+        $newMessage = DB::transaction(function () use ($data, $ticket, $attachmentData) {
+            $msg = SupportTicketMessage::create(array_merge([
+                'support_ticket_id' => $ticket->id,
+                'sender_id' => Auth::id(),
+                'body'      => $data['body'],
+            ], $attachmentData));
+
+            $ticket->update([
+                'status' => 'open',
+                'last_reply_at' => now(),
+            ]);
+
+            return $msg;
+        });
+
+        broadcast(new SupportTicketMessageSent($newMessage))->toOthers();
+
+        $admins = User::where('role', 'admin')->where('is_active', true)->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new SupportTicketReplyNotification(
+                $ticket,
+                Str::limit($data['body'], 140),
+                Auth::user()->name,
+                'citizen',
+            ));
+        }
+
+        return back()->with('success', 'Reply sent.');
+    }
+
+    // ── AI Chatbot ────────────────────────────────────────────────
+    public function chatbotAsk(Request $request, ChatbotService $bot)
+    {
+        $data = $request->validate([
+            'message' => 'required|string|max:2000',
+            'history' => 'nullable|array|max:20',
+            'history.*.role' => 'required_with:history|in:user,assistant',
+            'history.*.content' => 'required_with:history|string|max:2000',
+        ]);
+
+        $result = $bot->ask($data['history'] ?? [], $data['message']);
+
+        return response()->json($result, $result['ok'] ? 200 : 503);
+    }
+
+    private function storeSupportAttachment(Request $request): array
+    {
+        if (!$request->hasFile('attachment')) {
+            return [];
+        }
+
+        $file = $request->file('attachment');
+        $path = $file->store('support-attachments', 'public');
+
+        return [
+            'attachment'      => $path,
+            'attachment_name' => $file->getClientOriginalName(),
+            'attachment_size' => $file->getSize(),
+        ];
     }
 }
